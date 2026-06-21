@@ -1,6 +1,6 @@
 # The Roost - Setup Guide
 
-Your personal homepage and command center. The current bundle includes 689 curated link cards across 28 link sections, Kid Zone, Creative Writing, live headlines, a six-topic Roost Wire board, the dock tools, and an integrated Mission Control Academy.
+Your personal homepage and command center. The current bundle includes 689 curated link cards across 28 link sections, Kid Zone, Creative Writing, a daily dashboard, live headlines, a mode-aware Roost Wire board, read-later saves, personal boards, link notes, the dock tools, and an integrated Mission Control Academy.
 
 ## What's In This Folder
 
@@ -36,6 +36,8 @@ The Roost Wire and per-section headline strips pull public RSS/Atom feeds in the
 - The curated links are never blocked by headline failures.
 - Feed results are cached in `localStorage` for 30 minutes.
 - Cached feed data is preferred for the Wire when available, so the board appears faster on repeat visits.
+- Refresh buttons update the Wire or a section strip in place. They only touch feed data and do not reset Mission Control Academy progress.
+- Roost Wire modes let you narrow the board to Tech, Defense, AI, Gaming, Finance, World/Priority, or Quiet.
 
 Use the dock's "Headlines: on/off" control to disable or re-enable headline surfaces. The setting is saved under `roost_settings_v1`.
 
@@ -72,8 +74,13 @@ The Roost stores memory only in the browser's `localStorage`; there is no accoun
 - Upgrade-layer settings use `roost_` keys, including `roost_settings_v1`, `roost_launcher_minimized_v1`, `roost_mission_v1`, `roost_mission_tab_v1`, and `roost_workbench_v1`.
 - Mission Control Academy stores completed missions, notes, selected filters, mission statement, resource status, side quests, leadership lessons, project data, and the active tab.
 - Workbench stores saved notes locally under `roost_workbench_v1`.
+- Read Later, Boards, Link Notes, Cozy Mode, search scope, and Roost achievements use `roost_readlater_v1`, `roost_boards_v1`, `roost_link_notes_v1`, `roost_settings_v1`, and `roost_achievements_v1`.
 
 Clearing site data for the hosted Pages URL will clear this memory.
+
+### Backup / Restore
+
+Use the dock's **Backup / Restore** tool before major edits, browser cleanup, or moving devices. It downloads a JSON snapshot of The Roost memory keys. Restore validates the snapshot, writes only allowed Roost keys, and never deletes keys that are missing from the backup. Cached headline feeds are excluded unless the "Include cached headline feeds" box is checked.
 
 ## Tweaking It Later
 
@@ -85,6 +92,7 @@ All additive behavior lives at the bottom of `index.html` inside `ROOST UPGRADE 
 - `TOOLS`: dock tiles and actions.
 - `WB_METHODS`: Workbench templates.
 - `DIAGRAMS`: Concept Diagram topics.
+- `ROOST_ACHIEVEMENTS`: cross-page achievement definitions.
 
 The original curated link cards use the `kfl_` localStorage namespace. Upgrade-layer features use the `roost_` namespace.
 

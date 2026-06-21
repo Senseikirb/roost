@@ -7046,6 +7046,7 @@
 
   /* ---------- PER-SECTION HEADLINES ---------- */
   .roost-heads {
+    position: relative;
     margin: 2px 0 18px; padding: 0;
     display: grid; gap: 10px;
     grid-template-columns: 1.4fr 1fr;
@@ -7103,6 +7104,40 @@
     background-size: 200% 100%; animation: roostShimmer 1.3s linear infinite;
     border: 1px solid var(--border-subtle);
   }
+  .roost-news-refresh {
+    border: 1px solid var(--border-card);
+    border-radius: 999px;
+    background: rgba(15,27,51,.82);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: .66rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    line-height: 1;
+    min-height: 28px;
+    padding: 7px 10px;
+    text-transform: uppercase;
+    transition: var(--transition-fast);
+  }
+  .roost-news-refresh:hover,
+  .roost-news-refresh:focus-visible {
+    background: var(--bg-card-hover);
+    border-color: var(--red-light);
+    color: #fff;
+    outline: none;
+  }
+  .roost-news-refresh:disabled {
+    cursor: wait;
+    opacity: .62;
+  }
+  .roost-heads-refresh {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 4;
+    box-shadow: 0 4px 14px rgba(0,0,0,.28);
+  }
+  .roost-feat { padding-right: 82px; }
   @keyframes roostShimmer { to { background-position: -200% 0; } }
   @media (max-width: 720px) {
     .roost-heads { grid-template-columns: 1fr; }
@@ -7122,6 +7157,8 @@
   .roost-dock-menu {
     position: absolute; left: 0; bottom: 66px;
     display: flex; flex-direction: column; gap: 9px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
     opacity: 0; transform: translateY(12px) scale(.96); pointer-events: none;
     transition: var(--transition-med);
   }
@@ -7221,6 +7258,351 @@
   .dg-caption { font-size: .78rem; color: var(--text-secondary); line-height: 1.55; margin-top: 12px; }
   .dg-caption b { color: var(--gold); font-weight: 600; }
 
+  /* ---------- BACKUP / RESTORE ---------- */
+  .roost-backup-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+  }
+  .roost-backup-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 14px;
+  }
+  .roost-backup-card h4 {
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-size: .86rem;
+    margin-bottom: 8px;
+  }
+  .roost-backup-card p,
+  .roost-backup-list {
+    color: var(--text-secondary);
+    font-size: .78rem;
+    line-height: 1.55;
+  }
+  .roost-backup-list {
+    max-height: 210px;
+    overflow: auto;
+    margin: 10px 0 0;
+    padding-left: 18px;
+  }
+  .roost-backup-list code { color: var(--text-primary); }
+  .roost-backup-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+  }
+  .roost-backup-check {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: .74rem;
+  }
+  .roost-backup-drop {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    color: var(--text-secondary);
+    font-size: .78rem;
+  }
+  .roost-backup-text {
+    width: 100%;
+    min-height: 170px;
+    resize: vertical;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    font: .78rem/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+  }
+  .roost-backup-status {
+    min-height: 18px;
+    color: var(--text-muted);
+    font-size: .73rem;
+    margin-top: 10px;
+  }
+  .roost-backup-status.good { color: #8ff0c2; }
+  .roost-backup-status.bad { color: var(--red-light); }
+
+  /* ---------- DAILY DASHBOARD + PERSONAL TOOLS ---------- */
+  body.roost-ambient {
+    --bg-primary: #08111d;
+    --bg-card: rgba(18,32,53,.78);
+    --bg-card-hover: rgba(30,48,75,.9);
+    --border-card: rgba(201,168,76,.28);
+  }
+  body.roost-ambient .link-card,
+  body.roost-ambient .roost-panel,
+  body.roost-ambient .roost-today,
+  body.roost-ambient .roost-wire-inner.board {
+    box-shadow: 0 12px 30px rgba(0,0,0,.32);
+  }
+  body.roost-ambient .eagle-bg { opacity: .15; }
+  body.roost-ambient * {
+    animation-duration: .001ms !important;
+    transition-duration: .12s !important;
+  }
+  .roost-today {
+    position: relative;
+    z-index: 5;
+    max-width: 1440px;
+    margin: 10px auto 0;
+    padding: 0 24px;
+  }
+  .roost-today-inner {
+    display: grid;
+    grid-template-columns: 1.3fr repeat(4, minmax(135px, .65fr));
+    gap: 10px;
+    align-items: stretch;
+  }
+  .roost-today-card {
+    min-width: 0;
+    background: rgba(15,27,51,.74);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    box-shadow: var(--shadow-card);
+  }
+  .roost-today-card h3,
+  .roost-today-card h4 {
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: .86rem;
+    margin-bottom: 6px;
+  }
+  .roost-today-card p,
+  .roost-today-card span {
+    color: var(--text-secondary);
+    font-size: .74rem;
+    line-height: 1.4;
+  }
+  .roost-today-card strong {
+    display: block;
+    color: var(--gold);
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+  .roost-today-focus {
+    display: grid;
+    gap: 7px;
+    margin-top: 8px;
+  }
+  .roost-today-focus button,
+  .roost-mini-action {
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    background: rgba(255,255,255,.055);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: .69rem;
+    font-weight: 750;
+    padding: 6px 9px;
+  }
+  .roost-today-focus button:hover,
+  .roost-mini-action:hover,
+  .roost-mini-action:focus-visible {
+    color: #fff;
+    border-color: var(--red-light);
+    outline: none;
+  }
+  .roost-mini-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+  }
+  .roost-wire-modes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .roost-wire-mode {
+    border: 1px solid rgba(255,255,255,.28);
+    border-radius: 999px;
+    background: rgba(255,255,255,.09);
+    color: rgba(255,255,255,.78);
+    cursor: pointer;
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    line-height: 1;
+    padding: 5px 7px;
+    text-transform: uppercase;
+  }
+  .roost-wire-mode[aria-pressed="true"] {
+    background: #fff;
+    color: #7d0820;
+  }
+  .roost-wire-grid {
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  }
+  .roost-wire-cell {
+    position: relative;
+    display: block;
+  }
+  .roost-wire-link {
+    display: block;
+    min-height: 84px;
+    text-decoration: none;
+    padding-right: 34px;
+  }
+  .roost-save-article,
+  .roost-link-tool,
+  .roost-board-tool {
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    background: rgba(6,13,26,.82);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: .64rem;
+    font-weight: 800;
+    line-height: 1;
+    padding: 6px 7px;
+  }
+  .roost-save-article:hover,
+  .roost-link-tool:hover,
+  .roost-board-tool:hover,
+  .roost-save-article:focus-visible,
+  .roost-link-tool:focus-visible,
+  .roost-board-tool:focus-visible {
+    color: #fff;
+    border-color: var(--gold-dim);
+    outline: none;
+  }
+  .roost-wire-cell .roost-save-article,
+  .roost-feat-wrap .roost-save-article,
+  .roost-row-wrap .roost-save-article {
+    position: absolute;
+    right: 9px;
+    top: 9px;
+    z-index: 5;
+  }
+  .roost-feat-wrap,
+  .roost-row-wrap {
+    position: relative;
+  }
+  .roost-row-wrap .roost-row { padding-right: 58px; }
+  .roost-card-tools {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition-fast);
+  }
+  .link-card:hover .roost-card-tools,
+  .link-card:focus-within .roost-card-tools {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .link-card.roost-has-note::after {
+    content: "note";
+    position: absolute;
+    left: 9px;
+    bottom: 8px;
+    color: var(--gold);
+    font-size: .56rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .roost-scope-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 1440px;
+    margin: 6px auto 0;
+    padding: 0 24px;
+  }
+  .roost-scope-bar button {
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    background: rgba(15,27,51,.72);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: .68rem;
+    font-weight: 750;
+    padding: 6px 10px;
+  }
+  .roost-scope-bar button[aria-pressed="true"] {
+    background: var(--red);
+    border-color: var(--red-light);
+    color: #fff;
+  }
+  .roost-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+  }
+  .roost-tool-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 13px;
+  }
+  .roost-tool-card h4 {
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-size: .84rem;
+    margin-bottom: 6px;
+  }
+  .roost-tool-card p {
+    color: var(--text-secondary);
+    font-size: .75rem;
+    line-height: 1.45;
+    margin-bottom: 9px;
+  }
+  .roost-field {
+    display: grid;
+    gap: 5px;
+    color: var(--text-muted);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .roost-field input,
+  .roost-field select,
+  .roost-field textarea {
+    width: 100%;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font: inherit;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .roost-field textarea { min-height: 130px; resize: vertical; }
+  .roost-list {
+    display: grid;
+    gap: 8px;
+  }
+  .roost-list-row {
+    display: grid;
+    gap: 5px;
+    background: rgba(255,255,255,.035);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+  }
+  .roost-list-row strong { color: #fff; font-size: .8rem; }
+  .roost-list-row span { color: var(--text-muted); font-size: .66rem; }
+  .roost-achievement-badge.unlocked {
+    border-color: var(--gold-dim);
+    background: rgba(201,168,76,.08);
+  }
+  .roost-achievement-badge.locked { opacity: .52; }
+
   /* toast */
   .roost-toast {
     position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%) translateY(20px);
@@ -7233,13 +7615,15 @@
   /* ---------- ROOST WIRE BOARD + LAUNCHER/ACADEMY ADDITIONS ---------- */
   .roost-wire-inner.board {
     display: grid;
-    grid-template-columns: 150px minmax(0, 1fr);
+    grid-template-columns: 170px minmax(0, 1fr);
     min-height: auto;
   }
   .roost-wire-title {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+    gap: 9px;
     padding: 14px;
     background: linear-gradient(135deg, var(--red), #7d0820);
     color: #fff;
@@ -7248,6 +7632,11 @@
     letter-spacing: .06em;
     text-transform: uppercase;
   }
+  .roost-wire-title-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   .roost-wire-title .dot {
     width: 8px;
     height: 8px;
@@ -7255,6 +7644,13 @@
     background: #ffd34d;
     box-shadow: 0 0 8px #ffd34d;
     animation: roostPulse 2.4s ease-in-out infinite;
+  }
+  .roost-wire-refresh {
+    border-color: rgba(255,255,255,.34);
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    min-height: 26px;
+    padding: 6px 9px;
   }
   .roost-wire-grid {
     display: grid;
@@ -7675,15 +8071,19 @@
   .roost-portfolio-row b { color: var(--gold); font-size: .7rem; }
   @media (max-width: 900px) {
     .roost-wire-inner.board { grid-template-columns: 1fr; }
-    .roost-wire-title { min-height: 44px; }
+    .roost-wire-title { min-height: 44px; flex-direction: row; align-items: center; justify-content: space-between; }
     .roost-wire-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .roost-today-inner { grid-template-columns: 1fr 1fr; }
     .roost-academy-hero,
-    .roost-academy-grid { grid-template-columns: 1fr; }
+    .roost-academy-grid,
+    .roost-backup-grid { grid-template-columns: 1fr; }
     .roost-academy-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .roost-board-controls { grid-template-columns: 1fr; }
   }
   @media (max-width: 620px) {
     .roost-wire-grid { grid-template-columns: 1fr; }
+    .roost-today-inner { grid-template-columns: 1fr; }
+    .roost-card-tools { opacity: 1; pointer-events: auto; }
     .roost-project-fields { grid-template-columns: 1fr; }
   }
 
@@ -7704,7 +8104,15 @@
   };
   var SETTINGS_KEY = "roost_settings_v1";
   var settings = LS.read(SETTINGS_KEY, { headlines: true });
+  if (settings.headlines !== false) settings.headlines = true;
+  settings.newsMode = settings.newsMode || "all";
+  settings.searchScope = settings.searchScope || "all";
+  settings.ambient = !!settings.ambient;
   function saveSettings() { LS.write(SETTINGS_KEY, settings); }
+  var READ_LATER_KEY = "roost_readlater_v1";
+  var BOARDS_KEY = "roost_boards_v1";
+  var LINK_NOTES_KEY = "roost_link_notes_v1";
+  var ACHIEVEMENTS_KEY = "roost_achievements_v1";
 
   /* ---------- toast ---------- */
   var toastEl;
@@ -7720,6 +8128,16 @@
      Only sections listed here get a headline strip.
      ================================================================= */
   var WIRE_FEEDS = [{"label":"Tech","feeds":["https://www.theverge.com/rss/index.xml","https://feeds.arstechnica.com/arstechnica/index"]},{"label":"Defense","feeds":["https://www.defensenews.com/arc/outboundfeeds/rss/category/global/?outputType=xml","https://breakingdefense.com/feed/"]},{"label":"AI","feeds":["https://venturebeat.com/category/ai/feed/","https://huggingface.co/blog/feed.xml"]},{"label":"Gaming","feeds":["https://www.gamedeveloper.com/rss.xml","https://www.polygon.com/rss/index.xml"]},{"label":"Finance","feeds":["https://www.cnbc.com/id/100003114/device/rss/rss.html","http://feeds.marketwatch.com/marketwatch/topstories/"]},{"label":"Priority","feeds":["https://feeds.npr.org/1001/rss.xml","http://feeds.bbci.co.uk/news/rss.xml"]}];
+  var WIRE_MODES = [
+    { id: "all", label: "All", topics: null },
+    { id: "tech", label: "Tech", topics: ["Tech"] },
+    { id: "defense", label: "Defense", topics: ["Defense"] },
+    { id: "ai", label: "AI", topics: ["AI"] },
+    { id: "gaming", label: "Gaming", topics: ["Gaming"] },
+    { id: "finance", label: "Finance", topics: ["Finance"] },
+    { id: "world", label: "World", topics: ["Priority"] },
+    { id: "quiet", label: "Quiet", topics: [] }
+  ];
   var SECTION_FEEDS = {
     "ai-apps":   { label: "AI", feeds: ["https://venturebeat.com/category/ai/feed/", "https://huggingface.co/blog/feed.xml"] },
     "ai-learn":  { label: "Research", feeds: ["http://export.arxiv.org/rss/cs.AI", "https://www.technologyreview.com/topic/artificial-intelligence/feed"] },
@@ -7739,6 +8157,8 @@
     "news":      { label: "World", feeds: ["https://feeds.npr.org/1001/rss.xml", "http://feeds.bbci.co.uk/news/rss.xml"] },
     "entertainment": { label: "Culture", feeds: ["https://www.theverge.com/rss/index.xml"] }
   };
+  var wireHeadlineOffsets = {};
+  var sectionHeadlineOffsets = {};
 
   /* ---------- resilient feed fetch (CORS proxies + cache) ---------- */
   var CACHE_TTL = 30 * 60 * 1000; // 30 min
@@ -7785,10 +8205,10 @@
     opts = opts || {};
     var ck = cacheKey(url);
     var cached = LS.read(ck, null);
-    if (cached && (Date.now() - cached.t) < CACHE_TTL && cached.items && cached.items.length) {
+    if (!opts.force && cached && (Date.now() - cached.t) < CACHE_TTL && cached.items && cached.items.length) {
       return Promise.resolve(cached.items);
     }
-    if (opts.preferCache && cached && cached.items && cached.items.length) {
+    if (!opts.force && opts.preferCache && cached && cached.items && cached.items.length) {
       refreshFeed(url, label, ck, cached, opts.limit || 12);
       return Promise.resolve(cached.items);
     }
@@ -7820,18 +8240,87 @@
     return attempt();
   }
 
-  function fetchSection(cfg) {
-    return Promise.all(cfg.feeds.map(function (u) { return fetchOne(u, cfg.label, { limit: 8 }); }))
+  function fetchSection(cfg, opts) {
+    opts = opts || {};
+    return Promise.all(cfg.feeds.map(function (u) { return fetchOne(u, cfg.label, { force: !!opts.force, preferCache: !!opts.preferCache, limit: opts.limit || 8 }); }))
       .then(function (lists) {
-        var merged = [];
-        lists.forEach(function (l) { merged = merged.concat(l); });
-        var seen = {}, dedup = [];
-        merged.forEach(function (it) {
-          var k = (it.title || "").toLowerCase().slice(0, 60);
-          if (k && !seen[k]) { seen[k] = 1; dedup.push(it); }
-        });
-        return dedup;
+        return mergeFeedItems(lists, 60);
       });
+  }
+  function mergeFeedItems(lists, keyLen) {
+    var merged = [];
+    lists.forEach(function (l) { merged = merged.concat(l || []); });
+    var seen = {}, dedup = [];
+    merged.forEach(function (it) {
+      var k = (it.title || "").toLowerCase().slice(0, keyLen || 60);
+      if (k && !seen[k] && safeHttpUrl(it.link)) { seen[k] = 1; dedup.push(it); }
+    });
+    return dedup;
+  }
+  function rotateFeedItems(items, offsets, key, advance) {
+    if (!items || !items.length) return [];
+    if (advance) offsets[key] = (offsets[key] || 0) + 1;
+    var start = (offsets[key] || 0) % items.length;
+    return items.slice(start).concat(items.slice(0, start));
+  }
+  function setRefreshBusy(btn, busy) {
+    if (!btn) return;
+    btn.disabled = !!busy;
+    btn.textContent = busy ? "Refreshing" : "Refresh";
+  }
+  function sectionRefreshButtonHtml() {
+    return '<button class="roost-news-refresh roost-heads-refresh" type="button" data-roost-refresh-section title="Refresh headlines" aria-label="Refresh headlines">Refresh</button>';
+  }
+  function bindSectionRefresh(strip, sec) {
+    var btn = strip ? strip.querySelector("[data-roost-refresh-section]") : null;
+    if (!btn || btn._roostBound) return;
+    btn._roostBound = true;
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      loadSectionHeads(sec, { force: true, advance: true, button: btn });
+    });
+  }
+  function articleSaveButton(item, fallbackSource) {
+    if (!item || !safeHttpUrl(item.link)) return "";
+    return '<button class="roost-save-article" type="button" data-save-article data-title="' + esc(item.title || "Untitled") + '" data-link="' + esc(safeHttpUrl(item.link)) + '" data-source="' + esc(item.source || fallbackSource || "") + '" data-date="' + esc(item.date || "") + '" title="Save article">Save</button>';
+  }
+  function readLaterItems() {
+    return LS.read(READ_LATER_KEY, []);
+  }
+  function saveReadLater(item) {
+    var href = safeHttpUrl(item && item.link);
+    if (!href) return false;
+    var items = readLaterItems().filter(function (existing) { return existing.link !== href; });
+    items.unshift({
+      title: String(item.title || "Untitled").slice(0, 220),
+      link: href,
+      source: String(item.source || "").slice(0, 80),
+      date: String(item.date || ""),
+      savedAt: new Date().toISOString()
+    });
+    LS.write(READ_LATER_KEY, items.slice(0, 200));
+    checkRoostAchievements("readlater");
+    renderTodayDashboard();
+    return true;
+  }
+  function bindArticleSaveButtons(root) {
+    (root || document).querySelectorAll("[data-save-article]").forEach(function (btn) {
+      if (btn._roostSaveBound) return;
+      btn._roostSaveBound = true;
+      btn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var ok = saveReadLater({
+          title: btn.getAttribute("data-title"),
+          link: btn.getAttribute("data-link"),
+          source: btn.getAttribute("data-source"),
+          date: btn.getAttribute("data-date")
+        });
+        btn.textContent = ok ? "Saved" : "Save";
+        toast(ok ? "Saved for later" : "Could not save article");
+      });
+    });
   }
   function relTime(dateStr) {
     if (!dateStr) return "";
@@ -7849,57 +8338,118 @@
      ================================================================= */
 
   function buildWire() {
+    if (document.querySelector(".roost-wire")) return;
     var anchor = document.querySelector(".greeting-bar");
     if (!anchor) return;
     var wrap = document.createElement("div");
     wrap.className = "roost-wire";
     wrap.innerHTML =
       '<div class="roost-wire-inner board">' +
-        '<div class="roost-wire-title"><span class="dot"></span><span>Roost Wire</span></div>' +
+        '<div class="roost-wire-title"><div class="roost-wire-title-main"><span class="dot"></span><span>Roost Wire</span></div><div class="roost-wire-modes" id="roost-wire-modes">' + wireModeButtonsHtml() + '</div><button class="roost-news-refresh roost-wire-refresh" id="roost-wire-refresh" type="button" title="Refresh Roost Wire" aria-label="Refresh Roost Wire">Refresh</button></div>' +
         '<div class="roost-wire-grid" id="roost-wire-grid"></div>' +
       '</div>';
     anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
+    var refresh = wrap.querySelector("#roost-wire-refresh");
+    if (refresh) refresh.addEventListener("click", function () { refreshWire(refresh); });
+    bindWireModes(wrap);
     if (!settings.headlines) { wrap.classList.add("roost-hidden"); return; }
     var grid = wrap.querySelector("#roost-wire-grid");
-    grid.innerHTML = WIRE_FEEDS.map(function (bucket, idx) {
+    renderWireLoading(grid);
+    loadWire({ preferCache: true });
+  }
+  function wireModeButtonsHtml() {
+    return WIRE_MODES.map(function (mode) {
+      return '<button class="roost-wire-mode" type="button" data-wire-mode="' + esc(mode.id) + '" aria-pressed="' + (settings.newsMode === mode.id ? "true" : "false") + '">' + esc(mode.label) + '</button>';
+    }).join("");
+  }
+  function bindWireModes(wrap) {
+    wrap.querySelectorAll("[data-wire-mode]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        settings.newsMode = btn.getAttribute("data-wire-mode") || "all";
+        saveSettings();
+        wrap.querySelectorAll("[data-wire-mode]").forEach(function (b) { b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
+        loadWire({ preferCache: true, advance: false });
+        toast(settings.newsMode === "quiet" ? "Roost Wire quiet" : "News mode: " + btn.textContent);
+      });
+    });
+  }
+  function selectedWireBuckets() {
+    var mode = WIRE_MODES.filter(function (m) { return m.id === settings.newsMode; })[0] || WIRE_MODES[0];
+    if (!mode.topics) return WIRE_FEEDS.map(function (bucket, idx) { return { bucket: bucket, idx: idx }; });
+    return WIRE_FEEDS.map(function (bucket, idx) { return { bucket: bucket, idx: idx }; }).filter(function (item) {
+      return mode.topics.indexOf(item.bucket.label) !== -1;
+    });
+  }
+  function renderWireLoading(grid) {
+    if (!grid) return;
+    var selected = selectedWireBuckets();
+    if (!selected.length) {
+      grid.innerHTML = '<div class="roost-wire-cell"><div class="topic">Quiet</div><div class="headline" style="color:var(--text-muted)">News hidden for now.</div></div>';
+      return;
+    }
+    grid.innerHTML = selected.map(function (item) {
+      var bucket = item.bucket, idx = item.idx;
       return '<div class="roost-wire-cell" data-wire-topic="' + idx + '"><div class="topic">' + esc(bucket.label) + '</div><div class="headline" style="color:var(--text-muted)">Loading...</div></div>';
     }).join("");
-    var ready = 0, settled = 0;
-    WIRE_FEEDS.forEach(function (bucket, idx) {
-      Promise.all(bucket.feeds.map(function (u) { return fetchOne(u, bucket.label, { preferCache: true, limit: 6 }); }))
-        .then(function (lists) {
-          var items = [];
-          lists.forEach(function (list) { items = items.concat(list); });
-          var seen = {}, dedup = [];
-          items.forEach(function (item) {
-            var key = (item.title || "").toLowerCase().slice(0, 70);
-            if (key && !seen[key]) { seen[key] = 1; dedup.push(item); }
-          });
-          renderWireTopic(grid, idx, bucket, dedup[0]);
-          if (dedup.length) ready++;
-        })
-        .catch(function () { renderWireTopic(grid, idx, bucket, null); })
-        .finally(function () {
-          settled++;
-          if (settled === WIRE_FEEDS.length && !ready) wrap.classList.add("roost-hidden");
-        });
+  }
+  function loadWire(opts) {
+    opts = opts || {};
+    var wrap = document.querySelector(".roost-wire");
+    var grid = document.getElementById("roost-wire-grid");
+    if (!wrap || !grid) return Promise.resolve(0);
+    wrap.classList.remove("roost-hidden");
+    renderWireLoading(grid);
+    var selected = selectedWireBuckets();
+    if (!selected.length) return Promise.resolve(0);
+    return Promise.all(selected.map(function (item) {
+      return loadWireTopic(grid, item.idx, item.bucket, opts);
+    })).then(function (lists) {
+      var ready = lists.filter(function (items) { return items && items.length; }).length;
+      if (!ready) wrap.classList.add("roost-hidden");
+      return ready;
+    });
+  }
+  function loadWireTopic(grid, idx, bucket, opts) {
+    opts = opts || {};
+    return Promise.all(bucket.feeds.map(function (u) {
+      return fetchOne(u, bucket.label, { force: !!opts.force, preferCache: !!opts.preferCache, limit: 10 });
+    })).then(function (lists) {
+      var items = mergeFeedItems(lists, 70);
+      var rotated = rotateFeedItems(items, wireHeadlineOffsets, String(idx), !!opts.advance);
+      renderWireTopic(grid, idx, bucket, rotated[0]);
+      return items;
+    }).catch(function () {
+      renderWireTopic(grid, idx, bucket, null);
+      return [];
+    });
+  }
+  function refreshWire(btn) {
+    if (!settings.headlines) return;
+    setRefreshBusy(btn, true);
+    loadWire({ force: true, advance: true }).then(function (ready) {
+      toast(ready ? "Roost Wire refreshed" : "Roost Wire unavailable");
+    }).finally(function () {
+      setRefreshBusy(btn, false);
     });
   }
   function renderWireTopic(grid, idx, bucket, item) {
     var old = grid.querySelector('[data-wire-topic="' + idx + '"]');
     if (!old) return;
     if (!item || !safeHttpUrl(item.link)) {
-      old.innerHTML = '<div class="topic">' + esc(bucket.label) + '</div><div class="headline" style="color:var(--text-muted)">Unavailable</div>';
+      var cell = document.createElement("div");
+      cell.className = "roost-wire-cell";
+      cell.setAttribute("data-wire-topic", idx);
+      cell.innerHTML = '<div class="topic">' + esc(bucket.label) + '</div><div class="headline" style="color:var(--text-muted)">Unavailable</div>';
+      old.replaceWith(cell);
       return;
     }
-    var a = document.createElement("a");
-    a.className = "roost-wire-cell";
-    a.setAttribute("data-wire-topic", idx);
-    a.href = safeHttpUrl(item.link);
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    a.innerHTML = '<div class="topic">' + esc(bucket.label) + '</div><div class="headline">' + esc(item.title) + '</div><div class="meta">' + esc(item.source || bucket.label) + (relTime(item.date) ? ' - ' + esc(relTime(item.date)) : '') + '</div>';
-    old.replaceWith(a);
+    var cell = document.createElement("div");
+    var href = safeHttpUrl(item.link);
+    cell.className = "roost-wire-cell";
+    cell.setAttribute("data-wire-topic", idx);
+    cell.innerHTML = '<a class="roost-wire-link" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer"><div class="topic">' + esc(bucket.label) + '</div><div class="headline">' + esc(item.title) + '</div><div class="meta">' + esc(item.source || bucket.label) + (relTime(item.date) ? ' - ' + esc(relTime(item.date)) : '') + '</div></a>' + articleSaveButton(item, bucket.label);
+    old.replaceWith(cell);
+    bindArticleSaveButtons(cell);
   }
   function src(u) {
     try { var h = new URL(u).hostname.replace(/^www\.|^feeds\.|^rss\./, ""); return h.split(".")[0].toUpperCase(); }
@@ -7933,54 +8483,75 @@
   function setupHeadlines() {
     if (!settings.headlines) return;
     var ids = Object.keys(SECTION_FEEDS);
-    var io = new IntersectionObserver(function (entries, obs) {
+    var io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver(function (entries, obs) {
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
         obs.unobserve(en.target);
         loadSectionHeads(en.target);
       });
-    }, { rootMargin: "300px 0px" });
+    }, { rootMargin: "300px 0px" }) : null;
 
     ids.forEach(function (id) {
       var sec = document.getElementById(id);
       if (!sec) return;
       var header = sec.querySelector(".section-header");
       if (!header) return;
-      var strip = document.createElement("div");
-      strip.className = "roost-heads"; strip.setAttribute("data-state", "loading");
-      strip.innerHTML = '<div class="roost-heads-skel"></div>';
-      header.parentNode.insertBefore(strip, header.nextSibling);
+      var strip = sec.querySelector(".roost-heads");
+      if (!strip) {
+        strip = document.createElement("div");
+        strip.className = "roost-heads"; strip.setAttribute("data-state", "loading");
+        strip.innerHTML = sectionRefreshButtonHtml() + '<div class="roost-heads-skel"></div>';
+        header.parentNode.insertBefore(strip, header.nextSibling);
+      }
       strip._cfg = SECTION_FEEDS[id];
-      io.observe(sec);
+      strip.classList.remove("roost-hidden");
+      bindSectionRefresh(strip, sec);
+      if (io) io.observe(sec);
+      else loadSectionHeads(sec);
     });
   }
-  function loadSectionHeads(sec) {
+  function loadSectionHeads(sec, opts) {
+    opts = opts || {};
     var strip = sec.querySelector(".roost-heads");
-    if (!strip || !strip._cfg) return;
-    fetchSection(strip._cfg).then(function (items) {
+    if (!strip || !strip._cfg) return Promise.resolve([]);
+    if (opts.button) setRefreshBusy(opts.button, true);
+    return fetchSection(strip._cfg, { force: !!opts.force, preferCache: !opts.force, limit: 10 }).then(function (items) {
       if (!items.length) {
         strip.setAttribute("data-state", "empty");
-        strip.innerHTML = '<div class="roost-heads-msg">📡 Headlines unavailable right now — links below are unaffected.</div>';
-        return;
+        strip.innerHTML = sectionRefreshButtonHtml() + '<div class="roost-heads-msg">Headlines unavailable right now - links below are unaffected.</div>';
+        bindSectionRefresh(strip, sec);
+        return items;
       }
       strip.setAttribute("data-state", "ready");
-      var feat = items[0];
-      var rows = items.slice(1, 4);
-      var html = '' +
-        '<a class="roost-feat" href="' + esc(feat.link) + '" target="_blank" rel="noopener noreferrer">' +
+      var rotated = rotateFeedItems(items, sectionHeadlineOffsets, sec.id || strip._cfg.label, !!opts.advance);
+      var feat = rotated[0];
+      var rows = rotated.slice(1, 4);
+      var html = sectionRefreshButtonHtml() +
+        '<div class="roost-feat-wrap"><a class="roost-feat" href="' + esc(feat.link) + '" target="_blank" rel="noopener noreferrer">' +
           '<span class="eyebrow">★ Featured · ' + esc(feat.source || "") + '</span>' +
           '<span class="h">' + esc(feat.title) + '</span>' +
           (feat.desc ? '<span class="d">' + esc(feat.desc.slice(0, 180)) + '</span>' : '') +
           '<span class="meta">' + esc(relTime(feat.date)) + '</span>' +
-        '</a>' +
+        '</a>' + articleSaveButton(feat, strip._cfg.label) + '</div>' +
         '<div class="roost-rows">' +
           rows.map(function (it) {
-            return '<a class="roost-row" href="' + esc(it.link) + '" target="_blank" rel="noopener noreferrer">' +
+            return '<div class="roost-row-wrap"><a class="roost-row" href="' + esc(it.link) + '" target="_blank" rel="noopener noreferrer">' +
               '<div><div class="rt">' + esc(it.title) + '</div>' +
-              '<div class="rm">' + esc(it.source || "") + (relTime(it.date) ? ' · ' + esc(relTime(it.date)) : '') + '</div></div></a>';
+              '<div class="rm">' + esc(it.source || "") + (relTime(it.date) ? ' · ' + esc(relTime(it.date)) : '') + '</div></div></a>' + articleSaveButton(it, strip._cfg.label) + '</div>';
           }).join("") +
         '</div>';
       strip.innerHTML = html;
+      bindSectionRefresh(strip, sec);
+      bindArticleSaveButtons(strip);
+      return items;
+    }).catch(function () {
+      strip.setAttribute("data-state", "empty");
+      strip.innerHTML = sectionRefreshButtonHtml() + '<div class="roost-heads-msg">Headlines unavailable right now - links below are unaffected.</div>';
+      bindSectionRefresh(strip, sec);
+      return [];
+    }).finally(function () {
+      var btn = strip.querySelector("[data-roost-refresh-section]");
+      setRefreshBusy(btn, false);
     });
   }
 
@@ -8324,6 +8895,8 @@
     else st.completed[key] = { t: new Date().toISOString() };
     saveMissionState();
     renderMissionAcademy();
+    renderTodayDashboard();
+    checkRoostAchievements("mission");
     toast(st.completed[key] ? "Mission complete" : "Mission reopened");
   }
   function academyCategories(items, key) {
@@ -8593,7 +9166,12 @@
 
   window.roostTestHooks = {
     parseFeed: parseFeed,
+    refreshWire: refreshWire,
+    loadWire: loadWire,
     loadSectionHeads: loadSectionHeads,
+    fetchSection: fetchSection,
+    backupPayload: backupPayload,
+    safeRestoreData: safeRestoreData,
     missionConfigSearch: missionConfigSearch
   };
 
@@ -8602,8 +9180,14 @@
      ================================================================= */
   // Sibling tool files — must sit in the same folder on GitHub Pages.
   var TOOLS = [
+    { ic: "FO", label: "Focus Mode", sub: "Today's missions", action: "focus" },
+    { ic: "RL", label: "Read Later", sub: "Saved headlines", action: "readlater" },
+    { ic: "BD", label: "Boards", sub: "Personal link sets", action: "boards" },
     { ic: "🛠️", label: "Workbench", sub: "Brainstorm & notes", action: "workbench" },
     { ic: "📊", label: "Concept Diagrams", sub: "Visual explainers", action: "diagrams" },
+    { ic: "★", label: "Achievements", sub: "Roost badges", action: "achievements" },
+    { ic: "☾", label: "Cozy Mode", sub: "Softer cockpit", action: "ambient" },
+    { ic: "BK", label: "Backup / Restore", sub: "Save Roost memory", action: "backup" },
     { ic: "📡", label: "RFSoC Explorer", sub: "IQ & sampling", href: "iq-rfsoc-explorer.html" },
     { ic: "🎲", label: "Surprise me", sub: "Random link", action: "random" },
     { ic: "⚙️", label: "Headlines: on", sub: "Toggle the wire", action: "toggle-heads" }
@@ -8630,14 +9214,18 @@
         var a = btn.getAttribute("data-action");
         if (a === "workbench") openModal("workbench");
         else if (a === "diagrams") openModal("diagrams");
+        else if (a === "backup") openModal("backup");
+        else if (a === "focus") openModal("focus");
+        else if (a === "readlater") openModal("readlater");
+        else if (a === "boards") openModal("boards");
+        else if (a === "achievements") openModal("achievements");
+        else if (a === "ambient") toggleAmbientMode();
         else if (a === "random") randomLink();
         else if (a === "toggle-heads") toggleHeadlines(btn);
         dock.classList.remove("open");
       });
     });
-    // reflect current headline state on the toggle label
-    var ht = dock.querySelector('[data-action="toggle-heads"] span:last-child');
-    if (ht) ht.innerHTML = "Headlines: " + (settings.headlines ? "on" : "off") + "<br><small>Toggle the wire</small>";
+    syncHeadlineToggleLabel(dock);
   }
   function randomLink() {
     var cards = document.querySelectorAll('main .link-card');
@@ -8648,8 +9236,25 @@
   }
   function toggleHeadlines(btn) {
     settings.headlines = !settings.headlines; saveSettings();
-    toast("Headlines " + (settings.headlines ? "on — reloading" : "off — reloading"));
-    setTimeout(function () { location.reload(); }, 700);
+    applyHeadlineVisibility();
+    syncHeadlineToggleLabel(document);
+    toast("Headlines " + (settings.headlines ? "on" : "off"));
+  }
+  function syncHeadlineToggleLabel(root) {
+    var ht = (root || document).querySelector('[data-action="toggle-heads"] span:last-child');
+    if (ht) ht.innerHTML = "Headlines: " + (settings.headlines ? "on" : "off") + "<br><small>Toggle the wire</small>";
+  }
+  function applyHeadlineVisibility() {
+    var wire = document.querySelector(".roost-wire");
+    if (settings.headlines) {
+      if (!wire) buildWire();
+      else loadWire({ preferCache: true });
+      setupHeadlines();
+      document.querySelectorAll(".roost-heads").forEach(function (strip) { strip.classList.remove("roost-hidden"); });
+    } else {
+      if (wire) wire.classList.add("roost-hidden");
+      document.querySelectorAll(".roost-heads").forEach(function (strip) { strip.classList.add("roost-hidden"); });
+    }
   }
 
   /* =================================================================
@@ -8733,7 +9338,7 @@
       var notes = LS.read(WB_KEY, []);
       var title = (body.querySelector("#wb-title").value || WB_METHODS[cur].name).trim();
       notes.unshift({ id: Date.now(), title: title, method: WB_METHODS[cur].name, body: textEl.value, t: new Date().toISOString() });
-      LS.write(WB_KEY, notes.slice(0, 100)); renderNotes(body); toast("Saved");
+      LS.write(WB_KEY, notes.slice(0, 100)); renderNotes(body); checkRoostAchievements("workbench"); renderTodayDashboard(); toast("Saved");
       body.querySelector("#wb-status").textContent = "Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     });
     body.querySelector("#wb-copy").addEventListener("click", function () {
@@ -8766,7 +9371,7 @@
       list.querySelectorAll("[data-del]").forEach(function (b) {
         b.addEventListener("click", function () {
           var notes = LS.read(WB_KEY, []).filter(function (x) { return x.id != b.getAttribute("data-del"); });
-          LS.write(WB_KEY, notes); renderNotes(scope); toast("Deleted");
+          LS.write(WB_KEY, notes); renderNotes(scope); renderTodayDashboard(); toast("Deleted");
         });
       });
     }
@@ -8856,6 +9461,499 @@
     body.querySelectorAll(".wb-tab").forEach(function (t) { t.addEventListener("click", function () { show(t.getAttribute("data-d")); }); });
   }
 
+  /* =================================================================
+     5A) DAILY DASHBOARD, READ LATER, BOARDS, LINK NOTES, ACHIEVEMENTS
+     ================================================================= */
+  var activeLinkCardData = null;
+  var ROOST_ACHIEVEMENTS = [
+    { id: "article_saved", name: "Intel Clipped", desc: "Save your first article.", test: function () { return readLaterItems().length >= 1; } },
+    { id: "notes_started", name: "Workbench Spark", desc: "Save your first Workbench note.", test: function () { return LS.read(WB_KEY, []).length >= 1; } },
+    { id: "board_built", name: "Board Builder", desc: "Create a personal board.", test: function () { return boards().length >= 1; } },
+    { id: "link_annotated", name: "Librarian", desc: "Add a note or status to a link.", test: function () { return Object.keys(linkNotes()).length >= 1; } },
+    { id: "mission_started", name: "First Sortie", desc: "Complete a Mission Control item.", test: function () { return missionSummary().done >= 1; } },
+    { id: "ten_recent", name: "Flight Pattern", desc: "Open 10 recent links.", test: function () { return LS.read("kfl_recent_v1", []).length >= 10; } }
+  ];
+
+  function applyAmbientMode() {
+    document.body.classList.toggle("roost-ambient", !!settings.ambient);
+  }
+  function toggleAmbientMode() {
+    settings.ambient = !settings.ambient;
+    saveSettings();
+    applyAmbientMode();
+    toast(settings.ambient ? "Cozy mode on" : "Cozy mode off");
+  }
+  function linkNotes() {
+    return LS.read(LINK_NOTES_KEY, {});
+  }
+  function saveLinkNotes(notes) {
+    LS.write(LINK_NOTES_KEY, notes || {});
+    checkRoostAchievements("link-note");
+    markAnnotatedCards();
+  }
+  function linkCardData(card) {
+    if (!card) return null;
+    var label = card.querySelector(".card-label");
+    var desc = card.querySelector(".card-desc");
+    return {
+      href: safeHttpUrl(card.href),
+      title: label ? label.textContent.trim() : (card.getAttribute("data-name") || card.href),
+      desc: desc ? desc.textContent.trim() : (card.getAttribute("data-desc-search") || ""),
+      section: card.closest(".section") ? card.closest(".section").id : ""
+    };
+  }
+  function installCardTools() {
+    document.querySelectorAll("main .link-card").forEach(function (card) {
+      if (card.querySelector(".roost-card-tools")) return;
+      var tools = document.createElement("span");
+      tools.className = "roost-card-tools";
+      tools.innerHTML = '<button class="roost-link-tool" type="button" title="Link note" aria-label="Link note">Note</button><button class="roost-board-tool" type="button" title="Add to board" aria-label="Add to board">Board</button>';
+      card.appendChild(tools);
+      tools.querySelector(".roost-link-tool").addEventListener("click", function (event) {
+        event.preventDefault(); event.stopPropagation();
+        activeLinkCardData = linkCardData(card);
+        openModal("linknote");
+      });
+      tools.querySelector(".roost-board-tool").addEventListener("click", function (event) {
+        event.preventDefault(); event.stopPropagation();
+        addCardToBoard(card);
+      });
+    });
+    markAnnotatedCards();
+  }
+  function markAnnotatedCards() {
+    var notes = linkNotes();
+    document.querySelectorAll("main .link-card").forEach(function (card) {
+      var href = safeHttpUrl(card.href);
+      card.classList.toggle("roost-has-note", !!(href && notes[href] && (notes[href].note || notes[href].status || notes[href].rating)));
+    });
+  }
+  function buildLinkNote(body) {
+    var data = activeLinkCardData;
+    if (!data) { body.innerHTML = '<p class="roost-backup-status">No link selected.</p>'; return; }
+    var notes = linkNotes();
+    var current = notes[data.href] || {};
+    body.innerHTML =
+      '<div class="roost-panel-grid"><section class="roost-tool-card"><h4>' + esc(data.title) + '</h4><p>' + esc(data.desc || data.href) + '</p>' +
+      '<label class="roost-field">Status<select id="link-note-status"><option value="">No status</option><option value="useful">Useful</option><option value="review">Needs review</option><option value="dead">Possibly dead</option></select></label>' +
+      '<label class="roost-field">Rating<select id="link-note-rating"><option value="">No rating</option><option value="1">1 - okay</option><option value="2">2 - useful</option><option value="3">3 - favorite</option></select></label>' +
+      '<label class="roost-field">Note<textarea id="link-note-body" maxlength="1000" placeholder="Why this link matters, what to use it for, or what needs checking...">' + esc(current.note || "") + '</textarea></label>' +
+      '<div class="roost-backup-actions"><button class="wb-btn primary" id="link-note-save">Save Note</button><button class="wb-btn" id="link-note-clear">Clear</button><a class="wb-btn" href="' + esc(data.href) + '" target="_blank" rel="noopener noreferrer">Open Link</a></div></section></div>';
+    body.querySelector("#link-note-status").value = current.status || "";
+    body.querySelector("#link-note-rating").value = current.rating || "";
+    body.querySelector("#link-note-save").addEventListener("click", function () {
+      var next = linkNotes();
+      next[data.href] = {
+        title: data.title,
+        section: data.section,
+        status: body.querySelector("#link-note-status").value,
+        rating: body.querySelector("#link-note-rating").value,
+        note: body.querySelector("#link-note-body").value.slice(0, 1000),
+        updatedAt: new Date().toISOString()
+      };
+      saveLinkNotes(next);
+      toast("Link note saved");
+      renderTodayDashboard();
+    });
+    body.querySelector("#link-note-clear").addEventListener("click", function () {
+      var next = linkNotes();
+      delete next[data.href];
+      saveLinkNotes(next);
+      toast("Link note cleared");
+      closeModal();
+      renderTodayDashboard();
+    });
+  }
+
+  function boards() {
+    return LS.read(BOARDS_KEY, []);
+  }
+  function saveBoards(list) {
+    LS.write(BOARDS_KEY, list.slice(0, 40));
+    checkRoostAchievements("boards");
+    renderTodayDashboard();
+  }
+  function addCardToBoard(card) {
+    var data = linkCardData(card);
+    if (!data || !data.href) return;
+    var list = boards();
+    var names = list.map(function (b) { return b.name; }).join(", ");
+    var name = prompt("Add to board. Existing: " + (names || "none") + "\nBoard name:", list[0] ? list[0].name : "Morning Launch");
+    if (!name) return;
+    name = name.trim().slice(0, 40);
+    var board = list.filter(function (b) { return b.name.toLowerCase() === name.toLowerCase(); })[0];
+    if (!board) { board = { id: "b" + Date.now(), name: name, links: [] }; list.unshift(board); }
+    board.links = (board.links || []).filter(function (l) { return l.href !== data.href; });
+    board.links.unshift({ href: data.href, title: data.title, desc: data.desc, section: data.section, addedAt: new Date().toISOString() });
+    saveBoards(list);
+    toast("Added to " + board.name);
+  }
+  function buildBoards(body) {
+    var list = boards();
+    body.innerHTML =
+      '<div class="roost-backup-actions"><button class="wb-btn primary" id="board-create">Create Board</button></div>' +
+      '<div class="roost-list" id="boards-list"></div>';
+    function render() {
+      list = boards();
+      var box = body.querySelector("#boards-list");
+      if (!list.length) { box.innerHTML = '<p class="roost-backup-status">No boards yet. Use the Board button on any link card to start one.</p>'; return; }
+      box.innerHTML = list.map(function (board) {
+        var links = (board.links || []).map(function (link) {
+          return '<div class="roost-list-row"><strong><a href="' + esc(link.href) + '" target="_blank" rel="noopener noreferrer">' + esc(link.title) + '</a></strong><span>' + esc(link.section || "") + '</span><button class="wb-btn" type="button" data-board-remove="' + esc(board.id) + '" data-board-link="' + esc(link.href) + '">Remove</button></div>';
+        }).join("");
+        return '<section class="roost-tool-card"><h4>' + esc(board.name) + ' <span class="roost-academy-muted">' + (board.links || []).length + '</span></h4><div class="roost-list">' + (links || '<p class="roost-backup-status">Empty board.</p>') + '</div><div class="roost-backup-actions"><button class="wb-btn" type="button" data-board-rename="' + esc(board.id) + '">Rename</button><button class="wb-btn" type="button" data-board-delete="' + esc(board.id) + '">Delete Board</button></div></section>';
+      }).join("");
+      bindBoardButtons();
+    }
+    function bindBoardButtons() {
+      body.querySelectorAll("[data-board-remove]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var list = boards(), id = btn.getAttribute("data-board-remove"), href = btn.getAttribute("data-board-link");
+          list.forEach(function (board) { if (board.id === id) board.links = (board.links || []).filter(function (l) { return l.href !== href; }); });
+          saveBoards(list); render();
+        });
+      });
+      body.querySelectorAll("[data-board-rename]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var list = boards(), id = btn.getAttribute("data-board-rename"), board = list.filter(function (b) { return b.id === id; })[0];
+          if (!board) return;
+          var name = prompt("Board name:", board.name);
+          if (!name) return;
+          board.name = name.trim().slice(0, 40) || board.name;
+          saveBoards(list); render();
+        });
+      });
+      body.querySelectorAll("[data-board-delete]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-board-delete");
+          if (!confirm("Delete this board? Links themselves are not affected.")) return;
+          saveBoards(boards().filter(function (b) { return b.id !== id; })); render();
+        });
+      });
+    }
+    body.querySelector("#board-create").addEventListener("click", function () {
+      var name = prompt("New board name:", "Morning Launch");
+      if (!name) return;
+      var list = boards();
+      list.unshift({ id: "b" + Date.now(), name: name.trim().slice(0, 40) || "Board", links: [] });
+      saveBoards(list); render();
+    });
+    render();
+  }
+
+  function buildReadLater(body) {
+    function render() {
+      var items = readLaterItems();
+      body.innerHTML = '<div class="roost-backup-actions"><button class="wb-btn" id="readlater-clear">Clear All</button></div><div class="roost-list">' +
+        (items.map(function (item, idx) {
+          return '<div class="roost-list-row"><strong><a href="' + esc(item.link) + '" target="_blank" rel="noopener noreferrer">' + esc(item.title) + '</a></strong><span>' + esc(item.source || "Saved") + (item.savedAt ? " - " + esc(new Date(item.savedAt).toLocaleString()) : "") + '</span><button class="wb-btn" type="button" data-readlater-remove="' + idx + '">Remove</button></div>';
+        }).join("") || '<p class="roost-backup-status">No saved articles yet. Use Save on Roost Wire or headline strips.</p>') + '</div>';
+      body.querySelectorAll("[data-readlater-remove]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var items = readLaterItems();
+          items.splice(Number(btn.getAttribute("data-readlater-remove")), 1);
+          LS.write(READ_LATER_KEY, items);
+          renderTodayDashboard();
+          render();
+        });
+      });
+      var clear = body.querySelector("#readlater-clear");
+      if (clear) clear.addEventListener("click", function () {
+        if (!confirm("Clear saved articles?")) return;
+        LS.write(READ_LATER_KEY, []);
+        renderTodayDashboard();
+        render();
+      });
+    }
+    render();
+  }
+
+  function buildMissionFocus(body) {
+    var current = currentMissionWeek();
+    var focus = currentFocusItems(current);
+    body.innerHTML =
+      '<div class="roost-panel-grid"><section class="roost-tool-card"><h4>Current Cycle ' + current + '</h4><p>Focused work mode shows only the next visible Mission Control items.</p><div class="roost-list">' +
+      (focus.map(function (item) {
+        return '<div class="roost-list-row"><strong>' + esc(item.activity.name) + '</strong><span>' + esc(item.activity.day || "Any") + ' - ' + item.activity.hrs + 'h - ' + missionXP(item.activity) + ' XP</span><button class="wb-btn primary" type="button" data-focus-complete="' + esc(item.key) + '">Complete</button></div>';
+      }).join("") || '<p class="roost-backup-status">No focus items left for this cycle.</p>') +
+      '</div></section><section class="roost-tool-card"><h4>Mission Statement</h4><p>' + esc(readMissionState().missionStatement || "No mission statement yet.") + '</p><button class="wb-btn" type="button" id="focus-open-academy">Open Academy</button></section></div>';
+    body.querySelectorAll("[data-focus-complete]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        toggleMission(btn.getAttribute("data-focus-complete"));
+        buildMissionFocus(body);
+      });
+    });
+    var academy = body.querySelector("#focus-open-academy");
+    if (academy) academy.addEventListener("click", function () {
+      closeModal();
+      location.hash = "#mission-control";
+    });
+  }
+
+  function achievementState() {
+    return LS.read(ACHIEVEMENTS_KEY, {});
+  }
+  function checkRoostAchievements(trigger) {
+    var state = achievementState();
+    var changed = false;
+    ROOST_ACHIEVEMENTS.forEach(function (achievement) {
+      if (state[achievement.id]) return;
+      var ok = false;
+      try { ok = !!achievement.test(); } catch (e) {}
+      if (ok) {
+        state[achievement.id] = { unlockedAt: new Date().toISOString(), trigger: trigger || "boot" };
+        changed = true;
+        toast("Achievement: " + achievement.name);
+      }
+    });
+    if (changed) LS.write(ACHIEVEMENTS_KEY, state);
+    return state;
+  }
+  function buildAchievements(body) {
+    var state = checkRoostAchievements("view");
+    body.innerHTML = '<div class="roost-panel-grid">' + ROOST_ACHIEVEMENTS.map(function (achievement) {
+      var unlocked = !!state[achievement.id];
+      return '<article class="roost-tool-card roost-achievement-badge ' + (unlocked ? "unlocked" : "locked") + '"><h4>' + esc(achievement.name) + '</h4><p>' + esc(achievement.desc) + '</p><span>' + (unlocked ? "Unlocked " + esc(new Date(state[achievement.id].unlockedAt).toLocaleDateString()) : "Locked") + '</span></article>';
+    }).join("") + '</div>';
+  }
+
+  function renderTodayDashboard() {
+    var anchor = document.querySelector(".roost-wire") || document.querySelector(".greeting-bar");
+    if (!anchor) return;
+    var wrap = document.getElementById("roost-today");
+    if (!wrap) {
+      wrap = document.createElement("div");
+      wrap.className = "roost-today";
+      wrap.id = "roost-today";
+      anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
+    }
+    var summary = missionSummary();
+    var current = currentMissionWeek();
+    var focus = currentFocusItems(current).slice(0, 2);
+    var achievements = checkRoostAchievements("dashboard");
+    var unlocked = Object.keys(achievements).length;
+    wrap.innerHTML = '<div class="roost-today-inner">' +
+      '<section class="roost-today-card"><h3>Today</h3><p>Cycle ' + current + ' - ' + summary.done + '/' + summary.total + ' missions complete</p><div class="roost-today-focus">' + (focus.map(function (item) { return '<button type="button" data-dashboard-mission="' + esc(item.key) + '">' + esc(item.activity.name) + '</button>'; }).join("") || '<span>No focus items left for this cycle.</span>') + '</div><div class="roost-mini-actions"><button class="roost-mini-action" type="button" data-open-tool="focus">Focus</button><button class="roost-mini-action" type="button" data-open-tool="readlater">Read Later</button><button class="roost-mini-action" type="button" data-toggle-cozy>Cozy</button></div></section>' +
+      '<section class="roost-today-card"><h4>Read Later</h4><strong>' + readLaterItems().length + '</strong><span>saved articles</span></section>' +
+      '<section class="roost-today-card"><h4>Boards</h4><strong>' + boards().length + '</strong><span>personal boards</span></section>' +
+      '<section class="roost-today-card"><h4>Notes</h4><strong>' + Object.keys(linkNotes()).length + '</strong><span>annotated links</span></section>' +
+      '<section class="roost-today-card"><h4>Badges</h4><strong>' + unlocked + '/' + ROOST_ACHIEVEMENTS.length + '</strong><span>unlocked</span></section>' +
+      '</div>';
+    wrap.querySelectorAll("[data-dashboard-mission]").forEach(function (btn) {
+      btn.addEventListener("click", function () { toggleMission(btn.getAttribute("data-dashboard-mission")); });
+    });
+    wrap.querySelectorAll("[data-open-tool]").forEach(function (btn) {
+      btn.addEventListener("click", function () { openModal(btn.getAttribute("data-open-tool")); });
+    });
+    var cozy = wrap.querySelector("[data-toggle-cozy]");
+    if (cozy) cozy.addEventListener("click", toggleAmbientMode);
+  }
+
+  function installSearchScopes() {
+    var input = document.getElementById("search-input");
+    if (!input || document.getElementById("roost-scope-bar")) return;
+    var bar = document.createElement("div");
+    bar.className = "roost-scope-bar";
+    bar.id = "roost-scope-bar";
+    var scopes = [{ id: "all", label: "All" }, { id: "links", label: "Links" }, { id: "mission", label: "Mission" }, { id: "news", label: "News" }, { id: "saved", label: "Saved" }];
+    bar.innerHTML = scopes.map(function (scope) {
+      return '<button type="button" data-search-scope="' + scope.id + '" aria-pressed="' + (settings.searchScope === scope.id ? "true" : "false") + '">' + scope.label + '</button>';
+    }).join("");
+    var top = input.closest(".top-bar");
+    if (top) top.parentNode.insertBefore(bar, top.nextSibling);
+    bar.querySelectorAll("[data-search-scope]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        settings.searchScope = btn.getAttribute("data-search-scope") || "all";
+        saveSettings();
+        bar.querySelectorAll("[data-search-scope]").forEach(function (b) { b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    });
+    input.addEventListener("input", runScopedSearch, true);
+  }
+  function runScopedSearch(event) {
+    event.stopImmediatePropagation();
+    var input = document.getElementById("search-input");
+    var count = document.getElementById("search-count");
+    var noResults = document.getElementById("no-results");
+    var q = (input.value || "").toLowerCase().trim();
+    var scope = settings.searchScope || "all";
+    var visible = 0;
+    document.querySelectorAll("main .link-card").forEach(function (card) {
+      var section = card.closest(".section");
+      var sectionId = section ? section.id : "";
+      var hay = [card.getAttribute("data-name"), card.getAttribute("data-desc-search"), card.textContent, sectionId].join(" ").toLowerCase();
+      var inScope = scope === "all" || scope === "links" || (scope === "news" && !!SECTION_FEEDS[sectionId]);
+      var match = !q || (inScope && hay.indexOf(q) !== -1);
+      card.setAttribute("data-hidden", match ? "false" : "true");
+      if (match) visible++;
+    });
+    document.querySelectorAll("main .section").forEach(function (section) {
+      var missionMatch = section.id === "mission-control" && (scope === "all" || scope === "mission") && (!q || section.textContent.toLowerCase().indexOf(q) !== -1 || missionConfigSearch(q));
+      var linkMatch = !!section.querySelector('.link-card:not([data-hidden="true"])');
+      section.setAttribute("data-hidden", missionMatch || linkMatch || !q ? "false" : "true");
+    });
+    if (scope === "saved" && q) {
+      var savedHits = readLaterItems().concat(LS.read(WB_KEY, [])).filter(function (item) { return JSON.stringify(item).toLowerCase().indexOf(q) !== -1; }).length;
+      visible += savedHits;
+    }
+    if (count) {
+      if (q) { count.textContent = visible + " found"; count.classList.add("visible"); }
+      else count.classList.remove("visible");
+    }
+    if (noResults) noResults.classList.toggle("visible", !!q && visible === 0);
+  }
+
+  /* =================================================================
+     5A) BACKUP / RESTORE (local Roost memory, no cloud, no deletion)
+     ================================================================= */
+  var BACKUP_SCHEMA = "the-roost.localStorage.v1";
+  function isRoostStorageKey(k, includeFeeds) {
+    if (!k) return false;
+    if (k.indexOf("roost_feed_") === 0) return !!includeFeeds;
+    return k.indexOf("roost_") === 0 || k.indexOf("kfl_") === 0 || k === LEGACY_MISSION_KEY;
+  }
+  function storageKeysForBackup(includeFeeds) {
+    var keys = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (isRoostStorageKey(k, includeFeeds)) keys.push(k);
+      }
+    } catch (e) {}
+    return keys.sort();
+  }
+  function backupPayload(includeFeeds) {
+    var data = {};
+    storageKeysForBackup(includeFeeds).forEach(function (k) {
+      try { data[k] = localStorage.getItem(k); } catch (e) {}
+    });
+    return {
+      app: "The Roost",
+      schema: BACKUP_SCHEMA,
+      exportedAt: new Date().toISOString(),
+      href: location.href,
+      includesFeedCache: !!includeFeeds,
+      data: data
+    };
+  }
+  function backupBytes(s) {
+    return new Blob([String(s || "")]).size;
+  }
+  function backupKeyListHtml(keys, data) {
+    if (!keys.length) return '<p class="roost-backup-status">No Roost memory keys found in this browser yet.</p>';
+    return '<ul class="roost-backup-list">' + keys.map(function (k) {
+      return '<li><code>' + esc(k) + '</code> <span>(' + backupBytes(data[k]) + ' bytes)</span></li>';
+    }).join("") + '</ul>';
+  }
+  function parseBackupText(text) {
+    var parsed = JSON.parse(text || "{}");
+    if (!parsed || parsed.schema !== BACKUP_SCHEMA || !parsed.data || typeof parsed.data !== "object") {
+      throw new Error("This does not look like a The Roost backup.");
+    }
+    return parsed;
+  }
+  function safeRestoreData(data) {
+    var safe = {};
+    Object.keys(data || {}).forEach(function (k) {
+      if (isRoostStorageKey(k, true) && typeof data[k] === "string") safe[k] = data[k];
+    });
+    return safe;
+  }
+  function buildBackupRestore(body) {
+    body.innerHTML =
+      '<div class="roost-backup-grid">' +
+        '<section class="roost-backup-card"><h4>Export The Roost Memory</h4><p>Creates a JSON backup of saved local data: pins, recents, collapsed sections, settings, Workbench notes, Mission Control Academy progress, and launcher state.</p>' +
+          '<label class="roost-backup-check"><input type="checkbox" id="backup-include-feeds"> Include cached headline feeds</label>' +
+          '<div id="backup-current"></div>' +
+          '<div class="roost-backup-actions"><button class="wb-btn primary" id="backup-download">Download Backup</button><button class="wb-btn" id="backup-copy">Copy JSON</button></div>' +
+          '<div class="roost-backup-status" id="backup-export-status"></div></section>' +
+        '<section class="roost-backup-card"><h4>Restore From Backup</h4><p>Restore writes imported keys back into this browser. It does not delete any other local data.</p>' +
+          '<input class="roost-backup-drop" id="backup-file" type="file" accept="application/json,.json">' +
+          '<textarea class="roost-backup-text" id="backup-text" spellcheck="false" placeholder="Paste The Roost backup JSON here..."></textarea>' +
+          '<div class="roost-backup-actions"><button class="wb-btn" id="backup-preview">Preview</button><button class="wb-btn primary" id="backup-restore">Restore Backup</button><button class="wb-btn" id="backup-reload" disabled>Reload Page</button></div>' +
+          '<div id="backup-preview-box"></div><div class="roost-backup-status" id="backup-restore-status"></div></section>' +
+      '</div>';
+    var includeFeeds = body.querySelector("#backup-include-feeds");
+    var current = body.querySelector("#backup-current");
+    var exportStatus = body.querySelector("#backup-export-status");
+    var restoreStatus = body.querySelector("#backup-restore-status");
+    var previewBox = body.querySelector("#backup-preview-box");
+    var text = body.querySelector("#backup-text");
+    var reload = body.querySelector("#backup-reload");
+
+    function renderCurrent() {
+      var payload = backupPayload(includeFeeds.checked);
+      var keys = Object.keys(payload.data);
+      current.innerHTML = '<p class="roost-backup-status">' + keys.length + ' keys ready to export.</p>' + backupKeyListHtml(keys, payload.data);
+    }
+    function backupJson() {
+      return JSON.stringify(backupPayload(includeFeeds.checked), null, 2);
+    }
+    function setStatus(el, msg, kind) {
+      el.className = "roost-backup-status" + (kind ? " " + kind : "");
+      el.textContent = msg || "";
+    }
+    function previewBackup() {
+      try {
+        var payload = parseBackupText(text.value);
+        var safe = safeRestoreData(payload.data);
+        var keys = Object.keys(safe).sort();
+        previewBox.innerHTML = '<p class="roost-backup-status good">' + keys.length + ' restorable keys found from ' + esc(payload.exportedAt || "unknown date") + '.</p>' + backupKeyListHtml(keys, safe);
+        setStatus(restoreStatus, "Preview ready.", "good");
+        return { payload: payload, safe: safe, keys: keys };
+      } catch (e) {
+        previewBox.innerHTML = "";
+        setStatus(restoreStatus, e.message || "Could not read backup JSON.", "bad");
+        return null;
+      }
+    }
+
+    renderCurrent();
+    includeFeeds.addEventListener("change", renderCurrent);
+    body.querySelector("#backup-download").addEventListener("click", function () {
+      var json = backupJson();
+      var stamp = new Date().toISOString().replace(/[:.]/g, "-");
+      var blob = new Blob([json], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "the-roost-backup-" + stamp + ".json";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      setStatus(exportStatus, "Backup downloaded.", "good");
+    });
+    body.querySelector("#backup-copy").addEventListener("click", function () {
+      if (!navigator.clipboard) { setStatus(exportStatus, "Clipboard is unavailable in this browser.", "bad"); return; }
+      navigator.clipboard.writeText(backupJson()).then(function () {
+        setStatus(exportStatus, "Backup JSON copied.", "good");
+      }).catch(function () {
+        setStatus(exportStatus, "Copy failed. Use Download Backup instead.", "bad");
+      });
+    });
+    body.querySelector("#backup-file").addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () { text.value = String(reader.result || ""); previewBackup(); };
+      reader.onerror = function () { setStatus(restoreStatus, "Could not read that file.", "bad"); };
+      reader.readAsText(file);
+    });
+    body.querySelector("#backup-preview").addEventListener("click", previewBackup);
+    body.querySelector("#backup-restore").addEventListener("click", function () {
+      var preview = previewBackup();
+      if (!preview || !preview.keys.length) return;
+      if (!confirm("Restore " + preview.keys.length + " The Roost memory keys into this browser? Existing matching keys will be overwritten.")) return;
+      var written = 0;
+      preview.keys.forEach(function (k) {
+        try { localStorage.setItem(k, preview.safe[k]); written++; } catch (e) {}
+      });
+      setStatus(restoreStatus, "Restored " + written + " keys. Reload the page when you are ready to apply restored UI state.", written ? "good" : "bad");
+      reload.disabled = !written;
+      toast(written ? "Backup restored" : "Restore failed");
+    });
+    reload.addEventListener("click", function () { location.reload(); });
+  }
+
   /* ---------- modal plumbing ---------- */
   var modalEl, modalBody, modalTitle, builtWB = false, builtDG = false;
   function ensureModal() {
@@ -8874,9 +9972,27 @@
     if (which === "workbench") {
       modalTitle.textContent = "🛠️ Workbench";
       buildWorkbench(modalBody); modalBody._mode = "wb";
-    } else {
+    } else if (which === "diagrams") {
       modalTitle.textContent = "📊 Concept Diagrams";
       buildDiagrams(modalBody); modalBody._mode = "dg";
+    } else if (which === "backup") {
+      modalTitle.textContent = "Backup / Restore";
+      buildBackupRestore(modalBody); modalBody._mode = "backup";
+    } else if (which === "focus") {
+      modalTitle.textContent = "Focus Mode";
+      buildMissionFocus(modalBody); modalBody._mode = "focus";
+    } else if (which === "readlater") {
+      modalTitle.textContent = "Read Later";
+      buildReadLater(modalBody); modalBody._mode = "readlater";
+    } else if (which === "boards") {
+      modalTitle.textContent = "Boards";
+      buildBoards(modalBody); modalBody._mode = "boards";
+    } else if (which === "achievements") {
+      modalTitle.textContent = "Achievements";
+      buildAchievements(modalBody); modalBody._mode = "achievements";
+    } else if (which === "linknote") {
+      modalTitle.textContent = "Link Note";
+      buildLinkNote(modalBody); modalBody._mode = "linknote";
     }
     modalEl.classList.add("open");
   }
@@ -8894,11 +10010,16 @@
   /* ---------- boot ---------- */
 
   function boot() {
+    try { applyAmbientMode(); } catch (e) {}
     try { buildWire(); } catch (e) {}
     try { setupHeadlines(); } catch (e) {}
     try { buildMissionControlAcademy(); } catch (e) {}
     try { setupLauncherMinimize(); } catch (e) {}
     try { applySectionOrdering(); } catch (e) {}
+    try { installSearchScopes(); } catch (e) {}
+    try { installCardTools(); } catch (e) {}
+    try { renderTodayDashboard(); } catch (e) {}
+    try { checkRoostAchievements("boot"); } catch (e) {}
     try { buildDock(); } catch (e) {}
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
