@@ -41,7 +41,7 @@ Use the dock's "Headlines: on/off" control to disable or re-enable headline surf
 
 ## Mission Control Academy
 
-The Academy is integrated into The Roost as a native section after the AI sections. It uses `ROOST_MISSION_CONFIG` in the bottom upgrade layer and saves progress under `roost_mission_v1`.
+The Academy is integrated into The Roost as a native section directly under Quick Access. It uses `ROOST_MISSION_CONFIG` in the bottom upgrade layer and saves progress under `roost_mission_v1`.
 
 Current Academy data:
 
@@ -64,6 +64,17 @@ Academy tabs:
 
 Legacy Mission Control progress from `missionControlRPG_v3` is migrated defensively when present.
 
+## Local Memory
+
+The Roost stores memory only in the browser's `localStorage`; there is no account, server, sync, or cloud database.
+
+- Original curated-link features use `kfl_` keys, including `kfl_pins_v1`, `kfl_recent_v1`, and `kfl_collapsed_v1`.
+- Upgrade-layer settings use `roost_` keys, including `roost_settings_v1`, `roost_launcher_minimized_v1`, `roost_mission_v1`, `roost_mission_tab_v1`, and `roost_workbench_v1`.
+- Mission Control Academy stores completed missions, notes, selected filters, mission statement, resource status, side quests, leadership lessons, project data, and the active tab.
+- Workbench stores saved notes locally under `roost_workbench_v1`.
+
+Clearing site data for the hosted Pages URL will clear this memory.
+
 ## Tweaking It Later
 
 All additive behavior lives at the bottom of `index.html` inside `ROOST UPGRADE LAYER`.
@@ -84,5 +95,8 @@ The original curated link cards use the `kfl_` localStorage namespace. Upgrade-l
 - "new" chips removed from link cards.
 - Dead standalone Mission Control and PMD Toolkit dock tiles removed.
 - Section Launcher can be minimized on mobile or desktop.
+- All sections can be collapsed/expanded from the Section Launcher controls.
+- Mission Control Academy can be minimized like the link sections.
 - News-enabled sections are moved above non-news sections after Quick Access and AI.
+- Mission Control Academy sits directly under Quick Access.
 - PWA install and offline shell remain intact.

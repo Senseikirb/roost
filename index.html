@@ -7304,6 +7304,39 @@
     border-color: var(--v3-amber);
     background: rgba(226,184,87,.14);
   }
+  .section.collapsed .roost-heads,
+  .section.collapsed .roost-academy-shell {
+    display: none;
+  }
+  main .section[id] {
+    position: relative;
+    padding-left: 18px;
+  }
+  main .section[id]::before {
+    z-index: 4;
+    pointer-events: none;
+  }
+  main .section[id] > * {
+    position: relative;
+    z-index: 1;
+  }
+  .roost-academy-minimize {
+    min-height: 30px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    background: rgba(255,255,255,.055);
+    color: var(--text-secondary);
+    padding: 5px 10px;
+    font-size: .68rem;
+    font-weight: 750;
+    cursor: pointer;
+  }
+  .roost-academy-minimize:hover,
+  .roost-academy-minimize:focus-visible {
+    color: #fff;
+    border-color: var(--gold);
+    outline: none;
+  }
 
   /* ---------- ROOST MISSION CONTROL ACADEMY ---------- */
   .roost-academy-section { scroll-margin-top: 92px; }
@@ -8145,7 +8178,7 @@
     if (document.getElementById("mission-control")) return;
     ensureMissionNavSurfaces();
     var main = document.getElementById("main-content");
-    var anchor = document.getElementById("ai-learn") || document.getElementById("quick-access");
+    var anchor = document.getElementById("quick-access") || document.getElementById("ai-learn");
     if (!main || !anchor) return;
     var section = document.createElement("div");
     section.className = "section roost-academy-section";
@@ -8154,7 +8187,7 @@
     section.setAttribute("aria-labelledby", "mission-control-heading");
     section.setAttribute("data-v3-group", "learn");
     section.innerHTML =
-      '<div class="section-header"><div class="section-icon" aria-hidden="true">MC</div><h2 id="mission-control-heading">Mission Control Academy</h2><span class="section-count">486</span></div>' +
+      '<div class="section-header"><div class="section-icon" aria-hidden="true">MC</div><h2 id="mission-control-heading">Mission Control Academy</h2><button class="roost-academy-minimize" id="roost-mission-minimize" type="button" aria-expanded="true">Minimize</button><span class="section-count">486</span></div>' +
       '<div class="roost-academy-shell" id="roost-academy-shell">' +
         '<div class="roost-academy-hero"><div><h3>Career campaign, built into The Roost</h3><p>The Mission Control learning plan now lives here: 24 cycles, 240 core missions, projects, side quests, leadership lessons, resource tracking, XP, ranks, notes, and educational links without leaving your homepage.</p></div><div class="roost-academy-actions"><label class="roost-academy-field">Deployment date<input type="date" id="roost-mission-start"></label><button class="roost-academy-btn primary" type="button" id="roost-mission-current">Jump to Current Cycle</button></div></div>' +
         '<div class="roost-academy-tabs" role="tablist" aria-label="Mission Control Academy views">' +
@@ -8169,6 +8202,7 @@
       '</div>';
     anchor.parentNode.insertBefore(section, anchor.nextSibling);
     bindMissionAcademy(section);
+    setupMissionAcademyMinimize(section);
     renderMissionAcademy();
     protectAcademySearchVisibility();
     syncMissionSurfaceStats();
@@ -8427,23 +8461,107 @@
   }
   function setupLauncherMinimize() {
     var center = document.getElementById("command-center"), actions = center && center.querySelector(".v3-actions");
-    if (!center || !actions || document.getElementById("v3-launcher-toggle")) return;
+    if (!center || !actions) return;
     var key = "roost_launcher_minimized_v1";
-    var btn = document.createElement("button");
-    btn.className = "v3-btn v3-launcher-toggle";
-    btn.type = "button";
-    btn.id = "v3-launcher-toggle";
-    actions.insertBefore(btn, actions.firstChild);
+    var btn = document.getElementById("v3-launcher-toggle");
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.className = "v3-btn v3-launcher-toggle";
+      btn.type = "button";
+      btn.id = "v3-launcher-toggle";
+      actions.insertBefore(btn, actions.firstChild);
+      btn.addEventListener("click", function () { apply(!center.classList.contains("roost-launcher-minimized")); });
+    }
     function apply(on) {
       center.classList.toggle("roost-launcher-minimized", on);
       btn.setAttribute("aria-expanded", on ? "false" : "true");
       btn.textContent = on ? "Show Sections" : "Hide Sections";
       LS.write(key, on ? 1 : 0);
     }
-    btn.addEventListener("click", function () { apply(!center.classList.contains("roost-launcher-minimized")); });
     apply(LS.read(key, 0) === 1);
+    setupCollapseAllSectionsControl(actions);
   }
-  var SECTION_ORDER_PINNED = ["quick-access", "ai-apps", "ai-learn", "mission-control", "pinned", "recent"];
+  function readCollapsedSectionSet() {
+    var ids = LS.read("kfl_collapsed_v1", []);
+    return new Set(Array.isArray(ids) ? ids : []);
+  }
+  function writeCollapsedSectionSet(set) {
+    LS.write("kfl_collapsed_v1", Array.from(set));
+  }
+  function applyRoostSectionCollapsed(section, on) {
+    if (!section) return;
+    section.classList.toggle("collapsed", !!on);
+    var header = section.querySelector(".section-header");
+    if (header) header.setAttribute("aria-expanded", String(!on));
+    if (section.id === "mission-control") {
+      var btn = section.querySelector("#roost-mission-minimize");
+      if (btn) {
+        btn.textContent = on ? "Expand" : "Minimize";
+        btn.setAttribute("aria-expanded", String(!on));
+      }
+    }
+  }
+  function setStoredSectionCollapsed(section, on) {
+    var collapsed = readCollapsedSectionSet();
+    if (on) collapsed.add(section.id);
+    else collapsed.delete(section.id);
+    writeCollapsedSectionSet(collapsed);
+    applyRoostSectionCollapsed(section, on);
+  }
+  function setupMissionAcademyMinimize(section) {
+    var btn = section && section.querySelector("#roost-mission-minimize");
+    if (!section || !btn || btn._roostBound) return;
+    btn._roostBound = true;
+    applyRoostSectionCollapsed(section, readCollapsedSectionSet().has(section.id));
+    btn.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      setStoredSectionCollapsed(section, !section.classList.contains("collapsed"));
+      updateCollapseAllSectionsButton();
+    });
+  }
+  function setupCollapseAllSectionsControl(actions) {
+    if (!actions || document.getElementById("v3-collapse-all-toggle")) {
+      updateCollapseAllSectionsButton();
+      return;
+    }
+    var btn = document.createElement("button");
+    btn.className = "v3-btn";
+    btn.type = "button";
+    btn.id = "v3-collapse-all-toggle";
+    var hide = document.getElementById("v3-launcher-toggle");
+    actions.insertBefore(btn, hide ? hide.nextSibling : actions.firstChild);
+    btn.addEventListener("click", function () {
+      var sections = Array.from(document.querySelectorAll("main .section[id]"));
+      var shouldCollapse = sections.some(function (section) { return !section.classList.contains("collapsed"); });
+      sections.forEach(function (section) {
+        if (section.id === "mission-control") {
+          setStoredSectionCollapsed(section, shouldCollapse);
+          return;
+        }
+        if (section.classList.contains("collapsed") === shouldCollapse) return;
+        var header = section.querySelector(".section-header");
+        if (header) header.click();
+        else setStoredSectionCollapsed(section, shouldCollapse);
+      });
+      updateCollapseAllSectionsButton();
+    });
+    document.addEventListener("click", function (event) {
+      if (event.target.closest && event.target.closest(".section-header")) {
+        setTimeout(updateCollapseAllSectionsButton, 0);
+      }
+    });
+    updateCollapseAllSectionsButton();
+  }
+  function updateCollapseAllSectionsButton() {
+    var btn = document.getElementById("v3-collapse-all-toggle");
+    if (!btn) return;
+    var sections = Array.from(document.querySelectorAll("main .section[id]"));
+    var anyOpen = sections.some(function (section) { return !section.classList.contains("collapsed"); });
+    btn.textContent = anyOpen ? "Collapse Sections" : "Expand Sections";
+    btn.setAttribute("aria-pressed", anyOpen ? "false" : "true");
+  }
+  var SECTION_ORDER_PINNED = ["quick-access", "mission-control", "ai-apps", "ai-learn", "pinned", "recent"];
   function applySectionOrdering() {
     var main = document.getElementById("main-content");
     if (!main) return;
@@ -8457,6 +8575,7 @@
     reorderJumpSurface(document.getElementById("nav-tabs"), order);
     reorderJumpSurface(document.querySelector(".v3-section-launcher"), order);
     syncMissionSurfaceStats();
+    updateCollapseAllSectionsButton();
   }
   function reorderJumpSurface(container, order) {
     if (!container) return;
