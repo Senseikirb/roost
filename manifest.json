@@ -1,7 +1,7 @@
 {
-  "name": "Roost — Home Base",
-  "short_name": "Roost",
-  "description": "A living home base: links, headlines, creative tools, and learning.",
+  "name": "The Roost — Home Base",
+  "short_name": "The Roost",
+  "description": "The Roost: a living home base for links, headlines, creative tools, and learning.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
