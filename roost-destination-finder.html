@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Where To">
+<meta name="theme-color" content="#0a1225">
+<title>Where To · Roost</title>
+<style>
+  :root{
+    --bg:#060d1a;--surface:#0f1b33;--surface-2:#142545;
+    --ink:#e8ecf4;--ink-soft:#8a97b4;--line:rgba(255,255,255,.09);
+    --pine:#c9a84c;--pine-soft:rgba(201,168,76,.14);--amber:#d42040;--amber-soft:rgba(191,10,48,.18);
+    --danger:#ff7f91;--good:#4fbf86;
+    --r:16px;--r-sm:8px;
+    --shadow:0 2px 12px rgba(0,0,0,.30);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.45;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 44px) env(safe-area-inset-left);
+    -webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+    linear-gradient(180deg,rgba(10,18,37,.96),rgba(6,13,26,1) 58%),
+    repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 1px,transparent 1px 12px)}
+  .wrap{max-width:620px;margin:0 auto;padding:18px 16px 0}
+
+  header.top{padding:14px 4px 18px}
+  .kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);font-weight:700}
+  .roost-home{display:inline-flex;align-items:center;gap:6px;margin:0 0 14px;color:var(--ink-soft);font-size:13px;font-weight:800;text-decoration:none}
+  .roost-home:hover,.roost-home:focus-visible{color:var(--pine)}
+  header.top h1{font-size:30px;line-height:1.08;margin:6px 0 4px;font-weight:800;color:var(--ink)}
+  header.top p{margin:0;color:var(--ink-soft);font-size:14px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin:0 0 14px}
+  .card > h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 14px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .card > h2::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--amber);flex:none}
+
+  label.fld{display:block;margin:0 0 12px}
+  label.fld:last-child{margin-bottom:0}
+  label.fld > span{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0 0 6px}
+  input[type=text],input[type=date],input[type=number]{width:100%;font-family:var(--font);font-size:16px;color:var(--ink);
+    background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;appearance:none}
+  input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.72}
+  input:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px var(--pine-soft)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row3{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:12px}
+
+  /* toggle */
+  .switchrow{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .switchrow .lbl{font-weight:700;color:var(--pine);font-size:15px}
+  .switchrow .sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+  .switch{position:relative;flex:none;width:52px;height:31px;cursor:pointer}
+  .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .track{position:absolute;inset:0;background:var(--surface-2);border:1.5px solid var(--line);border-radius:999px;transition:background .18s,border-color .18s}
+  .knob{position:absolute;top:3px;left:3px;width:23px;height:23px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .18s}
+  .switch input:checked + .track{background:var(--pine);border-color:var(--pine)}
+  .switch input:checked + .track .knob{transform:translateX(21px)}
+
+  .kid-panel{margin-top:16px}
+  .kid-panel.hidden{display:none}
+  .kid-row{display:flex;align-items:flex-end;gap:10px;margin-bottom:10px}
+  .kid-row .name{flex:1.4}
+  .kid-row .age{width:84px;flex:none}
+  .kid-row .age input{text-align:center}
+  .iconbtn{flex:none;width:42px;height:42px;border-radius:var(--r-sm);border:1.5px solid var(--line);background:var(--surface);color:var(--danger);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .iconbtn:active{background:var(--surface-2)}
+  .addbtn{display:inline-flex;align-items:center;gap:7px;background:var(--pine-soft);color:var(--pine);border:none;border-radius:var(--r-sm);padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)}
+  .addbtn:active{filter:brightness(.96)}
+  .addbtn .plus{font-size:17px;line-height:1}
+  .kid-count{font-size:13px;color:var(--ink-soft);margin:2px 0 12px;font-weight:600}
+
+  /* chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+  .chip{padding:9px 13px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;user-select:none}
+  .chip[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:#060d1a}
+
+  .toggle-line{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+  .toggle-line:first-of-type{border-top:none}
+  .toggle-line .tl-txt{font-size:14px;font-weight:600;color:var(--ink)}
+  .toggle-line .tl-sub{font-size:12px;color:var(--ink-soft);margin-top:1px}
+  .sw-sm{position:relative;flex:none;width:46px;height:28px;cursor:pointer}
+  .sw-sm input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .sw-sm .track{border-radius:999px}
+  .sw-sm .knob{width:21px;height:21px}
+  .sw-sm input:checked + .track .knob{transform:translateX(18px)}
+
+  .runbtn{width:100%;padding:15px;border-radius:var(--r-sm);font-size:16px;font-weight:800;border:none;background:var(--pine);color:#060d1a;cursor:pointer;font-family:var(--font);letter-spacing:.01em}
+  .runbtn:active{filter:brightness(.96)}
+
+  .resultsum{font-size:13px;color:var(--ink-soft);font-weight:600;margin:0 4px 12px;padding-top:4px}
+  .result-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 13px}
+  .copybtn{border:1px solid var(--line);background:var(--surface);color:var(--pine);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:var(--font)}
+  .copybtn:hover,.copybtn:focus-visible{border-color:rgba(201,168,76,.42);background:var(--pine-soft);outline:none}
+  .copymsg{color:var(--ink-soft);font-size:12px;font-weight:700}
+
+  /* result card */
+  .res{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:15px;margin-bottom:13px;position:relative;overflow:hidden}
+  .res .rank{position:absolute;top:0;left:0;width:4px;height:100%;background:var(--amber)}
+  .res .top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .res .place{font-size:19px;font-weight:800;color:var(--pine);letter-spacing:-.01em;line-height:1.15}
+  .res .place small{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);letter-spacing:0;margin-top:2px}
+  .res .cost{text-align:right;flex:none}
+  .res .cost .big{font-size:23px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
+  .res .cost .lab{font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
+
+  .tier{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:6px;margin:11px 0 0}
+  .tier.t1{background:var(--good);color:#fff}
+  .tier.t2{background:var(--amber);color:#fff}
+  .tier.t3{background:var(--surface-2);color:var(--ink-soft)}
+
+  .rchips{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0 0}
+  .rchip{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--surface-2);color:var(--ink-soft)}
+  .rchip.pass{background:var(--amber-soft);color:#ffd4dc}
+
+  .why{margin:12px 0 0;padding:0;list-style:none}
+  .why li{font-size:13px;color:var(--ink);padding-left:16px;position:relative;margin-bottom:4px}
+  .why li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--pine)}
+  .why li:last-child{margin-bottom:0}
+
+  .breakdown{font-size:12px;color:var(--ink-soft);margin:10px 0 0;font-variant-numeric:tabular-nums}
+
+  .flightlink{display:inline-flex;align-items:center;gap:7px;margin:13px 0 0;padding:10px 14px;border-radius:var(--r-sm);background:var(--pine-soft);color:var(--pine);font-size:13.5px;font-weight:700;text-decoration:none}
+  .flightlink:active{filter:brightness(.96)}
+  .flightlink .arr{font-size:15px}
+
+  .empty{font-size:14px;color:var(--ink-soft);background:var(--surface-2);border:1px dashed var(--line);border-radius:var(--r-sm);padding:16px;text-align:center;line-height:1.5}
+
+  .foot{text-align:center;color:var(--ink-soft);font-size:12px;padding:8px 0 0;line-height:1.5}
+  .linkbtn{background:none;border:none;color:var(--danger);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);padding:8px;display:block;margin:4px auto 0}
+  @media (max-width:520px){
+    .wrap{padding-left:12px;padding-right:12px}
+    .row3{grid-template-columns:1fr}
+    .row2{grid-template-columns:1fr}
+    .res .top-row{align-items:flex-start}
+    .res .cost .big{font-size:20px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="roost-home" href="index.html">&larr; Back to The Roost</a>
+    <div class="kicker">Roost</div>
+    <h1>Where To</h1>
+    <p>Tell it who's going and what you'll spend — it ranks where to take them.</p>
+  </header>
+
+  <!-- WHO & HOW LONG -->
+  <section class="card">
+    <h2>Who & How Long</h2>
+    <div class="row3">
+      <label class="fld"><span>Fly from</span><input type="text" id="origin" value="DFW" maxlength="4" autocapitalize="characters" autocomplete="off"></label>
+      <label class="fld"><span>Nights</span><input type="number" id="nights" inputmode="numeric" min="1" value="5"></label>
+      <label class="fld"><span>Adults</span><input type="number" id="adults" inputmode="numeric" min="1" value="2"></label>
+    </div>
+    <div class="row2">
+      <label class="fld"><span>Leave (optional)</span><input type="date" id="start"></label>
+      <label class="fld"><span>Return (optional)</span><input type="date" id="end"></label>
+    </div>
+
+    <div class="switchrow" style="margin-top:4px">
+      <div>
+        <div class="lbl">Children coming along</div>
+        <div class="sub">Reshapes both the cost and what's suggested</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="kidsToggle"><span class="track"><span class="knob"></span></span></label>
+    </div>
+    <div class="kid-panel hidden" id="kidPanel">
+      <div class="kid-count" id="kidCount"></div>
+      <div id="kidList"></div>
+      <button class="addbtn" id="addKid"><span class="plus">+</span> Add a child</button>
+    </div>
+  </section>
+
+  <!-- BUDGET & STYLE -->
+  <section class="card">
+    <h2>Budget & Style</h2>
+    <label class="fld"><span>Total trip budget (optional)</span><input type="number" id="budget" inputmode="numeric" min="0" placeholder="Leave blank to rank by value"></label>
+
+    <div style="font-size:13px;font-weight:600;color:var(--ink);margin:14px 0 8px">What sounds good? <span style="font-weight:500;color:var(--ink-soft)">(optional)</span></div>
+    <div class="chips" id="styleChips">
+      <button class="chip" data-style="beach" aria-pressed="false">Beach</button>
+      <button class="chip" data-style="resort" aria-pressed="false">All-inclusive</button>
+      <button class="chip" data-style="themepark" aria-pressed="false">Theme parks</button>
+      <button class="chip" data-style="city" aria-pressed="false">City</button>
+      <button class="chip" data-style="nature" aria-pressed="false">Outdoors</button>
+      <button class="chip" data-style="snow" aria-pressed="false">Snow</button>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="toggle-line">
+        <div><div class="tl-txt">We can travel internationally</div><div class="tl-sub">Off = domestic only (no passport needed)</div></div>
+        <label class="sw-sm"><input type="checkbox" id="passport" checked><span class="track"><span class="knob"></span></span></label>
+      </div>
+      <div class="toggle-line">
+        <div><div class="tl-txt">Keep flights short</div><div class="tl-sub">Under ~4 hrs — easier with little ones</div></div>
+        <label class="sw-sm"><input type="checkbox" id="shortOnly"><span class="track"><span class="knob"></span></span></label>
+      </div>
+      <div class="toggle-line">
+        <div><div class="tl-txt">Only show styles I picked</div><div class="tl-sub">Otherwise they just rank higher</div></div>
+        <label class="sw-sm"><input type="checkbox" id="styleOnly"><span class="track"><span class="knob"></span></span></label>
+      </div>
+    </div>
+  </section>
+
+  <button class="runbtn" id="runBtn">Find destinations</button>
+
+  <div id="results" style="margin-top:20px"></div>
+
+  <p class="foot">Costs are rough estimates to compare destinations — tap through for live fares before booking.<br>Nothing is saved; this lives only in this tab.</p>
+  <button class="linkbtn" id="resetBtn">Clear and start over</button>
+</div>
+
+<script>
+"use strict";
+(function(){
+  var uid = 0;
+  var hasRun = false;
+  var state = { children: [], styles: {} };
+
+  /* ---------- destination dataset (curated, offline) ----------
+     mi: great-circle miles from DFW · di: per-person/day on the ground (mid-range family)
+     fam: 0-2 inherent family-friendliness · ns: nonstop from DFW · drive: reachable by car */
+  var DEST = [
+    {n:"Galveston",iata:"GLS",reg:"Texas Gulf Coast",mi:270,di:120,fam:2,ns:true,intl:false,drive:true,cats:["beach"]},
+    {n:"San Antonio",iata:"SAT",reg:"Texas",mi:270,di:140,fam:2,ns:true,intl:false,drive:true,cats:["themepark","city"]},
+    {n:"Broken Bow",iata:"---",reg:"Oklahoma",mi:200,di:110,fam:2,ns:true,intl:false,drive:true,cats:["nature"]},
+    {n:"Hot Springs",iata:"HOT",reg:"Arkansas",mi:320,di:110,fam:1,ns:true,intl:false,drive:true,cats:["nature"]},
+    {n:"Branson",iata:"SGF",reg:"Missouri",mi:480,di:130,fam:2,ns:false,intl:false,drive:true,cats:["themepark","nature"]},
+    {n:"Destin / 30A",iata:"VPS",reg:"Florida Panhandle",mi:600,di:170,fam:2,ns:true,intl:false,drive:false,cats:["beach"]},
+    {n:"New Orleans",iata:"MSY",reg:"Louisiana",mi:440,di:160,fam:0,ns:true,intl:false,drive:false,cats:["city"]},
+    {n:"Denver",iata:"DEN",reg:"Colorado",mi:640,di:180,fam:1,ns:true,intl:false,drive:false,cats:["nature","city"]},
+    {n:"Scottsdale / Phoenix",iata:"PHX",reg:"Arizona",mi:870,di:175,fam:1,ns:true,intl:false,drive:false,cats:["resort"]},
+    {n:"Orlando",iata:"MCO",reg:"Florida",mi:985,di:210,fam:2,ns:true,intl:false,drive:false,cats:["themepark"]},
+    {n:"Chicago",iata:"ORD",reg:"Illinois",mi:800,di:200,fam:1,ns:true,intl:false,drive:false,cats:["city"]},
+    {n:"Las Vegas",iata:"LAS",reg:"Nevada",mi:1050,di:190,fam:0,ns:true,intl:false,drive:false,cats:["city","resort"]},
+    {n:"San Diego",iata:"SAN",reg:"California",mi:1180,di:210,fam:2,ns:true,intl:false,drive:false,cats:["beach","city"]},
+    {n:"Anaheim / LA",iata:"SNA",reg:"Southern California",mi:1240,di:230,fam:2,ns:true,intl:false,drive:false,cats:["themepark","beach"]},
+    {n:"Miami",iata:"MIA",reg:"South Florida",mi:1120,di:240,fam:1,ns:true,intl:false,drive:false,cats:["beach","city"]},
+    {n:"Washington DC",iata:"DCA",reg:"Capital",mi:1190,di:210,fam:1,ns:true,intl:false,drive:false,cats:["city"]},
+    {n:"Park City / SLC",iata:"SLC",reg:"Utah",mi:990,di:240,fam:1,ns:true,intl:false,drive:false,cats:["snow","nature"]},
+    {n:"Aspen / Vail",iata:"EGE",reg:"Colorado Rockies",mi:720,di:320,fam:1,ns:true,intl:false,drive:false,cats:["snow"]},
+    {n:"New York City",iata:"JFK",reg:"New York",mi:1390,di:300,fam:0,ns:true,intl:false,drive:false,cats:["city"]},
+    {n:"Jackson / Yellowstone",iata:"JAC",reg:"Wyoming",mi:1100,di:250,fam:1,ns:false,intl:false,drive:false,cats:["nature"]},
+    {n:"Seattle",iata:"SEA",reg:"Pacific Northwest",mi:1660,di:240,fam:1,ns:true,intl:false,drive:false,cats:["city","nature"]},
+    {n:"Honolulu",iata:"HNL",reg:"Hawaii",mi:3780,di:300,fam:1,ns:true,intl:false,drive:false,cats:["beach"]},
+    {n:"Cancún",iata:"CUN",reg:"Mexico",mi:1050,di:150,fam:2,ns:true,intl:true,drive:false,cats:["beach","resort"]},
+    {n:"Puerto Vallarta",iata:"PVR",reg:"Mexico",mi:1080,di:160,fam:2,ns:true,intl:true,drive:false,cats:["beach","resort"]},
+    {n:"Cabo San Lucas",iata:"SJD",reg:"Mexico",mi:1180,di:200,fam:1,ns:true,intl:true,drive:false,cats:["beach","resort"]},
+    {n:"Cozumel",iata:"CZM",reg:"Mexico",mi:1070,di:160,fam:1,ns:true,intl:true,drive:false,cats:["beach"]},
+    {n:"Nassau",iata:"NAS",reg:"Bahamas",mi:1180,di:230,fam:1,ns:true,intl:true,drive:false,cats:["beach"]},
+    {n:"Belize",iata:"BZE",reg:"Belize",mi:1080,di:200,fam:1,ns:true,intl:true,drive:false,cats:["nature","beach"]},
+    {n:"Punta Cana",iata:"PUJ",reg:"Dominican Republic",mi:2100,di:170,fam:2,ns:true,intl:true,drive:false,cats:["beach","resort"]},
+    {n:"Costa Rica",iata:"SJO",reg:"Central America",mi:1730,di:190,fam:1,ns:true,intl:true,drive:false,cats:["nature"]},
+    {n:"Vancouver",iata:"YVR",reg:"Canada",mi:1750,di:240,fam:1,ns:true,intl:true,drive:false,cats:["city","nature"]},
+    {n:"Reykjavík",iata:"KEF",reg:"Iceland",mi:3650,di:260,fam:1,ns:false,intl:true,drive:false,cats:["nature"]},
+    {n:"London",iata:"LHR",reg:"England",mi:4730,di:300,fam:0,ns:true,intl:true,drive:false,cats:["city"]},
+    {n:"Paris",iata:"CDG",reg:"France",mi:4930,di:300,fam:0,ns:true,intl:true,drive:false,cats:["city"]},
+    {n:"Rome",iata:"FCO",reg:"Italy",mi:5560,di:260,fam:0,ns:false,intl:true,drive:false,cats:["city"]},
+    {n:"Tokyo",iata:"HND",reg:"Japan",mi:6440,di:240,fam:0,ns:true,intl:true,drive:false,cats:["city"]}
+  ];
+
+  var CAT_LABEL = {beach:"Beach",resort:"All-inclusive",themepark:"Theme parks",city:"City",nature:"Outdoors",snow:"Snow"};
+  var BAND_ORDER = ["infant","toddler","preschool","school","tween","teen"];
+  var BAND_LABEL = {infant:"baby",toddler:"toddler",preschool:"preschooler",school:"kid",tween:"tween",teen:"teen"};
+  var AGE_FIT = {
+    beach:    {infant:.8, toddler:.9, preschool:.9, school:.9, tween:.8, teen:.8},
+    resort:   {infant:.85,toddler:.9, preschool:.9, school:.85,tween:.8, teen:.8},
+    themepark:{infant:.4, toddler:.6, preschool:.95,school:1,  tween:.85,teen:.8},
+    city:     {infant:.3, toddler:.35,preschool:.5, school:.7, tween:.85,teen:.95},
+    nature:   {infant:.4, toddler:.5, preschool:.7, school:.9, tween:.95,teen:.9},
+    snow:     {infant:.2, toddler:.4, preschool:.6, school:.8, tween:.9, teen:.85}
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function el(t,c){ var e=document.createElement(t); if(c) e.className=c; return e; }
+  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+  function fmt(n){ return Math.round(n).toLocaleString(); }
+  function money(n){ return "$"+fmt(n); }
+  function intVal(id,def){ var v=parseInt($(id).value,10); return isNaN(v)?def:v; }
+
+  function bandOf(age){
+    age=Number(age);
+    if(age<1) return "infant";
+    if(age<=3) return "toddler";
+    if(age<=5) return "preschool";
+    if(age<=9) return "school";
+    if(age<=12) return "tween";
+    return "teen";
+  }
+  function fareEst(mi,intl){
+    var f = 120 + Math.min(mi,1500)*0.16 + Math.max(0,mi-1500)*0.11;
+    if(intl) f *= 1.2;
+    return Math.round(f/10)*10;
+  }
+  function driveCost(mi){ return Math.round((mi*2/25)*3.30/5)*5; }
+  function flightHrs(d){ return d.mi/480 + 0.75 + (d.ns?0:1.3); }
+  function kidsOn(){ return $("kidsToggle").checked; }
+
+  /* ---------- children module ---------- */
+  function renderKids(){
+    var list=$("kidList"); list.innerHTML="";
+    state.children.forEach(function(c){
+      var row=el("div","kid-row");
+      var nw=el("label","fld name"); var ns=el("span"); ns.textContent="Name (optional)";
+      var ni=el("input"); ni.type="text"; ni.value=c.name; ni.placeholder="Child";
+      ni.oninput=function(){ c.name=ni.value; };
+      nw.appendChild(ns); nw.appendChild(ni);
+      var aw=el("label","fld age"); var as=el("span"); as.textContent="Age";
+      var ai=el("input"); ai.type="number"; ai.inputMode="numeric"; ai.min="0"; ai.max="17";
+      ai.value=(c.age===null?"":c.age); ai.placeholder="–";
+      ai.oninput=function(){ c.age=ai.value===""?null:Number(ai.value); rerun(); };
+      aw.appendChild(as); aw.appendChild(ai);
+      var rm=el("button","iconbtn"); rm.type="button"; rm.textContent="×";
+      rm.onclick=function(){ state.children=state.children.filter(function(x){return x.id!==c.id;}); renderKids(); rerun(); };
+      row.appendChild(nw); row.appendChild(aw); row.appendChild(rm);
+      list.appendChild(row);
+    });
+    var n=state.children.length;
+    $("kidCount").textContent = n===0 ? "No children added yet." : (n+(n===1?" child":" children")+" on this trip.");
+  }
+  function addKid(){ state.children.push({id:++uid,name:"",age:null}); renderKids(); rerun(); }
+
+  /* ---------- flight deep link ---------- */
+  function flightURL(origin,iata,start,end){
+    var q="flights from "+origin+" to "+iata;
+    if(start) q+=" on "+start;
+    if(end) q+=" through "+end;
+    return "https://www.google.com/travel/flights?q="+encodeURIComponent(q);
+  }
+  function tripSummary(R){
+    var parts=[R.adults+(R.adults===1?" adult":" adults")];
+    if(R.on && state.children.length) parts.push(state.children.length+(state.children.length===1?" child":" kids"));
+    return parts.join(" + ")+" · "+R.nights+" nights from "+R.origin+(R.budget?" · under "+money(R.budget):"");
+  }
+  function travelTime(r){
+    return r.d.drive ? Math.round(r.d.mi/60)+" hr drive" : r.fh.toFixed(1)+" hr "+(r.d.ns?"nonstop":"1 stop");
+  }
+  function shortlistText(R){
+    var lines=["Roost Destination Shortlist", tripSummary(R), ""];
+    R.top.slice(0,5).forEach(function(r,i){
+      lines.push((i+1)+". "+r.d.n+" — "+r.d.reg+" — "+money(r.total)+" est. — "+travelTime(r)+" — fit "+Math.round(r.score)+"/100");
+    });
+    lines.push("", "Costs are rough planning estimates; check live fares and lodging before booking.");
+    return lines.join("\n");
+  }
+  function copyShortlist(R,msg){
+    if(!navigator.clipboard){
+      msg.textContent="Clipboard unavailable.";
+      return;
+    }
+    navigator.clipboard.writeText(shortlistText(R)).then(function(){
+      msg.textContent="Shortlist copied.";
+    }).catch(function(){
+      msg.textContent="Copy failed.";
+    });
+  }
+
+  /* ---------- the engine ---------- */
+  function compute(){
+    var origin=($("origin").value||"DFW").toUpperCase().trim()||"DFW";
+    var nights=intVal("nights",5); if(nights<1) nights=1;
+    var adults=intVal("adults",2); if(adults<1) adults=1;
+    var budget=parseInt($("budget").value,10); if(isNaN(budget)||budget<=0) budget=null;
+    var start=$("start").value, end=$("end").value;
+    var passport=$("passport").checked, shortOnly=$("shortOnly").checked, styleOnly=$("styleOnly").checked;
+    var sel=Object.keys(state.styles).filter(function(k){return state.styles[k];});
+    var on=kidsOn();
+    var kids=on?state.children.filter(function(c){return c.age!==null && !isNaN(c.age);}):[];
+    var youngest = kids.length? Math.min.apply(null,kids.map(function(c){return c.age;})) : null;
+    var band = youngest!==null ? bandOf(youngest) : null;
+    var travelers = adults + (on?state.children.length:0);
+
+    var rows=[];
+    DEST.forEach(function(d){
+      // hard filters
+      if(d.intl && !passport) return;
+      var fh = d.drive ? null : flightHrs(d);
+      var dh = d.drive ? d.mi/60 : null;
+      if(shortOnly){
+        if(d.drive){ if(dh>5) return; }
+        else if(fh>4.5) return;
+      }
+      if(styleOnly && sel.length){
+        if(!d.cats.some(function(c){return sel.indexOf(c)>=0;})) return;
+      }
+
+      // cost
+      var airW = adults;
+      var dayW = adults;
+      if(on){
+        state.children.forEach(function(c){
+          var a=c.age;
+          if(a===null||isNaN(a)){ airW+=1; dayW+=0.75; return; }
+          airW += (a<2) ? (d.intl?0.1:0) : 1;
+          dayW += (a<6) ? 0.5 : (a<13 ? 0.75 : 0.9);
+        });
+      }
+      var transport = d.drive ? driveCost(d.mi) : fareEst(d.mi,d.intl)*airW;
+      var ground = d.di * dayW * nights;
+      var total = transport + ground;
+
+      rows.push({d:d,fh:fh,dh:dh,transport:transport,ground:ground,total:total,airW:airW});
+    });
+
+    // budget filter (relax if it leaves too few)
+    var working=rows, overBudgetFlag=false;
+    if(budget){
+      var within=rows.filter(function(r){return r.total<=budget;});
+      if(within.length>=3){ working=within; }
+      else { overBudgetFlag=true; }
+    }
+
+    // value normalization across the working set
+    var totals=working.map(function(r){return r.total;});
+    var minT=Math.min.apply(null,totals), maxT=Math.max.apply(null,totals);
+
+    working.forEach(function(r){
+      var d=r.d;
+      // value
+      var value = budget ? clamp(1 - r.total/budget,0,1)
+                         : (maxT>minT ? 1-(r.total-minT)/(maxT-minT) : 1);
+      // suitability
+      var suit, suitAge=null;
+      if(on && band){
+        suitAge = Math.max.apply(null, d.cats.map(function(c){ return (AGE_FIT[c]&&AGE_FIT[c][band])||0.5; }));
+        suit = 0.65*suitAge + 0.35*(d.fam/2);
+        if(band==="infant"||band==="toddler"){
+          if(!d.drive){ if(r.fh>6) suit-=0.45; else if(r.fh>4) suit-=0.25; }
+          else if(r.dh>4) suit-=0.20;
+        }
+      } else {
+        suit = 0.6 + ((d.cats.indexOf("city")>=0||d.cats.indexOf("resort")>=0)?0.15:0);
+      }
+      suit=clamp(suit,0,1);
+      // style
+      var matched = sel.filter(function(c){return d.cats.indexOf(c)>=0;});
+      var style = sel.length ? (matched.length ? matched.length/sel.length : 0.15) : 0.5;
+      // convenience
+      var conv;
+      if(d.drive){ conv=0.7; }
+      else { conv = clamp((d.ns?0.6:0.3) + (r.fh<3?0.4:(r.fh<5?0.25:0.1)),0,1); }
+
+      r.score = 100*(0.38*suit + 0.32*value + 0.18*style + 0.12*conv);
+      r.value=value; r.suitAge=suitAge; r.matched=matched;
+    });
+
+    working.sort(function(a,b){return b.score-a.score;});
+    var top=working.slice(0,10);
+
+    return {top:top,origin:origin,nights:nights,adults:adults,budget:budget,start:start,end:end,
+            on:on,youngest:youngest,band:band,travelers:travelers,overBudgetFlag:overBudgetFlag,
+            count:working.length,sel:sel};
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    hasRun=true;
+    var box=$("results"); box.innerHTML="";
+    var R=compute();
+
+    // summary
+    var sum=el("div","resultsum");
+    sum.textContent="Top picks for "+tripSummary(R);
+    box.appendChild(sum);
+
+    if(R.top.length===0){
+      var e=el("div","empty");
+      e.innerHTML="Nothing matched those filters. Try turning on international travel, loosening “short flights,” or raising the budget.";
+      box.appendChild(e);
+      return;
+    }
+    var actions=el("div","result-actions");
+    var copy=el("button","copybtn");
+    copy.type="button";
+    copy.textContent="Copy shortlist";
+    var msg=el("span","copymsg");
+    msg.setAttribute("role","status");
+    msg.setAttribute("aria-live","polite");
+    copy.onclick=function(){ copyShortlist(R,msg); };
+    actions.appendChild(copy);
+    actions.appendChild(msg);
+    box.appendChild(actions);
+    if(R.overBudgetFlag){
+      var w=el("div","empty");
+      w.style.marginBottom="13px";
+      w.innerHTML="Heads up — most spots come in over "+money(R.budget)+" for this group and length. Showing the closest options, with the overage flagged.";
+      box.appendChild(w);
+    }
+
+    R.top.forEach(function(r){
+      var d=r.d;
+      var card=el("div","res");
+      card.appendChild(el("div","rank"));
+
+      var top=el("div","top-row");
+      var place=el("div","place"); place.innerHTML = d.n + "<small>"+d.reg+"</small>";
+      var cost=el("div","cost");
+      var big=el("div","big"); big.textContent=money(r.total);
+      var lab=el("div","lab"); lab.textContent="est. total";
+      cost.appendChild(big); cost.appendChild(lab);
+      top.appendChild(place); top.appendChild(cost);
+      card.appendChild(top);
+
+      // tier
+      var tier=el("span","tier "+(r.score>=80?"t1":r.score>=66?"t2":"t3"));
+      tier.textContent = r.score>=80?"Top pick":r.score>=66?"Great fit":"Worth a look";
+      card.appendChild(tier);
+
+      // chips
+      var rc=el("div","rchips");
+      d.cats.forEach(function(c){ var x=el("span","rchip"); x.textContent=CAT_LABEL[c]||c; rc.appendChild(x); });
+      if(d.intl){ var p=el("span","rchip pass"); p.textContent="Passport"; rc.appendChild(p); }
+      var tx=el("span","rchip");
+      tx.textContent = travelTime(r);
+      rc.appendChild(tx);
+      card.appendChild(rc);
+
+      // why
+      var why=el("ul","why");
+      function add(t){ var li=el("li"); li.textContent=t; why.appendChild(li); }
+      if(R.budget){ var diff=R.budget-r.total; add(diff>=0?("About "+money(diff)+" under budget"):("About "+money(-diff)+" over budget")); }
+      else if(r.value>0.78){ add("One of your better-value picks"); }
+      if(R.on && R.band){
+        var who=R.youngest+"-yr-old";
+        if(r.suitAge>=0.85) add("Strong fit for a "+who);
+        else if(r.suitAge>=0.6) add("Works for a "+who+" with a little planning");
+        else add("A stretch for a "+who+(d.drive?" — long drive":(r.fh>4?" — long flight":"")));
+      }
+      if(R.sel.length && r.matched.length){ add("Matches: "+r.matched.map(function(c){return CAT_LABEL[c];}).join(", ")); }
+      card.appendChild(why);
+
+      // breakdown
+      var bd=el("div","breakdown");
+      bd.textContent = d.drive
+        ? ("≈ "+money(r.transport)+" to drive + ≈ "+money(r.ground)+" on the ground · "+R.nights+" nights")
+        : ("≈ "+money(r.transport)+" flights ("+R.travelers+" travelers) + ≈ "+money(r.ground)+" on the ground · "+R.nights+" nights");
+      card.appendChild(bd);
+
+      // flight link
+      if(!d.drive && d.iata!=="---"){
+        var a=document.createElement("a");
+        a.className="flightlink"; a.href=flightURL(R.origin,d.iata,R.start,R.end);
+        a.target="_blank"; a.rel="noopener noreferrer";
+        a.innerHTML='<span class="arr">↗</span> Live fares to '+d.iata;
+        card.appendChild(a);
+      }
+
+      box.appendChild(card);
+    });
+  }
+
+  function rerun(){ if(hasRun) render(); }
+
+  /* ---------- wire up ---------- */
+  $("kidsToggle").addEventListener("change", function(){
+    $("kidPanel").classList.toggle("hidden", !this.checked);
+    if(this.checked && state.children.length===0) addKid();
+    rerun();
+  });
+  $("addKid").addEventListener("click", addKid);
+  $("styleChips").addEventListener("click", function(e){
+    var b=e.target.closest(".chip"); if(!b) return;
+    var s=b.getAttribute("data-style");
+    state.styles[s]=!state.styles[s];
+    b.setAttribute("aria-pressed", state.styles[s]?"true":"false");
+    rerun();
+  });
+  ["origin","nights","adults","budget","start","end"].forEach(function(id){
+    $(id).addEventListener("input", rerun);
+  });
+  ["passport","shortOnly","styleOnly"].forEach(function(id){
+    $(id).addEventListener("change", rerun);
+  });
+  $("runBtn").addEventListener("click", function(){
+    render();
+    $("results").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  $("resetBtn").addEventListener("click", function(){
+    if(!confirm("Clear everything and start fresh?")) return;
+    $("origin").value="DFW"; $("nights").value="5"; $("adults").value="2";
+    $("budget").value=""; $("start").value=""; $("end").value="";
+    $("kidsToggle").checked=false; $("kidPanel").classList.add("hidden");
+    $("passport").checked=true; $("shortOnly").checked=false; $("styleOnly").checked=false;
+    state.children=[]; state.styles={};
+    document.querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed","false");});
+    renderKids();
+    hasRun=false; $("results").innerHTML="";
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+
+  renderKids();
+})();
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 /* Roost service worker — caches the app shell so the page (and its
    links) work offline. Live headlines still require a network + proxy;
    they degrade gracefully when offline. Bump CACHE to force an update. */
-const CACHE = "roost-shell-v2";
+const CACHE = "roost-shell-v3";
 const SHELL_CORE = [
   "./",
   "./index.html",
@@ -11,7 +11,9 @@ const SHELL_OPTIONAL = [
   "./icon-180.png",
   "./icon-192.png",
   "./icon-512.png",
-  "./favicon-32.png"
+  "./favicon-32.png",
+  "./iq-rfsoc-explorer.html",
+  "./roost-destination-finder.html"
 ];
 
 self.addEventListener("install", (e) => {

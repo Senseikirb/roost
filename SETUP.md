@@ -1,6 +1,6 @@
 # The Roost - Setup Guide
 
-Your personal homepage and command center. The current bundle includes 714 curated link cards, Kid Zone, Creative Writing, Battle History & Maps, Defense & National Security, a privacy-preserving first-run setup, saved home views, a visual layout editor, a daily dashboard, live headlines, custom RSS sources, a mode-aware Roost Wire board, read-later saves, personal boards with starter templates, link notes with local tags, accessibility preferences, manual link-health checks, the dock tools, and an optional Mission Control Academy example profile.
+Your personal homepage and command center. The current bundle includes 738 curated link cards, Kid Zone, Creative Writing, Philosophy & Ethics, Leadership & Management, Battle History & Maps, Defense & National Security, a privacy-preserving first-run setup, saved home views, a visual layout editor, a daily dashboard, live headlines, custom RSS sources, a mode-aware Roost Wire board, read-later saves, personal boards with starter templates, link notes with local tags, accessibility preferences, manual link-health checks, the dock tools, and an optional Mission Control Academy example profile.
 
 ## What's In This Folder
 
@@ -179,6 +179,7 @@ The Roost Wire and per-section headline strips pull public RSS/Atom feeds in the
 - Cached feed data is preferred for the Wire when available, so the board appears faster on repeat visits.
 - Headline cards can show **Cached** or **Stale** freshness labels based on the local `roost_feed_*` cache timestamps.
 - Refresh buttons update the Wire or a section strip in place. They only touch feed data and do not reset Mission Control Academy progress.
+- Roost Wire topic cards include a **More** action for rotating that topic's headline without switching or narrowing the active Wire mode.
 - Custom RSS/Atom feeds are stored locally under `roost_custom_feeds_v1` and reuse the same proxy, parser, cache, and graceful-fallback path as built-in feeds.
 - Roost Wire modes let you narrow the board to Tech, Defense, AI, Gaming, Finance, World/Priority, or Quiet.
 - Roost Wire and Today can be collapsed independently. Their collapsed/expanded state is remembered in local settings.
@@ -271,7 +272,7 @@ The original curated link cards use the `kfl_` localStorage namespace. Upgrade-l
 
 ## Quick Sanity Checklist
 
-- 714 curated link cards preserved.
+- 738 curated link cards preserved.
 - Static link sections preserved, plus Pinned/Recent utility sections and the dynamic Academy section.
 - "new" chips removed from link cards.
 - Dead standalone Mission Control and PMD Toolkit dock tiles removed.
