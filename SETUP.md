@@ -1,6 +1,6 @@
 # The Roost - Setup Guide
 
-Your personal homepage and command center. The current bundle includes 738 curated link cards, Kid Zone, Creative Writing, Philosophy & Ethics, Leadership & Management, Battle History & Maps, Defense & National Security, a privacy-preserving first-run setup, saved home views, a visual layout editor, a daily dashboard, live headlines, custom RSS sources, a mode-aware Roost Wire board, read-later saves, personal boards with starter templates, link notes with local tags, accessibility preferences, manual link-health checks, the dock tools, and an optional Mission Control Academy example profile.
+Your personal homepage and command center. The current bundle includes 762 curated link cards, Kid Zone, Creative Writing, Philosophy & Ethics, Leadership & Management, Battle History & Maps, Defense & National Security, a privacy-preserving first-run setup, saved home views, a visual layout editor, a daily dashboard, live headlines, custom RSS sources, a mode-aware Roost Wire board, read-later saves, personal boards with starter templates, link notes with local tags, accessibility preferences, manual link-health checks, standalone dock tools, and an optional Mission Control Academy example profile.
 
 ## What's In This Folder
 
@@ -11,6 +11,7 @@ Your personal homepage and command center. The current bundle includes 738 curat
 | `sw.js` | Offline shell service worker | Yes for offline |
 | `icon-180.png`, `icon-192.png`, `icon-512.png`, `favicon-32.png` | App icons | Yes for install |
 | `iq-rfsoc-explorer.html` | Optional sibling tool opened by the dock RFSoC tile | Optional |
+| `roost-destination-finder.html` | Optional sibling trip finder opened by the dock Where To tile | Optional |
 
 Keep everything in the same folder. The page is vanilla HTML/CSS/JS: no build step, no npm, no framework.
 
@@ -272,7 +273,7 @@ The original curated link cards use the `kfl_` localStorage namespace. Upgrade-l
 
 ## Quick Sanity Checklist
 
-- 738 curated link cards preserved.
+- 762 curated link cards preserved.
 - Static link sections preserved, plus Pinned/Recent utility sections and the dynamic Academy section.
 - "new" chips removed from link cards.
 - Dead standalone Mission Control and PMD Toolkit dock tiles removed.
