@@ -2,7 +2,7 @@
 
 **The Roost** is a single-page personal command center: part homepage, part live intelligence board, part learning platform, and part thinking workspace. It is built to be fast, durable, installable, and useful every day without needing a backend, build step, framework, or account.
 
-At its core, The Roost is a carefully curated launchpad: **762 hand-picked link cards** across the homepage sections. Around that foundation it adds a privacy-preserving first-run setup, saved home views, current-view snapshot export, shareable configuration packs, a visual layout editor, a daily dashboard with a Daily Quest Deck, a local session planner, live RSS headlines, custom RSS sources, read-later triage, personal boards, offline-first PWA support, a lightweight tool dock, searchable Workbench notes, concept diagrams, a local Where To trip finder, Kid Zone, Creative Writing resources, philosophy, leadership, defense and battle-history reference sections, and an optional **Mission Control Academy** example profile for long-range career development.
+At its core, The Roost is a carefully curated launchpad: **786 hand-picked link cards** across the homepage sections. Around that foundation it adds a privacy-preserving first-run setup, saved home views, current-view snapshot export, shareable configuration packs, a visual layout editor, a daily dashboard with a Daily Quest Deck, a local session planner, live RSS headlines, custom RSS sources, read-later triage, personal boards, offline-first PWA support, a lightweight tool dock, searchable Workbench notes, concept diagrams, a local Where To trip finder, Kid Zone, Creative Writing resources, philosophy, leadership, defense and battle-history reference sections, a Briefing Room for battle briefs and defense-industry decoder cards, and an optional **Mission Control Academy** example profile for long-range career development.
 
 ## Why It Exists
 
@@ -18,7 +18,7 @@ It is intentionally vanilla: one main HTML file, one manifest, one service worke
 
 ## Highlights
 
-- **762 curated link cards** across AI, coding, RF, embedded systems, game dev, writing, philosophy, leadership, finance, security, defense, battle history, family, homestead, cooking, news, sports, Kid Zone, and more.
+- **786 curated link cards** across AI, coding, RF, embedded systems, game dev, writing, philosophy, leadership, finance, security, defense, battle history, family, homestead, cooking, news, sports, Kid Zone, and more.
 - **First-run setup wizard** for display name, use case, modules, news, density, visual mode, and starter sections.
 - **Mission Control Academy** available as an optional local example profile directly under Quick Access.
 - **24-cycle learning plan** with 240 core missions, 97 resources, 120 side quests, 23 leadership lessons, 6 projects, and 18 achievements.
@@ -27,7 +27,7 @@ It is intentionally vanilla: one main HTML file, one manifest, one service worke
 - **Keyboard Shortcuts** command for a compact launcher, modal, and tool key reference.
 - **Roost Wire**, a six-topic live news board with modes for Tech, Defense, AI, Gaming, Finance, World, and Quiet.
 - **Per-section headline strips** for sections that benefit from fresh context.
-- **Philosophy & Ethics**, **Leadership & Management**, **Battle History & Maps**, and **Defense & National Security** sections for durable reference, practical judgment, campaign maps, military history, defense industry news, and strategy analysis.
+- **Philosophy & Ethics**, **Leadership & Management**, **Briefing Room**, **Battle History & Maps**, and **Defense & National Security** sections for durable reference, practical judgment, battle briefs, defense-industry decoder cards, campaign maps, military history, defense industry news, and strategy analysis.
 - **Read Later** saves for articles from Roost Wire and section headlines, with status, priority, filters, and local offline notes.
 - **Session Planner** for one local timeboxed goal, resources, notes, and a completion summary.
 - **Personal Boards** for grouping favorite links into custom workflows, with local starter templates.
@@ -380,8 +380,8 @@ The result is intentionally personal: a little command center, a little library,
 
 ## Current Integrity Snapshot
 
-- 762 link cards
-- 33 static sections
+- 786 link cards
+- 34 static sections
 - Mission Control Academy available as an optional setup module under Quick Access
 - 24 Academy cycles
 - 240 Academy missions

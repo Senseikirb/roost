@@ -8,8 +8,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 
 const checks = [];
-const EXPECTED_LINK_CARDS = 762;
-const EXPECTED_STATIC_SECTIONS = 33;
+const EXPECTED_LINK_CARDS = 786;
+const EXPECTED_STATIC_SECTIONS = 34;
 
 function record(name, ok, detail = "") {
   checks.push({ name, ok: !!ok, detail });
@@ -57,6 +57,17 @@ function validateStructure() {
   record("script tag balance", counts.scriptOpen === counts.scriptClose, `${counts.scriptOpen}/${counts.scriptClose}`);
   record("style tag balance", counts.styleOpen === counts.styleClose, `${counts.styleOpen}/${counts.styleClose}`);
   record("inline script syntax", true, `${scripts.length} inline scripts`);
+  const countMismatches = [...html.matchAll(/<div class="section" id="([^"]+)"[\s\S]*?(?=<div class="section" id=|<\/main>)/g)]
+    .map((match) => {
+      const block = match[0];
+      const label = block.match(/<span class="section-count"[^>]*>([\s\S]*?)<\/span>/);
+      if (!label) return null;
+      const expected = Number(String(label[1]).replace(/<[^>]+>/g, "").trim());
+      const actual = (block.match(/class="link-card"/g) || []).length;
+      return Number.isFinite(expected) && expected !== actual ? `${match[1]} ${expected}/${actual}` : null;
+    })
+    .filter(Boolean);
+  record("section count labels", countMismatches.length === 0, countMismatches.length ? countMismatches.join(", ") : "all section labels match");
   record("manifest required fields", !!(manifest.name && manifest.short_name && manifest.start_url && manifest.display && Array.isArray(manifest.icons) && manifest.icons.length), manifest.name || "manifest");
   const missingIcons = (manifest.icons || []).map((icon) => icon && icon.src).filter(Boolean).filter((src) => !fs.existsSync(path.join(root, src.replace(/^\.\//, ""))));
   record("manifest icons resolve", missingIcons.length === 0, missingIcons.length ? missingIcons.join(", ") : `${(manifest.icons || []).length} icons`);
