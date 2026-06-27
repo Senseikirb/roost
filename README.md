@@ -2,7 +2,7 @@
 
 **The Roost** is a single-page personal command center: part homepage, part live intelligence board, part learning platform, and part thinking workspace. It is built to be fast, durable, installable, and useful every day without needing a backend, build step, framework, or account.
 
-At its core, The Roost is a carefully curated launchpad: **738 hand-picked link cards** across the homepage sections. Around that foundation it adds a privacy-preserving first-run setup, saved home views, current-view snapshot export, shareable configuration packs, a visual layout editor, a daily dashboard with a Daily Quest Deck, a local session planner, live RSS headlines, custom RSS sources, read-later triage, personal boards, offline-first PWA support, a lightweight tool dock, searchable Workbench notes, concept diagrams, Kid Zone, Creative Writing resources, philosophy, leadership, defense and battle-history reference sections, and an optional **Mission Control Academy** example profile for long-range career development.
+At its core, The Roost is a carefully curated launchpad: **762 hand-picked link cards** across the homepage sections. Around that foundation it adds a privacy-preserving first-run setup, saved home views, current-view snapshot export, shareable configuration packs, a visual layout editor, a daily dashboard with a Daily Quest Deck, a local session planner, live RSS headlines, custom RSS sources, read-later triage, personal boards, offline-first PWA support, a lightweight tool dock, searchable Workbench notes, concept diagrams, a local Where To trip finder, Kid Zone, Creative Writing resources, philosophy, leadership, defense and battle-history reference sections, and an optional **Mission Control Academy** example profile for long-range career development.
 
 ## Why It Exists
 
@@ -18,7 +18,7 @@ It is intentionally vanilla: one main HTML file, one manifest, one service worke
 
 ## Highlights
 
-- **738 curated link cards** across AI, coding, RF, embedded systems, game dev, writing, philosophy, leadership, finance, security, defense, battle history, family, homestead, cooking, news, sports, Kid Zone, and more.
+- **762 curated link cards** across AI, coding, RF, embedded systems, game dev, writing, philosophy, leadership, finance, security, defense, battle history, family, homestead, cooking, news, sports, Kid Zone, and more.
 - **First-run setup wizard** for display name, use case, modules, news, density, visual mode, and starter sections.
 - **Mission Control Academy** available as an optional local example profile directly under Quick Access.
 - **24-cycle learning plan** with 240 core missions, 97 resources, 120 side quests, 23 leadership lessons, 6 projects, and 18 achievements.
@@ -273,12 +273,13 @@ Optional:
 
 ```text
 iq-rfsoc-explorer.html
+roost-destination-finder.html
 tests/run-custom-import-parser-tests.mjs
 tests/run-layout-cdp-tests.mjs
 tests/run-roost-validation.mjs
 ```
 
-The RFSoC Explorer dock tile expects `iq-rfsoc-explorer.html` as a sibling file. If it is not present, the rest of The Roost still works.
+The RFSoC Explorer and Where To dock tiles expect `iq-rfsoc-explorer.html` and `roost-destination-finder.html` as sibling files. If either standalone tool is not present, the rest of The Roost still works.
 
 The combined validation runner is optional for deployment, but useful before publishing changes:
 
@@ -379,7 +380,7 @@ The result is intentionally personal: a little command center, a little library,
 
 ## Current Integrity Snapshot
 
-- 738 link cards
+- 762 link cards
 - 33 static sections
 - Mission Control Academy available as an optional setup module under Quick Access
 - 24 Academy cycles
