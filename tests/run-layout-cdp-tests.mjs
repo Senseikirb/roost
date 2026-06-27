@@ -2,8 +2,8 @@ import http from "node:http";
 
 const CDP_PORT = Number(process.env.ROOST_CDP_PORT || 9223);
 const APP_URL = process.env.ROOST_APP_URL || "http://127.0.0.1:8765/index.html";
-const EXPECTED_LINK_CARDS = 762;
-const EXPECTED_RUNTIME_SECTIONS = 34;
+const EXPECTED_LINK_CARDS = 786;
+const EXPECTED_RUNTIME_SECTIONS = 35;
 
 function getJson(path, method = "GET") {
   return new Promise((resolve, reject) => {
@@ -298,16 +298,20 @@ async function main() {
     const defense = document.getElementById("defense-industry");
     const philosophy = document.getElementById("philosophy");
     const leadership = document.getElementById("leadership");
+    const briefing = document.getElementById("briefing-room");
     const navBattle = document.querySelector('#nav-tabs a[href="#battle-history"]');
     const navDefense = document.querySelector('#nav-tabs a[href="#defense-industry"]');
     const navPhilosophy = document.querySelector('#nav-tabs a[href="#philosophy"]');
     const navLeadership = document.querySelector('#nav-tabs a[href="#leadership"]');
+    const navBriefing = document.querySelector('#nav-tabs a[href="#briefing-room"]');
     const jumpBattle = document.querySelector('.v3-section-launcher a[href="#battle-history"][data-v3-group="learn"]');
     const jumpDefense = document.querySelector('.v3-section-launcher a[href="#defense-industry"][data-v3-group="media"]');
     const jumpPhilosophy = document.querySelector('.v3-section-launcher a[href="#philosophy"][data-v3-group="learn"]');
     const jumpLeadership = document.querySelector('.v3-section-launcher a[href="#leadership"][data-v3-group="learn"]');
+    const jumpBriefing = document.querySelector('.v3-section-launcher a[href="#briefing-room"][data-v3-group="learn"]');
     const learnButton = document.querySelector('[data-v3-view="learn"]');
     if (learnButton) learnButton.click();
+    const learnShowsBriefing = !!briefing && briefing.getAttribute("data-hidden") !== "true";
     const learnShowsBattle = !!battle && battle.getAttribute("data-hidden") !== "true";
     const learnShowsPhilosophy = !!philosophy && philosophy.getAttribute("data-hidden") !== "true";
     const learnShowsLeadership = !!leadership && leadership.getAttribute("data-hidden") !== "true";
@@ -315,6 +319,7 @@ async function main() {
     const mediaButton = document.querySelector('[data-v3-view="media"]');
     if (mediaButton) mediaButton.click();
     const mediaShowsDefense = !!defense && defense.getAttribute("data-hidden") !== "true";
+    const mediaHidesBriefing = !!briefing && briefing.getAttribute("data-hidden") === "true";
     const mediaHidesBattle = !!battle && battle.getAttribute("data-hidden") === "true";
     const mediaHidesPhilosophy = !!philosophy && philosophy.getAttribute("data-hidden") === "true";
     const mediaHidesLeadership = !!leadership && leadership.getAttribute("data-hidden") === "true";
@@ -339,6 +344,11 @@ async function main() {
     }
     const radicalCandor = Array.from(document.querySelectorAll("#leadership .link-card")).filter((card) => /Radical Candor/.test(card.textContent || ""))[0];
     if (input) {
+      input.value = "cjadc2";
+      input.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+    }
+    const cjadc2 = Array.from(document.querySelectorAll("#briefing-room .link-card")).filter((card) => /CJADC2/.test(card.textContent || ""))[0];
+    if (input) {
       input.value = "";
       input.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
     }
@@ -347,15 +357,20 @@ async function main() {
       defenseExists: !!defense,
       philosophyExists: !!philosophy,
       leadershipExists: !!leadership,
+      briefingExists: !!briefing,
       battleCount: !!battle && battle.querySelectorAll(".link-card").length === 12,
       defenseCount: !!defense && defense.querySelectorAll(".link-card").length === 12,
       philosophyCount: !!philosophy && philosophy.querySelectorAll(".link-card").length === 24,
       leadershipCount: !!leadership && leadership.querySelectorAll(".link-card").length === 24,
-      navEntries: !!navBattle && !!navDefense && !!navPhilosophy && !!navLeadership && !!jumpBattle && !!jumpDefense && !!jumpPhilosophy && !!jumpLeadership,
-      groupedViews: learnShowsBattle && learnShowsPhilosophy && learnShowsLeadership && learnHidesDefense && mediaShowsDefense && mediaHidesBattle && mediaHidesPhilosophy && mediaHidesLeadership,
+      briefingCount: !!briefing && briefing.querySelectorAll(".link-card").length === 24,
+      leadershipLabelCount: !!leadership && /24/.test((leadership.querySelector(".section-count") || {}).textContent || ""),
+      briefingLabelCount: !!briefing && /24/.test((briefing.querySelector(".section-count") || {}).textContent || ""),
+      navEntries: !!navBattle && !!navDefense && !!navPhilosophy && !!navLeadership && !!navBriefing && !!jumpBattle && !!jumpDefense && !!jumpPhilosophy && !!jumpLeadership && !!jumpBriefing,
+      groupedViews: learnShowsBriefing && learnShowsBattle && learnShowsPhilosophy && learnShowsLeadership && learnHidesDefense && mediaShowsDefense && mediaHidesBriefing && mediaHidesBattle && mediaHidesPhilosophy && mediaHidesLeadership,
       searchFindsDefense: !!c4isr && c4isr.getAttribute("data-hidden") !== "true" && /C4ISRNET/.test(searchText),
       searchFindsPhilosophy: !!warEthics && warEthics.getAttribute("data-hidden") !== "true",
       searchFindsLeadership: !!radicalCandor && radicalCandor.getAttribute("data-hidden") !== "true",
+      searchFindsBriefing: !!cjadc2 && cjadc2.getAttribute("data-hidden") !== "true",
       battleLinkPresent: !!westPoint && /^https:\\/\\/dhc\\.westpoint\\.edu\\//.test(westPoint.href)
     };
   })()`);
