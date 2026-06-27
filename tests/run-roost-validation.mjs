@@ -8,6 +8,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 
 const checks = [];
+const EXPECTED_LINK_CARDS = 762;
+const EXPECTED_STATIC_SECTIONS = 33;
 
 function record(name, ok, detail = "") {
   checks.push({ name, ok: !!ok, detail });
@@ -49,8 +51,8 @@ function validateStructure() {
     styleClose: (html.match(/<\/style>/g) || []).length
   };
 
-  record("curated link count", counts.linkCards >= 646, `${counts.linkCards} link cards`);
-  record("section count", counts.sections >= 28, `${counts.sections} static sections`);
+  record("curated link count", counts.linkCards === EXPECTED_LINK_CARDS, `${counts.linkCards}/${EXPECTED_LINK_CARDS} link cards`);
+  record("section count", counts.sections === EXPECTED_STATIC_SECTIONS, `${counts.sections}/${EXPECTED_STATIC_SECTIONS} static sections`);
   record("div tag balance", counts.divOpen === counts.divClose, `${counts.divOpen}/${counts.divClose}`);
   record("script tag balance", counts.scriptOpen === counts.scriptClose, `${counts.scriptOpen}/${counts.scriptClose}`);
   record("style tag balance", counts.styleOpen === counts.styleClose, `${counts.styleOpen}/${counts.styleClose}`);
