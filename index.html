@@ -9645,6 +9645,14 @@
     top: 9px;
     z-index: 5;
   }
+  .roost-feat-wrap .roost-save-article {
+    top: 48px;
+  }
+  .roost-save-article.is-saved {
+    border-color: rgba(255, 211, 77, .42);
+    background: rgba(255, 211, 77, .12);
+    color: #ffe7a3;
+  }
   .roost-feat-wrap,
   .roost-row-wrap {
     position: relative;
@@ -11929,6 +11937,7 @@
 
   /* ---------- resilient feed fetch (CORS proxies + cache) ---------- */
   var CACHE_TTL = 30 * 60 * 1000; // 30 min
+  var SECTION_HEADLINE_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
   var PROXIES = [
     function (u) { return { url: "https://api.allorigins.win/raw?url=" + encodeURIComponent(u), json: false }; },
     function (u) { return { url: "https://corsproxy.io/?url=" + encodeURIComponent(u), json: false }; },
@@ -11974,7 +11983,7 @@
           var t = txt(it, "title"), l = txt(it, "link"),
               d = txt(it, "description") || txt(it, "summary"),
               p = txt(it, "pubDate") || txt(it, "date");
-          if (t) out.push({ title: clean(t), link: l, desc: stripHtml(d), date: p, source: sourceLabel });
+          if (t) out.push({ title: cleanFeedTitle(t), link: l, desc: stripHtml(d), date: p, source: sourceLabel });
         });
       } else {
         // Atom
@@ -11984,7 +11993,7 @@
           var l = linkEl ? (linkEl.getAttribute("href") || linkEl.textContent) : "";
           var d = txt(it, "summary") || txt(it, "content");
           var p = txt(it, "updated") || txt(it, "published");
-          if (t) out.push({ title: clean(t), link: l, desc: stripHtml(d), date: p, source: sourceLabel });
+          if (t) out.push({ title: cleanFeedTitle(t), link: l, desc: stripHtml(d), date: p, source: sourceLabel });
         });
       }
     } catch (e) {}
@@ -11992,7 +12001,23 @@
   }
   function txt(parent, tag) { var el = parent.getElementsByTagName(tag)[0]; return el ? el.textContent : ""; }
   function clean(s) { return (s || "").replace(/<!\[CDATA\[|\]\]>/g, "").trim(); }
-  function stripHtml(s) { var tmp = document.createElement("div"); tmp.innerHTML = clean(s); return (tmp.textContent || "").trim(); }
+  function decodeHtmlEntities(s) {
+    var out = clean(s);
+    if (!/[&][#a-z0-9]+;/i.test(out)) return out;
+    var textarea = document.createElement("textarea");
+    for (var i = 0; i < 3 && /[&][#a-z0-9]+;/i.test(out); i++) {
+      textarea.innerHTML = out;
+      if (textarea.value === out) break;
+      out = textarea.value;
+    }
+    return out;
+  }
+  function cleanFeedTitle(s) {
+    var decoded = decodeHtmlEntities(s);
+    if (/[<>]/.test(decoded)) return stripHtml(decoded);
+    return decoded.replace(/\s+/g, " ").trim();
+  }
+  function stripHtml(s) { var tmp = document.createElement("div"); tmp.innerHTML = clean(s); return decodeHtmlEntities(tmp.textContent || "").trim(); }
 
 
   function fetchOne(url, label, opts) {
@@ -12057,6 +12082,14 @@
     var start = (offsets[key] || 0) % items.length;
     return items.slice(start).concat(items.slice(0, start));
   }
+  function recentSectionHeadlines(items) {
+    return (items || []).filter(function (item) {
+      var parsed = Date.parse(item && item.date);
+      if (!isFinite(parsed)) return true;
+      var age = Date.now() - parsed;
+      return age < 0 || age <= SECTION_HEADLINE_MAX_AGE;
+    });
+  }
   function setRefreshBusy(btn, busy) {
     if (!btn) return;
     btn.disabled = !!busy;
@@ -12077,7 +12110,9 @@
   }
   function articleSaveButton(item, fallbackSource) {
     if (!item || !safeHttpUrl(item.link)) return "";
-    return '<button class="roost-save-article" type="button" data-save-article data-title="' + esc(item.title || "Untitled") + '" data-link="' + esc(safeHttpUrl(item.link)) + '" data-source="' + esc(item.source || fallbackSource || "") + '" data-date="' + esc(item.date || "") + '" title="Save article">Save</button>';
+    var href = safeHttpUrl(item.link);
+    var saved = readLaterLinkSaved(href);
+    return '<button class="roost-save-article' + (saved ? ' is-saved' : '') + '" type="button" data-save-article data-title="' + esc(item.title || "Untitled") + '" data-link="' + esc(href) + '" data-source="' + esc(item.source || fallbackSource || "") + '" data-date="' + esc(item.date || "") + '" aria-pressed="' + (saved ? "true" : "false") + '" title="' + (saved ? "Remove from Read Later" : "Save article") + '">' + (saved ? "Saved" : "Save") + '</button>';
   }
   function readLaterStatus(value) {
     value = String(value || "new").toLowerCase();
@@ -12107,10 +12142,33 @@
   function saveReadLaterItems(items) {
     LS.write(READ_LATER_KEY, (items || []).map(normalizeReadLaterItem).filter(Boolean).slice(0, 200));
     renderTodayDashboard();
+    syncArticleSaveButtons();
   }
   function readLaterActiveItems() {
     return readLaterItems().filter(function (item) {
       return item.status !== "done" && item.status !== "archived";
+    });
+  }
+  function savedReadLaterLinks() {
+    var saved = {};
+    readLaterItems().forEach(function (item) { saved[item.link] = true; });
+    return saved;
+  }
+  function readLaterLinkSaved(link) {
+    var href = safeHttpUrl(link);
+    return !!(href && savedReadLaterLinks()[href]);
+  }
+  function syncArticleSaveButtons(link) {
+    var href = safeHttpUrl(link);
+    var saved = savedReadLaterLinks();
+    document.querySelectorAll("[data-save-article]").forEach(function (btn) {
+      var btnHref = safeHttpUrl(btn.getAttribute("data-link"));
+      if (!btnHref || (href && btnHref !== href)) return;
+      var isSaved = !!saved[btnHref];
+      btn.textContent = isSaved ? "Saved" : "Save";
+      btn.classList.toggle("is-saved", isSaved);
+      btn.setAttribute("aria-pressed", isSaved ? "true" : "false");
+      btn.setAttribute("title", isSaved ? "Remove from Read Later" : "Save article");
     });
   }
   function readLaterMatchesFilter(item, filter) {
@@ -12153,6 +12211,15 @@
     checkRoostAchievements("readlater");
     return true;
   }
+  function removeReadLater(link) {
+    var href = safeHttpUrl(link);
+    if (!href) return false;
+    var items = readLaterItems();
+    var next = items.filter(function (current) { return current.link !== href; });
+    if (next.length === items.length) return false;
+    saveReadLaterItems(next);
+    return true;
+  }
   function bindArticleSaveButtons(root) {
     (root || document).querySelectorAll("[data-save-article]").forEach(function (btn) {
       if (btn._roostSaveBound) return;
@@ -12160,16 +12227,24 @@
       btn.addEventListener("click", function (event) {
         event.preventDefault();
         event.stopPropagation();
+        var link = btn.getAttribute("data-link");
+        if (readLaterLinkSaved(link)) {
+          var removed = removeReadLater(link);
+          syncArticleSaveButtons(link);
+          toast(removed ? "Removed from Read Later" : "Article was not saved");
+          return;
+        }
         var ok = saveReadLater({
           title: btn.getAttribute("data-title"),
-          link: btn.getAttribute("data-link"),
+          link: link,
           source: btn.getAttribute("data-source"),
           date: btn.getAttribute("data-date")
         });
-        btn.textContent = ok ? "Saved" : "Save";
+        syncArticleSaveButtons(link);
         toast(ok ? "Saved for later" : "Could not save article");
       });
     });
+    syncArticleSaveButtons();
   }
   function relTime(dateStr) {
     if (!dateStr) return "";
@@ -12527,14 +12602,21 @@
         bindSectionRefresh(strip, sec);
         return items;
       }
+      var freshItems = recentSectionHeadlines(items);
+      if (!freshItems.length) {
+        strip.setAttribute("data-state", "empty");
+        strip.innerHTML = sectionRefreshButtonHtml() + '<div class="roost-heads-msg">No recent headlines in this section right now - links below are unaffected.</div>';
+        bindSectionRefresh(strip, sec);
+        return freshItems;
+      }
       strip.setAttribute("data-state", "ready");
-      var rotated = rotateFeedItems(items, sectionHeadlineOffsets, sec.id || strip._cfg.label, !!opts.advance);
+      var rotated = rotateFeedItems(freshItems, sectionHeadlineOffsets, sec.id || strip._cfg.label, !!opts.advance);
       var feat = rotated[0];
       var rows = rotated.slice(1, 4);
       var freshness = feedFreshnessHtml(strip._cfg.feeds);
       var html = sectionRefreshButtonHtml() +
         '<div class="roost-feat-wrap"><a class="roost-feat" href="' + esc(feat.link) + '" target="_blank" rel="noopener noreferrer">' +
-          '<span class="eyebrow">★ Featured · ' + esc(feat.source || "") + '</span>' +
+          '<span class="eyebrow">&#9733; Featured &middot; ' + esc(feat.source || "") + '</span>' +
           '<span class="h">' + esc(feat.title) + '</span>' +
           (feat.desc ? '<span class="d">' + esc(feat.desc.slice(0, 180)) + '</span>' : '') +
           '<span class="meta">' + esc(relTime(feat.date)) + freshness + '</span>' +
@@ -12543,13 +12625,13 @@
           rows.map(function (it) {
             return '<div class="roost-row-wrap"><a class="roost-row" href="' + esc(it.link) + '" target="_blank" rel="noopener noreferrer">' +
               '<div><div class="rt">' + esc(it.title) + '</div>' +
-              '<div class="rm">' + esc(it.source || "") + (relTime(it.date) ? ' · ' + esc(relTime(it.date)) : '') + freshness + '</div></div></a>' + articleSaveButton(it, strip._cfg.label) + '</div>';
+              '<div class="rm">' + esc(it.source || "") + (relTime(it.date) ? ' &middot; ' + esc(relTime(it.date)) : '') + freshness + '</div></div></a>' + articleSaveButton(it, strip._cfg.label) + '</div>';
           }).join("") +
         '</div>';
       strip.innerHTML = html;
       bindSectionRefresh(strip, sec);
       bindArticleSaveButtons(strip);
-      return items;
+      return freshItems;
     }).catch(function () {
       strip.setAttribute("data-state", "empty");
       strip.innerHTML = sectionRefreshButtonHtml() + '<div class="roost-heads-msg">Headlines unavailable right now - links below are unaffected.</div>';
@@ -14351,6 +14433,7 @@
     cacheKey: cacheKey,
     feedCacheMeta: feedCacheMeta,
     feedFreshnessHtml: feedFreshnessHtml,
+    recentSectionHeadlines: recentSectionHeadlines,
     refreshWire: refreshWire,
     loadWire: loadWire,
     advanceWireTopic: advanceWireTopic,
@@ -14359,6 +14442,8 @@
     readLaterItems: readLaterItems,
     saveReadLaterItems: saveReadLaterItems,
     readLaterActiveItems: readLaterActiveItems,
+    readLaterLinkSaved: readLaterLinkSaved,
+    bindArticleSaveButtons: bindArticleSaveButtons,
     renderTodayDashboard: renderTodayDashboard,
     dailyQuestState: dailyQuestState,
     completeDailyQuest: completeDailyQuest,

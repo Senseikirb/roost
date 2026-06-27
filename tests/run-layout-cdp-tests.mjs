@@ -482,6 +482,8 @@ async function main() {
     const bodyText = (document.getElementById("roost-modal-body") || {}).textContent || "";
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
     const closed = !document.querySelector(".roost-modal.open");
+    input.value = "";
+    input.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "?", bubbles: true, cancelable: true }));
     const helpOpen = !!document.querySelector("#help-overlay.visible");
@@ -743,9 +745,17 @@ async function main() {
     urls.forEach((url, idx) => {
       localStorage.setItem(window.roostTestHooks.cacheKey(url), JSON.stringify({
         t: Date.now() - 3600000,
-        items: [{
+        items: [
+        {
+          title: "Very old fixture headline " + idx,
+          link: "https://example.com/news-old-" + idx,
+          desc: "Old fixture description",
+          date: new Date(Date.now() - 160 * 86400000).toISOString(),
+          source: "Fixture"
+        },
+        {
           title: "Cached fixture headline " + idx,
-          link: "https://example.com/news-" + idx,
+          link: "https://example.com/news-fresh-" + idx,
           desc: "Fixture description",
           date: new Date(Date.now() - 7200000).toISOString(),
           source: "Fixture"
@@ -756,14 +766,77 @@ async function main() {
     await window.roostTestHooks.loadSectionHeads(sec, { advance: false });
     const age = sec && sec.querySelector(".roost-news-age");
     const meta = window.roostTestHooks.feedCacheMeta(urls);
+    const text = sec ? sec.textContent || "" : "";
     return {
       rendered: !!age,
       staleClass: !!age && age.classList.contains("stale"),
       staleText: !!age && /Stale/.test(age.textContent),
       metaStale: !!meta && meta.stale === true,
-      linkSafe: !!sec && !!sec.querySelector('.roost-heads a[href^="https://example.com/news-"]')
+      linkSafe: !!sec && !!sec.querySelector('.roost-heads a[href^="https://example.com/news-fresh-"]'),
+      staleItemsHidden: !/Very old fixture headline/.test(text),
+      freshItemsShown: /Cached fixture headline/.test(text)
     };
   })()`);
+
+  const feedEntityDecoding = await evalJson(`(() => {
+    const xml = '<rss><channel><item><title>This puzzle game&amp;#8217;s simple premise hides depth</title><link>https://example.com/entity</link><description>Smith &amp;amp; Wesson &amp;#8212; brief</description><pubDate>Sat, 27 Jun 2026 12:00:00 GMT</pubDate></item></channel></rss>';
+    const item = window.roostTestHooks.parseFeed(xml, "Fixture")[0] || {};
+    const apostrophe = String.fromCharCode(8217);
+    const dash = String.fromCharCode(8212);
+    return {
+      titleDecoded: (item.title || "").includes("game" + apostrophe + "s"),
+      numericEntityHidden: !/&#8217;/.test(item.title || ""),
+      descriptionDecoded: (item.desc || "").includes("Wesson " + dash + " brief"),
+      safeLinkPreserved: item.link === "https://example.com/entity"
+    };
+  })()`);
+
+  await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 900, deviceScaleFactor: 3, mobile: true });
+  await evalValue(`new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))`);
+  const sectionHeadlineControls = await evalJson(`(async () => {
+    const urls = ["https://feeds.npr.org/1001/rss.xml", "http://feeds.bbci.co.uk/news/rss.xml"];
+    urls.forEach((url, idx) => {
+      localStorage.setItem(window.roostTestHooks.cacheKey(url), JSON.stringify({
+        t: Date.now() - 3600000,
+        items: [{
+          title: "Mobile fixture headline " + idx,
+          link: "https://example.com/mobile-news-" + idx,
+          desc: "Mobile fixture description",
+          date: new Date(Date.now() - 7200000).toISOString(),
+          source: "Fixture"
+        }]
+      }));
+    });
+    const sec = document.getElementById("news");
+    const search = document.getElementById("search-input");
+    if (search) {
+      search.value = "";
+      search.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+    }
+    let strip = sec && sec.querySelector(".roost-heads");
+    if (sec && !strip) {
+      strip = document.createElement("div");
+      strip.className = "roost-heads";
+      const header = sec.querySelector(".section-header");
+      if (header && header.parentNode) header.parentNode.insertBefore(strip, header.nextSibling);
+    }
+    if (strip) strip._cfg = window.roostTestHooks.sectionFeedConfig("news");
+    if (sec) await window.roostTestHooks.loadSectionHeads(sec, { advance: false });
+    const refresh = sec && sec.querySelector("[data-roost-refresh-section]");
+    const save = sec && sec.querySelector(".roost-feat-wrap [data-save-article]");
+    const refreshRect = refresh ? refresh.getBoundingClientRect() : null;
+    const saveRect = save ? save.getBoundingClientRect() : null;
+    function overlaps(a, b) {
+      return !!a && !!b && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+    }
+    return {
+      refreshRendered: !!refreshRect && refreshRect.width > 0 && refreshRect.height > 0,
+      saveRendered: !!saveRect && saveRect.width > 0 && saveRect.height > 0,
+      noSaveRefreshOverlap: !overlaps(refreshRect, saveRect),
+      controlsInViewport: !!refreshRect && !!saveRect && refreshRect.right <= window.innerWidth && saveRect.right <= window.innerWidth && refreshRect.left >= 0 && saveRect.left >= 0
+    };
+  })()`);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
 
   const wireTopicDrilldown = await evalJson(`(async () => {
     const now = Date.now();
@@ -995,6 +1068,28 @@ async function main() {
       activeCountUpdated: active.length === 0,
       allFilterShowsDone: /Old shape article/.test(bodyText) && /done/i.test(bodyText),
       backupHasReadLater
+    };
+  })()`);
+
+  const readLaterSaveToggle = await evalJson(`(() => {
+    localStorage.removeItem("roost_readlater_v1");
+    const host = document.createElement("div");
+    host.innerHTML = '<button class="roost-save-article" type="button" data-save-article data-title="Toggle fixture article" data-link="https://example.com/read-later-toggle" data-source="Fixture" data-date="2026-06-27T12:00:00.000Z">Save</button>';
+    document.body.appendChild(host);
+    const btn = host.querySelector("[data-save-article]");
+    window.roostTestHooks.bindArticleSaveButtons(host);
+    if (btn) btn.click();
+    const savedAfterFirst = window.roostTestHooks.readLaterLinkSaved("https://example.com/read-later-toggle");
+    const buttonSaved = !!btn && btn.textContent === "Saved" && btn.getAttribute("aria-pressed") === "true" && btn.classList.contains("is-saved");
+    if (btn) btn.click();
+    const removedAfterSecond = !window.roostTestHooks.readLaterLinkSaved("https://example.com/read-later-toggle");
+    const buttonReset = !!btn && btn.textContent === "Save" && btn.getAttribute("aria-pressed") === "false" && !btn.classList.contains("is-saved");
+    host.remove();
+    return {
+      savedAfterFirst,
+      buttonSaved,
+      removedAfterSecond,
+      buttonReset
     };
   })()`);
 
@@ -1537,6 +1632,12 @@ async function main() {
   Object.keys(newsFreshness).forEach((key) => {
     if (newsFreshness[key] !== true) failed.push(`news freshness ${key}`);
   });
+  Object.keys(feedEntityDecoding).forEach((key) => {
+    if (feedEntityDecoding[key] !== true) failed.push(`feed entity decoding ${key}`);
+  });
+  Object.keys(sectionHeadlineControls).forEach((key) => {
+    if (sectionHeadlineControls[key] !== true) failed.push(`section headline controls ${key}`);
+  });
   Object.keys(wireTopicDrilldown).forEach((key) => {
     if (wireTopicDrilldown[key] !== true) failed.push(`wire topic drilldown ${key}`);
   });
@@ -1554,6 +1655,9 @@ async function main() {
   });
   Object.keys(readLaterTriage).forEach((key) => {
     if (readLaterTriage[key] !== true) failed.push(`read later triage ${key}`);
+  });
+  Object.keys(readLaterSaveToggle).forEach((key) => {
+    if (readLaterSaveToggle[key] !== true) failed.push(`read later save toggle ${key}`);
   });
   Object.keys(sessionPlanner).forEach((key) => {
     if (sessionPlanner[key] !== true) failed.push(`session planner ${key}`);
@@ -1614,7 +1718,7 @@ async function main() {
     if (keyboardShortcuts[key] !== true) failed.push(`keyboard shortcuts ${key}`);
   });
 
-  const report = { widthResults, curatedSpecialtySections, backToTopButton, launcher, helpLauncher, keyboardShortcuts, interaction, missionIntro, memoryHealth, restoreUndo, configPacks, offlineStatus, newsFreshness, wireTopicDrilldown, dailyTip, dailyQuestDeck, achievementHints, nextLearningStep, readLaterTriage, sessionPlanner, productionParserFixtures, customImportUndo, workbenchSearchPin, recentCommands, calmStart, savedHomeViews, currentViewSnapshot, localTags, customFeeds, accessibility, linkHealth, emptyStateCards, finalState, runtimeErrors, failed };
+  const report = { widthResults, curatedSpecialtySections, backToTopButton, launcher, helpLauncher, keyboardShortcuts, interaction, missionIntro, memoryHealth, restoreUndo, configPacks, offlineStatus, newsFreshness, feedEntityDecoding, sectionHeadlineControls, wireTopicDrilldown, dailyTip, dailyQuestDeck, achievementHints, nextLearningStep, readLaterTriage, readLaterSaveToggle, sessionPlanner, productionParserFixtures, customImportUndo, workbenchSearchPin, recentCommands, calmStart, savedHomeViews, currentViewSnapshot, localTags, customFeeds, accessibility, linkHealth, emptyStateCards, finalState, runtimeErrors, failed };
   console.log(JSON.stringify(report, null, 2));
   if (failed.length) process.exit(1);
 }
