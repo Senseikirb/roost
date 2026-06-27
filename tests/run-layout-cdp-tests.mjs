@@ -2,6 +2,8 @@ import http from "node:http";
 
 const CDP_PORT = Number(process.env.ROOST_CDP_PORT || 9223);
 const APP_URL = process.env.ROOST_APP_URL || "http://127.0.0.1:8765/index.html";
+const EXPECTED_LINK_CARDS = 762;
+const EXPECTED_RUNTIME_SECTIONS = 34;
 
 function getJson(path, method = "GET") {
   return new Promise((resolve, reject) => {
@@ -188,8 +190,8 @@ async function main() {
     const load = waitEvent("Page.loadEventFired", 20000).catch(() => null);
     await send("Page.navigate", { url: `${APP_URL}?runtime=${width}` });
     await load;
-    const booted = await evalValue(`new Promise(resolve => { let n = 0; (function poll(){ const hooks = window.roostTestHooks; const widgets = hooks && hooks.layoutWidgetDefinitions ? hooks.layoutWidgetDefinitions() : []; const ready = hooks && document.getElementById("v3-layout-edit") && document.getElementById("roost-dock") && widgets.some((w) => w.id === "csec_test" && w.kind === "Custom Section") && widgets.some((w) => w.id === "mission-control") && widgets.some((w) => w.id === "launcher" && w.locked); if (ready) resolve(true); else if (++n > 120) resolve(false); else setTimeout(poll, 50); })(); })`);
-    if (!booted) throw new Error(`Boot did not complete at ${width}`);
+    const boot = await evalJson(`new Promise(resolve => { let n = 0; function status(){ const hooks = window.roostTestHooks; const widgets = hooks && hooks.layoutWidgetDefinitions ? hooks.layoutWidgetDefinitions() : []; const state = { hooks: !!hooks, editor: !!document.getElementById("v3-layout-edit"), dock: !!document.getElementById("roost-dock"), widgetCount: widgets.length, hasCustomWidget: widgets.some((w) => w.id === "csec_test" && w.kind === "Custom Section"), hasMissionWidget: widgets.some((w) => w.id === "mission-control"), hasLockedLauncher: widgets.some((w) => w.id === "launcher" && w.locked), readyState: document.readyState }; state.ready = state.hooks && state.editor && state.dock && state.hasCustomWidget && state.hasMissionWidget && state.hasLockedLauncher; return state; } (function poll(){ const current = status(); if (current.ready) resolve(current); else if (++n > 240) resolve(current); else setTimeout(poll, 50); })(); })`);
+    if (!boot.ready) throw new Error(`Boot did not complete at ${width}: ${JSON.stringify(boot)}`);
   }
 
   const widthResults = [];
@@ -1024,6 +1026,49 @@ async function main() {
     };
   })()`);
 
+  const productionParserFixtures = await evalJson(`(() => {
+    const hooks = window.roostTestHooks;
+    const csv = [
+      "title,url,description,section,tags,favorite",
+      "OpenAI Fixture,https://example.com/parser-one,AI lab,Research,ai,true",
+      "Plain Domain,example.com,Plain domain,General,,false",
+      "Duplicate Fixture,https://example.com/parser-one,Duplicate,Research,duplicate,false"
+    ].join("\\n");
+    const csvPreview = hooks.buildCustomImportPreview(csv, "csv");
+    let malformedCsv = false;
+    try {
+      hooks.buildCustomImportPreview('title,url\\n"Broken,https://example.com', "csv");
+    } catch (error) {
+      malformedCsv = /Malformed CSV quote/.test(error && error.message || "");
+    }
+    const bookmarkPreview = hooks.buildCustomImportPreview('<DL><DT><H3>Research</H3><DL><DT><A HREF="https://example.org" TAGS="paper"><script>alert(1)</script>Example</A><DT><A HREF="javascript:alert(1)">Bad</A></DL></DL>', "bookmarks");
+    let unsafeRejected = false;
+    try {
+      hooks.buildCustomImportPreview('<DL><DT><A HREF="javascript:alert(1)">Bad</A></DL>', "bookmarks");
+    } catch (error) {
+      unsafeRejected = /No safe http\\/https links/.test(error && error.message || "");
+    }
+    const opmlPreview = hooks.buildCustomImportPreview('<opml><body><outline text="Feeds"><outline text="Ars" xmlUrl="https://feeds.arstechnica.com/arstechnica/index" htmlUrl="https://arstechnica.com/"/></outline></body></opml>', "opml");
+    let malformedOpml = false;
+    try {
+      hooks.buildCustomImportPreview('<opml><body><outline text="Broken"></body></opml>', "opml");
+    } catch (error) {
+      malformedOpml = /OPML\\/XML is malformed/.test(error && error.message || "");
+    }
+    return {
+      hookPresent: !!(hooks && hooks.buildCustomImportPreview),
+      csvCount: csvPreview.items.length === 3,
+      csvPlainDomain: csvPreview.items[1].url === "https://example.com/",
+      csvDuplicate: csvPreview.items[2].duplicate === true && csvPreview.duplicates.length === 1,
+      malformedCsv,
+      bookmarkSafeOnly: bookmarkPreview.items.length === 1 && bookmarkPreview.items[0].url === "https://example.org/",
+      bookmarkScriptRemoved: bookmarkPreview.items[0].title === "Example",
+      unsafeRejected,
+      opmlCount: opmlPreview.items.length === 1 && opmlPreview.items[0].sectionTitle === "Feeds",
+      malformedOpml
+    };
+  })()`);
+
   const customImportUndo = await evalJson(`(() => {
     localStorage.removeItem("roost_import_history_v1");
     const beforeLinks = window.roostTestHooks.customLinks();
@@ -1423,8 +1468,8 @@ async function main() {
 
   const failed = [];
   for (const item of widthResults) {
-    if (item.linkCards < 646) failed.push(`link count at ${item.width}`);
-    if (item.sections < 28) failed.push(`section count at ${item.width}`);
+    if (item.linkCards !== EXPECTED_LINK_CARDS) failed.push(`link count at ${item.width}: ${item.linkCards}/${EXPECTED_LINK_CARDS}`);
+    if (item.sections !== EXPECTED_RUNTIME_SECTIONS) failed.push(`section count at ${item.width}: ${item.sections}/${EXPECTED_RUNTIME_SECTIONS}`);
     if (!item.editorFit || !item.editorOpened || item.editorButtons < 10) failed.push(`editor fit/open at ${item.width}`);
     if (!item.hasCustomWidget || !item.hasMissionWidget || !item.hasLockedLauncher) failed.push(`widget mapping at ${item.width}`);
     if (item.overflow > 2) failed.push(`horizontal overflow at ${item.width}: ${item.overflow}`);
@@ -1498,6 +1543,9 @@ async function main() {
   Object.keys(sessionPlanner).forEach((key) => {
     if (sessionPlanner[key] !== true) failed.push(`session planner ${key}`);
   });
+  Object.keys(productionParserFixtures).forEach((key) => {
+    if (productionParserFixtures[key] !== true) failed.push(`production parser fixtures ${key}`);
+  });
   Object.keys(customImportUndo).forEach((key) => {
     if (customImportUndo[key] !== true) failed.push(`custom import undo ${key}`);
   });
@@ -1551,7 +1599,7 @@ async function main() {
     if (keyboardShortcuts[key] !== true) failed.push(`keyboard shortcuts ${key}`);
   });
 
-  const report = { widthResults, curatedSpecialtySections, backToTopButton, launcher, helpLauncher, keyboardShortcuts, interaction, missionIntro, memoryHealth, restoreUndo, configPacks, offlineStatus, newsFreshness, wireTopicDrilldown, dailyTip, dailyQuestDeck, achievementHints, nextLearningStep, readLaterTriage, sessionPlanner, customImportUndo, workbenchSearchPin, recentCommands, calmStart, savedHomeViews, currentViewSnapshot, localTags, customFeeds, accessibility, linkHealth, emptyStateCards, finalState, runtimeErrors, failed };
+  const report = { widthResults, curatedSpecialtySections, backToTopButton, launcher, helpLauncher, keyboardShortcuts, interaction, missionIntro, memoryHealth, restoreUndo, configPacks, offlineStatus, newsFreshness, wireTopicDrilldown, dailyTip, dailyQuestDeck, achievementHints, nextLearningStep, readLaterTriage, sessionPlanner, productionParserFixtures, customImportUndo, workbenchSearchPin, recentCommands, calmStart, savedHomeViews, currentViewSnapshot, localTags, customFeeds, accessibility, linkHealth, emptyStateCards, finalState, runtimeErrors, failed };
   console.log(JSON.stringify(report, null, 2));
   if (failed.length) process.exit(1);
 }
