@@ -1,6 +1,6 @@
 # The Roost - Setup Guide
 
-Your personal homepage and command center. The current bundle includes 762 curated link cards, Kid Zone, Creative Writing, Philosophy & Ethics, Leadership & Management, Battle History & Maps, Defense & National Security, a privacy-preserving first-run setup, saved home views, a visual layout editor, a daily dashboard, live headlines, custom RSS sources, a mode-aware Roost Wire board, read-later saves, personal boards with starter templates, link notes with local tags, accessibility preferences, manual link-health checks, standalone dock tools, and an optional Mission Control Academy example profile.
+Your personal homepage and command center. The current bundle includes 785 curated link cards, Kid Zone, Creative Writing, Philosophy & Ethics, Leadership & Management, Battle History & Maps, Defense & National Security, a privacy-preserving first-run setup, saved home views, a visual layout editor, a daily dashboard, live headlines, custom RSS sources, a mode-aware Roost Wire board, read-later saves, personal boards with starter templates, link notes with local tags, accessibility preferences, manual link-health checks, standalone dock tools, and an optional Mission Control Academy example profile.
 
 ## What's In This Folder
 
@@ -23,7 +23,7 @@ Run the no-dependency validation bundle from the repo root:
 node tests/run-roost-validation.mjs
 ```
 
-By default it checks the curated link count, section count, tag balance, manifest JSON, manifest icon files, inline script syntax, `sw.js` syntax, and custom import parser fixtures. To include the browser/runtime suite, serve the page over HTTP and launch Chrome with remote debugging, then run:
+By default it checks the curated link count, section count, tag balance, manifest JSON, manifest icon files, inline script syntax, `sw.js` syntax, parser fixture wiring, storage recovery, and service-worker isolation. To include the original browser/runtime suite and focused daily-opening, launcher, storage, feed, and offline journeys, serve the page over HTTP and launch Chrome with remote debugging in an isolated test profile, then run:
 
 ```text
 $env:ROOST_APP_URL='http://127.0.0.1:8765/index.html'
@@ -42,7 +42,7 @@ The search surface directly under the header is the main launcher for links, sec
 - `Escape`: close the launcher and restore focus.
 - `?`: open the Quick Start help panel.
 
-The enhanced launcher uses the existing page search/filter behavior for link results, so the inline search still works as a fallback if enhanced behavior fails.
+The launcher ranks exact titles and prefixes before descriptive matches, with small Favorites/Recent tie-breaks. Saved searches open matching notes, articles, and Boards. The inline search remains the fallback if enhanced behavior fails.
 
 Command matches count as launcher results even when no link cards match, which keeps searches such as `import`, `backup`, or `setup` from showing a misleading no-results state.
 
@@ -58,7 +58,7 @@ What it stores:
 
 - Key: `roost_layout_v1`
 - Schema version: `version: 1`
-- Top widget order: launcher, Roost Wire, Today
+- Default top widget order: launcher, Today, Roost Wire; existing saved orders are preserved
 - Homepage section order: Section Launcher, Favorites, Recent, Mission Control, built-in sections, and custom sections
 - Hidden widgets
 - Compact or comfortable widget sizes
@@ -74,7 +74,7 @@ Presets:
 
 Preset changes show a preview before applying. The Search / Launcher widget is locked visible so there is always a recovery path. Collapsed sections are not overwritten; they remain stored separately in `kfl_collapsed_v1`.
 
-The launcher command **Apply Calm Start** applies the Quiet preset immediately and also collapses Wire and Today in `roost_settings_v1`. It is meant as an explicit mobile-friendly reset, not an automatic migration for existing users.
+The launcher command **Apply Calm Start** applies the Quiet preset immediately and also collapses Wire and Today in `roost_settings_v1`. It is an explicit mobile-friendly reset. Today already keeps its deeper tools under a disclosure and offers up to three direct resume actions from saved local work; Browse library opens the existing Section Launcher.
 
 ## Saved Home Views
 
@@ -167,7 +167,7 @@ The Today dashboard can show one dismissible **Local Tip** per day. Dismissal is
 1. Open the GitHub Pages URL in Safari.
 2. Tap Share -> Add to Home Screen -> Add.
 3. The installed app uses `manifest.json`, the Apple touch icon, and the offline shell cache in `sw.js`.
-4. The small launcher status strip can show **Offline-ready** after the service worker is ready, or **Offline** when the browser loses network access. This status is stored locally under `roost_shell_status_v1`; live headlines pause offline, but curated links and local tools remain usable.
+4. The small launcher status strip can show **Offline-ready** after the service worker is ready, or **Offline** when the browser loses network access. Local shell status is stored under `roost_shell_status_v1`, but readiness is confirmed in the current browser. The library and local tools remain available offline; external destinations need a connection and live headlines pause. When an updated worker activates, Roost offers a Reload button.
 5. After scrolling, the floating **Back to top** button sits above the tool dock so you can return to the launcher from anywhere on the page.
 
 ## Live Headlines
@@ -178,14 +178,14 @@ The Roost Wire and per-section headline strips pull public RSS/Atom feeds in the
 - The curated links are never blocked by headline failures.
 - Feed results are cached in `localStorage` for 30 minutes.
 - Cached feed data is preferred for the Wire when available, so the board appears faster on repeat visits.
-- Headline cards can show **Cached** or **Stale** freshness labels based on the local `roost_feed_*` cache timestamps.
+- Headline cards show **Live**, **Cached**, or **Stale** per story. **Unavailable** retains a retry path when there are no usable results. Both news surfaces exclude dated stories older than 14 days.
 - Refresh buttons update the Wire or a section strip in place. They only touch feed data and do not reset Mission Control Academy progress.
 - Roost Wire topic cards include a **More** action for rotating that topic's headline without switching or narrowing the active Wire mode.
 - Custom RSS/Atom feeds are stored locally under `roost_custom_feeds_v1` and reuse the same proxy, parser, cache, and graceful-fallback path as built-in feeds.
 - Roost Wire modes let you narrow the board to Tech, Defense, AI, Gaming, Finance, World/Priority, or Quiet.
 - Roost Wire and Today can be collapsed independently. Their collapsed/expanded state is remembered in local settings.
 
-Use the dock's "Headlines: on/off" control to disable or re-enable headline surfaces. The setting is saved under `roost_settings_v1` and mirrored into `roost_onboarding_v1` so it survives future setup-aware reloads.
+Use the dock's "Headlines: on/off" control to disable or re-enable headline surfaces. Disabling cancels pending feed requests and lazy observers. The setting is saved under `roost_settings_v1` and mirrored into `roost_onboarding_v1` so it survives future setup-aware reloads.
 
 ## Mission Control Academy
 
@@ -246,7 +246,7 @@ Clearing site data for the hosted Pages URL will clear this memory.
 
 ### Backup / Restore
 
-Use the dock's **Backup / Restore** tool before major edits, browser cleanup, or moving devices. It downloads a JSON snapshot of The Roost memory keys. Restore validates the snapshot, writes only allowed Roost keys, and never deletes keys that are missing from the backup. Before writing restored keys, it captures a one-step undo snapshot for **Undo Last Restore**. Cached headline feeds are excluded unless the "Include cached headline feeds" box is checked.
+Use the dock's **Backup / Restore** tool before major edits, browser cleanup, or moving devices. It downloads a JSON snapshot of The Roost memory keys. Restore validates the snapshot, writes only allowed Roost keys, and never deletes keys that are missing from the backup. Known data structures are validated before writing; preview shows new/replaced/unchanged keys. A one-step recovery snapshot is required before either backup restore or config-pack apply. Failed writes are rolled back with a visible error. **Undo Last Restore** can recover the prior raw values. Cached headline feeds are excluded unless the "Include cached headline feeds" box is checked.
 
 Use **Configuration Pack** when you want a smaller, shareable setup template instead of a full personal backup. Use **Current View Snapshot** when you want a readable run sheet of the page that is currently visible.
 
@@ -273,7 +273,7 @@ The original curated link cards use the `kfl_` localStorage namespace. Upgrade-l
 
 ## Quick Sanity Checklist
 
-- 762 curated link cards preserved.
+- 785 curated link cards preserved.
 - Static link sections preserved, plus Pinned/Recent utility sections and the dynamic Academy section.
 - "new" chips removed from link cards.
 - Dead standalone Mission Control and PMD Toolkit dock tiles removed.
@@ -295,3 +295,9 @@ Optional validation commands:
 node tests/run-custom-import-parser-tests.mjs
 $env:ROOST_APP_URL='http://127.0.0.1:8765/index.html'; $env:ROOST_CDP_PORT='9223'; node tests/run-layout-cdp-tests.mjs
 ```
+
+## Data formats and validation evidence
+
+See [Storage schemas](docs/STORAGE_SCHEMAS.md) for every local key, recovery behavior, and pack exclusions; see [Daily-use audit](docs/DAILY_USE_AUDIT.md) for the product map and validation scope.
+
+The static validator counts real HTML: 785 curated cards across 33 curated sections, plus Favorites and Recent (35 static sections total). Older counts of 786 accidentally included a JavaScript card template; no curated links were removed.

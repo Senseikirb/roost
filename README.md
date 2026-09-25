@@ -2,7 +2,7 @@
 
 **The Roost** is a single-page personal command center: part homepage, part live intelligence board, part learning platform, and part thinking workspace. It is built to be fast, durable, installable, and useful every day without needing a backend, build step, framework, or account.
 
-At its core, The Roost is a carefully curated launchpad: **786 hand-picked link cards** across the homepage sections. Around that foundation it adds a privacy-preserving first-run setup, saved home views, current-view snapshot export, shareable configuration packs, a visual layout editor, a daily dashboard with a Daily Quest Deck, a local session planner, live RSS headlines, custom RSS sources, read-later triage, personal boards, offline-first PWA support, a lightweight tool dock, searchable Workbench notes, concept diagrams, a local Where To trip finder, Kid Zone, Creative Writing resources, philosophy, leadership, defense and battle-history reference sections, a Briefing Room for battle briefs and defense-industry decoder cards, and an optional **Mission Control Academy** example profile for long-range career development.
+At its core, The Roost is a carefully curated launchpad: **785 hand-picked link cards** across the homepage sections. Around that foundation it adds a privacy-preserving first-run setup, saved home views, current-view snapshot export, shareable configuration packs, a visual layout editor, a daily dashboard with a Daily Quest Deck, a local session planner, live RSS headlines, custom RSS sources, read-later triage, personal boards, offline-first PWA support, a lightweight tool dock, searchable Workbench notes, concept diagrams, a local Where To trip finder, Kid Zone, Creative Writing resources, philosophy, leadership, defense and battle-history reference sections, a Briefing Room for battle briefs and defense-industry decoder cards, and an optional **Mission Control Academy** example profile for long-range career development.
 
 ## Why It Exists
 
@@ -18,11 +18,11 @@ It is intentionally vanilla: one main HTML file, one manifest, one service worke
 
 ## Highlights
 
-- **786 curated link cards** across AI, coding, RF, embedded systems, game dev, writing, philosophy, leadership, finance, security, defense, battle history, family, homestead, cooking, news, sports, Kid Zone, and more.
+- **785 curated link cards** across AI, coding, RF, embedded systems, game dev, writing, philosophy, leadership, finance, security, defense, battle history, family, homestead, cooking, news, sports, Kid Zone, and more.
 - **First-run setup wizard** for display name, use case, modules, news, density, visual mode, and starter sections.
 - **Mission Control Academy** available as an optional local example profile directly under Quick Access.
 - **24-cycle learning plan** with 240 core missions, 97 resources, 120 side quests, 23 leadership lessons, 6 projects, and 18 achievements.
-- **Today Dashboard** with current Mission Control progress, a Daily Quest Deck, a next learning step, a local session summary, focus missions, active read-later count, boards, notes, and badges.
+- **Today** offers up to three direct resume points from an unfinished session, pinned Workbench note, active reading, saved board, or enabled learning step. Quests, tips, badges, and deeper tools remain available under a disclosure.
 - **Command launcher** directly under the header for links, sections, and Roost tools.
 - **Keyboard Shortcuts** command for a compact launcher, modal, and tool key reference.
 - **Roost Wire**, a six-topic live news board with modes for Tech, Defense, AI, Gaming, Finance, World, and Quiet.
@@ -89,7 +89,7 @@ Shortcuts:
 - `Enter`: activate the selected result.
 - `Escape`: close the launcher and restore focus.
 
-The launcher reuses the existing page search/filter behavior for link results, then layers commands and section jumps on top. If the enhanced launcher fails, the original inline search input still works as a link filter.
+The launcher ranks exact titles, title prefixes, and title words before descriptive matches. Favorites and Recent provide small tie-breaks using existing local saves; there is no usage score or new tracking. Saved results open the matching Workbench note, Read Later article, or Board. Commands and section jumps share the same relevance order. If the enhanced launcher fails, the original inline search input still works as a link filter.
 
 Command matches are treated as valid launcher results even when no link card matches the same query, so searches like `import`, `backup`, or `setup` do not show a misleading no-results page state.
 
@@ -167,7 +167,7 @@ The Roost uses public RSS/Atom feeds for its news surfaces:
 - Results are cached in browser storage for 30 minutes.
 - Refresh buttons on Roost Wire and each headline strip swap headlines in place without reloading the page.
 - Each Roost Wire topic has a local More action that rotates just that topic's headline without changing the active Wire mode.
-- Cached headline surfaces show compact **Cached** or **Stale** labels, so slow or failed public proxies are visible without blocking the curated links.
+- Headlines show per-story **Live**, **Cached**, or **Stale** labels; **Unavailable** indicates no usable results. Wire and section strips exclude dated stories older than 14 days. Disabling headlines cancels pending requests and observers; concurrent requests for one feed share the same work.
 - Custom RSS/Atom sources can be added from Custom Links -> Feeds. A feed can appear in Roost Wire, attach to a section headline strip, or both.
 - Roost Wire and Today are individually collapsible, and their display state is remembered locally.
 - If feeds or proxies fail, the headline areas degrade gracefully. The curated links still work.
@@ -249,7 +249,7 @@ Roost custom JSON exports use:
 
 The dock includes a **Backup / Restore** tool for local memory. It exports The Roost's `kfl_*`, `roost_*`, and legacy Mission Control keys to a JSON file, including custom links, custom sections, custom feeds, saved views, accessibility preferences, link health results, session state, import history, and layout state. Cached news feeds are skipped by default because they are temporary; the panel has an opt-in checkbox if you want them included. The panel also includes **Memory Health**: key count, approximate size, custom link/note/feed/view counts, and the last local export time stored under `roost_backup_meta_v1`.
 
-Restore is intentionally conservative: it validates the backup schema, writes only The Roost keys, overwrites matching keys, and does not delete other browser storage. Before writing, it keeps a one-step local undo snapshot so **Undo Last Restore** can put overwritten keys back. After restore or undo, reload the page to apply restored UI state.
+Restore validates the envelope and known data structures before writing, previews new/replaced/unchanged keys and categories, and requires a saved recovery snapshot. Failed writes roll back to the previous values, with explicit errors if browser storage also blocks recovery. **Undo Last Restore** covers backups and configuration packs. Missing keys are preserved. After restore or undo, reload the page to apply restored UI state. Exports include the schema, export date, categories, approximate UTF-8 data size, and transient exclusions. See [Storage schemas](docs/STORAGE_SCHEMAS.md) for exact formats and limits.
 
 The same panel includes **Configuration Pack** export/import with schema `the-roost.config-pack.v1`. Packs include shareable setup surfaces such as custom links, custom sections, custom feeds, saved views, boards, accessibility preferences, and layout. They exclude personal progress, recents, Read Later, link notes, Workbench notes, Mission Control progress, and feed caches.
 
@@ -287,7 +287,7 @@ The combined validation runner is optional for deployment, but useful before pub
 node tests/run-roost-validation.mjs
 ```
 
-It checks link/section counts, tag balance, manifest JSON, manifest icon files, inline script syntax, `sw.js` syntax, and custom import parser fixtures. If `ROOST_APP_URL` and `ROOST_CDP_PORT` are set, it also runs the browser/CDP layout and runtime suite.
+It checks link/section counts, tag balance, manifest JSON, manifest icon files, inline script syntax, `sw.js` syntax, parser fixture wiring, storage recovery, and service-worker isolation. If `ROOST_APP_URL` and `ROOST_CDP_PORT` are set, it also runs the original browser/CDP suite and focused daily-opening, launcher, storage, feed, and offline journeys. Use an isolated browser profile because these tests replace data on their test origins.
 
 The parser test can still run by itself:
 
@@ -325,7 +325,7 @@ On iPhone:
 1. Open the GitHub Pages URL in Safari.
 2. Tap **Share**.
 3. Tap **Add to Home Screen**.
-4. When the offline shell is ready, The Roost can show an **Offline-ready** notice near the launcher. If the device goes offline, that notice changes to explain that local links and tools still work while live headlines pause.
+4. When the offline shell is ready, The Roost can show an **Offline-ready** notice near the launcher. Offline, the library and local tools remain available; external destinations need a connection and live headlines pause.
 5. After scrolling, use the floating **Back to top** button above the tool dock to jump back to the launcher.
 6. Launch The Roost from the installed icon.
 
@@ -342,7 +342,7 @@ The service worker in `sw.js` caches the app shell:
 
 Cross-origin resources such as RSS proxies, feeds, and remote favicons are not cached by the service worker. That keeps the offline cache clean and avoids accidentally storing third-party responses.
 
-Live headlines still require a network connection, but the page and curated links remain available offline.
+The shell, optional sibling tools when cached, and local data work offline. External destinations still require a network. Previously saved headlines can be shown as cached/stale. Missing optional tools get a readable offline fallback. Each installation owns only its own known shell assets and cache namespace. A newly activated application version offers an explicit reload notice so work is not interrupted.
 
 ## Customization Guide
 
@@ -378,10 +378,12 @@ The Roost is designed as a daily-use operational page, not a marketing site. The
 
 The result is intentionally personal: a little command center, a little library, a little classroom, a little dashboard.
 
+See [Daily-use audit](docs/DAILY_USE_AUDIT.md) for the product choices, measured checks, and deliberately deferred work.
+
 ## Current Integrity Snapshot
 
-- 786 link cards
-- 34 static sections
+- 785 link cards
+- 33 curated sections; 35 static sections including Favorites and Recent
 - Mission Control Academy available as an optional setup module under Quick Access
 - 24 Academy cycles
 - 240 Academy missions

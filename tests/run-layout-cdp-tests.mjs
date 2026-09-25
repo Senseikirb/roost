@@ -2,7 +2,7 @@ import http from "node:http";
 
 const CDP_PORT = Number(process.env.ROOST_CDP_PORT || 9223);
 const APP_URL = process.env.ROOST_APP_URL || "http://127.0.0.1:8765/index.html";
-const EXPECTED_LINK_CARDS = 786;
+const EXPECTED_LINK_CARDS = 786; // 785 curated cards plus one custom fixture.
 const EXPECTED_RUNTIME_SECTIONS = 35;
 
 function getJson(path, method = "GET") {
@@ -19,6 +19,7 @@ function getJson(path, method = "GET") {
       });
     });
     req.on("error", reject);
+    req.setTimeout(15000, () => req.destroy(new Error(`CDP HTTP timeout: ${path}`)));
     req.end();
   });
 }
@@ -35,8 +36,14 @@ function cdpClient(wsUrl) {
     ws.onopen = () => {
       function send(method, params = {}) {
         const id = nextId++;
-        ws.send(JSON.stringify({ id, method, params }));
-        return new Promise((res, rej) => pending.set(id, { res, rej, method }));
+        return new Promise((res, rej) => {
+          const timer = setTimeout(() => {
+            pending.delete(id);
+            rej(new Error(`CDP timeout: ${method} ${String(params.expression || params.url || '').slice(0, 240)}`));
+          }, 25000);
+          pending.set(id, { res, rej, method, timer });
+          ws.send(JSON.stringify({ id, method, params }));
+        });
       }
 
       function waitEvent(method, timeout = 15000, predicate = () => true) {
@@ -63,9 +70,15 @@ function cdpClient(wsUrl) {
         if (msg.id && pending.has(msg.id)) {
           const item = pending.get(msg.id);
           pending.delete(msg.id);
+          clearTimeout(item.timer);
           if (msg.error) item.rej(new Error(`${item.method}: ${msg.error.message}`));
           else item.res(msg.result || {});
           return;
+        }
+
+        if (msg.method === "Page.javascriptDialogOpening") {
+          runtimeErrors.push(`Unexpected ${msg.params.type} dialog: ${msg.params.message}`);
+          send("Page.handleJavaScriptDialog", { accept: false }).catch(() => {});
         }
 
         if (msg.method === "Runtime.exceptionThrown") {
@@ -91,6 +104,10 @@ function cdpClient(wsUrl) {
 const seedStorageScript = `
 try {
   sessionStorage.removeItem("roost_next_step_skipped");
+  localStorage.removeItem("kfl_pins_v1");
+  localStorage.removeItem("kfl_recent_v1");
+  localStorage.removeItem("kfl_collapsed_v1");
+  localStorage.removeItem("kfl_v3_view");
   localStorage.removeItem("roost_layout_v1");
   localStorage.removeItem("roost_mission_intro_v1");
   localStorage.removeItem("roost_tip_state_v1");
@@ -169,15 +186,21 @@ async function main() {
   const client = await cdpClient(target.webSocketDebuggerUrl);
   const { send, waitEvent, runtimeErrors } = client;
 
+  try {
   await send("Page.enable");
+  await send("Page.bringToFront");
+  await send("Emulation.setFocusEmulationEnabled", { enabled: true });
   await send("Runtime.enable");
   await send("Log.enable");
   await send("Network.enable");
+  await send("Network.setBlockedURLs", { urls: ["https://*"] });
+  await send("Network.setBypassServiceWorker", { bypass: true });
   await send("Page.addScriptToEvaluateOnNewDocument", { source: seedStorageScript });
 
   async function evalValue(expression) {
+    if (process.env.ROOST_CDP_TRACE) console.error(`CDP evaluate: ${expression.slice(0, 180).replace(/\s+/g, ' ')}`);
     const result = await send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true });
-    if (result.exceptionDetails) throw new Error(result.exceptionDetails.text || "Evaluation failed");
+    if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text || "Evaluation failed");
     return result.result.value;
   }
   async function evalJson(expression) {
@@ -187,11 +210,22 @@ async function main() {
 
   async function navigate(width) {
     await send("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: width < 600 });
-    const load = waitEvent("Page.loadEventFired", 20000).catch(() => null);
-    await send("Page.navigate", { url: `${APP_URL}?runtime=${width}` });
-    await load;
-    const boot = await evalJson(`new Promise(resolve => { let n = 0; function status(){ const hooks = window.roostTestHooks; const widgets = hooks && hooks.layoutWidgetDefinitions ? hooks.layoutWidgetDefinitions() : []; const state = { hooks: !!hooks, editor: !!document.getElementById("v3-layout-edit"), dock: !!document.getElementById("roost-dock"), widgetCount: widgets.length, hasCustomWidget: widgets.some((w) => w.id === "csec_test" && w.kind === "Custom Section"), hasMissionWidget: widgets.some((w) => w.id === "mission-control"), hasLockedLauncher: widgets.some((w) => w.id === "launcher" && w.locked), readyState: document.readyState }; state.ready = state.hooks && state.editor && state.dock && state.hasCustomWidget && state.hasMissionWidget && state.hasLockedLauncher; return state; } (function poll(){ const current = status(); if (current.ready) resolve(current); else if (++n > 240) resolve(current); else setTimeout(poll, 50); })(); })`);
-    if (!boot.ready) throw new Error(`Boot did not complete at ${width}: ${JSON.stringify(boot)}`);
+    const url = new URL(APP_URL);
+    url.searchParams.set('runtime', width);
+    url.searchParams.set('run', Date.now());
+    await send("Page.navigate", { url: url.href });
+    let boot;
+    const deadline = Date.now() + 20000;
+    while (Date.now() < deadline) {
+      try {
+        boot = await evalJson(`(() => { const hooks = window.roostTestHooks; const widgets = hooks && hooks.layoutWidgetDefinitions ? hooks.layoutWidgetDefinitions() : []; const state = { hooks: !!hooks, editor: !!document.getElementById("v3-layout-edit"), dock: !!document.getElementById("roost-dock"), widgetCount: widgets.length, hasCustomWidget: widgets.some((w) => w.id === "csec_test" && w.kind === "Custom Section"), hasMissionWidget: widgets.some((w) => w.id === "mission-control"), hasLockedLauncher: widgets.some((w) => w.id === "launcher" && w.locked), readyState: document.readyState, href: location.href }; state.ready = state.href === ${JSON.stringify(url.href)} && state.readyState !== "loading" && state.hooks && state.editor && state.dock && state.hasCustomWidget && state.hasMissionWidget && state.hasLockedLauncher; return state; })()`);
+        if (boot.ready) return;
+      } catch (error) {
+        if (!/context|navigation/i.test(error.message)) throw error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    throw new Error(`Boot did not complete at ${width}: ${JSON.stringify(boot)}`);
   }
 
   const widthResults = [];
@@ -256,7 +290,7 @@ async function main() {
       const widgets = window.roostTestHooks.layoutWidgetDefinitions();
       return {
         width: window.innerWidth,
-        linkCards: document.querySelectorAll("main .link-card").length,
+        linkCards: document.querySelectorAll("main .section:not(#pinned):not(#recent) .link-card").length,
         sections: document.querySelectorAll("main .section[id]:not(#pinned):not(#recent)").length,
         widgets: widgets.length,
         hasCustomWidget: widgets.some((w) => w.id === "csec_test" && w.kind === "Custom Section"),
@@ -380,7 +414,7 @@ async function main() {
     const btn = document.getElementById("back-to-top");
     const dock = document.getElementById("roost-dock-toggle");
     const maxScroll = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-    window.scrollTo(0, maxScroll);
+    window.scrollTo({ top: maxScroll, behavior: "instant" });
     setTimeout(() => {
       window.dispatchEvent(new Event("scroll"));
       setTimeout(() => {
@@ -1574,7 +1608,6 @@ async function main() {
   }))()`);
 
   await send("Emulation.clearDeviceMetricsOverride");
-  client.ws.close();
 
   const failed = [];
   for (const item of widthResults) {
@@ -1602,10 +1635,10 @@ async function main() {
     if (interaction[key] !== true) failed.push(key);
   });
   if (launcher.beforeEnter.noResultsVisible) failed.push("launcher import showed no-results");
-  if (!launcher.beforeEnter.activeText.includes("Manage Custom Links")) failed.push("launcher import active command");
+  if (!launcher.beforeEnter.activeText.includes("Import Bookmarks")) failed.push("launcher import active command");
   if (launcher.beforeEnter.itemCount < 1) failed.push("launcher import results");
   if (!launcher.afterEnter.modalOpen || launcher.afterEnter.modalTitle !== "Custom Links") failed.push("launcher import enter activation");
-  if (!/^http:\/\/127\.0\.0\.1/.test(launcher.afterEnter.href)) failed.push("launcher import external navigation");
+  if (new URL(launcher.afterEnter.href).origin !== new URL(APP_URL).origin) failed.push("launcher import external navigation");
   Object.keys(missionIntro).forEach((key) => {
     if (key === "previewTitle") {
       if (missionIntro[key] !== "Mission Control Preview") failed.push("mission intro preview title");
@@ -1720,7 +1753,11 @@ async function main() {
 
   const report = { widthResults, curatedSpecialtySections, backToTopButton, launcher, helpLauncher, keyboardShortcuts, interaction, missionIntro, memoryHealth, restoreUndo, configPacks, offlineStatus, newsFreshness, feedEntityDecoding, sectionHeadlineControls, wireTopicDrilldown, dailyTip, dailyQuestDeck, achievementHints, nextLearningStep, readLaterTriage, readLaterSaveToggle, sessionPlanner, productionParserFixtures, customImportUndo, workbenchSearchPin, recentCommands, calmStart, savedHomeViews, currentViewSnapshot, localTags, customFeeds, accessibility, linkHealth, emptyStateCards, finalState, runtimeErrors, failed };
   console.log(JSON.stringify(report, null, 2));
-  if (failed.length) process.exit(1);
+  if (failed.length) process.exitCode = 1;
+  } finally {
+    client.ws.close();
+    await getJson(`/json/close/${target.id}`).catch(() => {});
+  }
 }
 
 main().catch((error) => {

@@ -25,6 +25,9 @@ The Roost is a local-first, static personal homepage and command center. It is a
 - `tests/run-roost-validation.mjs`: main validation harness.
 - `tests/run-layout-cdp-tests.mjs`: browser/CDP runtime validation.
 - `tests/run-custom-import-parser-tests.mjs`: production parser fixture wiring check.
+- `docs/STORAGE_SCHEMAS.md`: local keys, migrations, backup/restore and configuration-pack boundaries.
+- `docs/DAILY_USE_AUDIT.md`: system map, decisions, measurements and deferred work.
+- Focused browser journeys supplement the original CDP suite; use an isolated browser profile because fixtures replace test-origin storage.
 
 ## Runtime And Tooling
 
