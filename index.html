@@ -1154,7 +1154,7 @@
               <a class="v3-section-jump" data-v3-group="learn" href="#battle-history"><span>Battle History &amp; Maps</span><b>12</b></a>
               <a class="v3-section-jump" data-v3-group="media" href="#defense-industry"><span>Defense &amp; National Security</span><b>12</b></a>
               <a class="v3-section-jump" data-v3-group="life" href="#family"><span>Family &amp; Parenting</span><b>25</b></a>
-              <a class="v3-section-jump" data-v3-group="life" href="#home-land"><span>Home, Land &amp; Homestead</span><b>48</b></a>
+              <a class="v3-section-jump" data-v3-group="life" href="#home-land"><span>Home, Land &amp; Homestead</span><b>12</b></a>
               <a class="v3-section-jump" data-v3-group="kid" href="#kid-zone"><span>Learning with Dad — Kid Zone</span><b>36</b></a>
               <a class="v3-section-jump" data-v3-group="media" href="#entertainment"><span>Entertainment</span><b>26</b></a>
               <a class="v3-section-jump" data-v3-group="media" href="#social-media"><span>Social Media</span><b>7</b></a>
@@ -6471,7 +6471,7 @@
       <div class="section-header">
         <div class="section-icon" aria-hidden="true">🏡</div>
         <h2 id="home-land-heading">Home, Land &amp; Homestead</h2>
-        <span class="section-count">48</span>
+        <span class="section-count">12</span>
       </div>
       <div class="link-grid">
                 <a class="link-card" href="https://www.zillow.com"
@@ -7142,7 +7142,9 @@
       nr.classList.toggle('visible', q && v === 0);
     });
     document.addEventListener('keydown', e => {
-      if (e.key === '/' && document.activeElement !== si) { e.preventDefault(); si.focus(); }
+      const active = document.activeElement;
+      const editable = active && (active.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName));
+      if (e.key === '/' && !editable && !e.ctrlKey && !e.metaKey && !e.altKey && !document.getElementById('roost-command-panel')) { e.preventDefault(); si.focus(); }
       if (e.key === 'Escape' && document.activeElement === si) {
         si.value = ''; si.dispatchEvent(new Event('input')); si.blur();
       }
@@ -7257,7 +7259,13 @@
       const RECENT_MAX = 8;
 
       function safeRead(k) {
-        try { return JSON.parse(localStorage.getItem(k) || '[]'); }
+        try {
+          const value = JSON.parse(localStorage.getItem(k) || '[]');
+          return Array.isArray(value) ? value.filter(item => {
+            if (!item || typeof item !== 'object' || typeof item.href !== 'string') return false;
+            try { return /^https?:$/.test(new URL(item.href, location.href).protocol); } catch (e) { return false; }
+          }).map(item => ({ ...item, label: String(item.label || ''), desc: String(item.desc || '') })) : [];
+        }
         catch (e) { return []; }
       }
       function safeWrite(k, v) {
@@ -8336,6 +8344,24 @@
     color: var(--gold);
     font-size: 1.25rem;
     line-height: 1.1;
+  }
+  /* Today is a short continuation surface; the existing deep tools stay one disclosure away. */
+  #roost-today .roost-today-inner { grid-template-columns: minmax(0, 1fr); }
+  .roost-resume-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .roost-resume-point { display: flex; flex-direction: column; gap: 7px; min-width: 0; min-height: 100px; text-align: left; cursor: pointer; padding: 12px; background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); color: var(--text-primary); }
+  .roost-resume-point:hover { border-color: var(--gold); background: var(--bg-card-hover); }
+  .roost-resume-point strong { font-size: .93rem; line-height: 1.35; overflow-wrap: anywhere; }
+  .roost-resume-point .roost-resume-open { margin-top: auto; color: var(--gold); }
+  .roost-daily-desk > .roost-mini-actions { margin-top: 12px; }
+  .roost-daily-desk .roost-mini-action { min-height: 44px; }
+  .roost-today-empty { padding: 4px 0; }
+  .roost-today-details { margin-top: 10px; border-top: 1px solid var(--border-subtle); }
+  .roost-today-details summary { cursor: pointer; padding: 12px 0; min-height: 44px; color: var(--text-secondary); font-size: .78rem; }
+  .roost-today-extra { display: grid; gap: 12px; }
+  @media (max-width: 600px) {
+    .roost-resume-grid { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+    .roost-resume-point { min-height: 78px; padding: 10px 12px; gap: 4px; }
+    .roost-resume-point .roost-resume-open { display: none; }
   }
   .top-bar.roost-command-surface {
     z-index: 72;
@@ -10474,7 +10500,8 @@
     .roost-setup-foot,
     .roost-setup-actions { display: grid; grid-template-columns: 1fr; }
     .roost-setup-btn { width: 100%; }
-    .roost-primary-actions { width: 100%; display: grid; grid-template-columns: 1fr; }
+    .roost-primary-actions { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .roost-primary-actions button { min-height: 44px; white-space: normal; }
     .roost-add-link-primary { width: 100%; }
     .roost-custom-form .roost-field-row,
     .roost-import-controls,
@@ -10528,8 +10555,18 @@
 (function () {
   "use strict";
   var LS = {
-    read: function (k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-    write: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    read: function (k, d) {
+      try {
+        var raw = localStorage.getItem(k), value = raw == null ? d : JSON.parse(raw);
+        // A valid JSON value can still be the wrong shape. Leave the original
+        // bytes available to Backup / Restore; isolate the affected subsystem.
+        if (Array.isArray(d)) return Array.isArray(value) ? value : d;
+        if (d && typeof d === "object") return value && typeof value === "object" && !Array.isArray(value) ? value : d;
+        if (d != null) return typeof value === typeof d ? value : d;
+        return value;
+      } catch (e) { return d; }
+    },
+    write: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
   };
   var SETTINGS_KEY = "roost_settings_v1";
   var settings = LS.read(SETTINGS_KEY, { headlines: true });
@@ -10901,10 +10938,18 @@
     } catch (e) {}
     return "";
   }
+  function customSectionsStorageIsMalformed() {
+    try {
+      var raw = localStorage.getItem(CUSTOM_SECTIONS_KEY);
+      if (raw === null) return false;
+      var value = JSON.parse(raw);
+      return !Array.isArray(value) || value.some(function (section) { return !section || typeof section !== "object" || Array.isArray(section); });
+    } catch (e) { return true; }
+  }
   function customSections() {
     var raw = LS.read(CUSTOM_SECTIONS_KEY, []);
     if (!Array.isArray(raw)) raw = [];
-    return raw.map(function (section, index) {
+    return raw.filter(function (section) { return section && typeof section === "object" && !Array.isArray(section); }).map(function (section, index) {
       var id = String(section.id || customId("csec")).replace(/[^a-zA-Z0-9_-]/g, "");
       if (!id) id = customId("csec");
       return {
@@ -10929,7 +10974,7 @@
   function customLinks() {
     var raw = LS.read(CUSTOM_LINKS_KEY, []);
     if (!Array.isArray(raw)) raw = [];
-    return raw.map(function (link) {
+    return raw.filter(function (link) { return link && typeof link === "object" && !Array.isArray(link); }).map(function (link) {
       var url = safeCustomUrl(link.url || link.href);
       if (!url) return null;
       return {
@@ -10987,30 +11032,40 @@
     document.querySelectorAll('#nav-tabs a[data-custom-section], .v3-section-launcher a[data-custom-section]').forEach(function (node) { node.remove(); });
     var sections = customSections();
     var links = customLinks();
-    if (links.length && !sections.length) {
+    var preserveSections = customSectionsStorageIsMalformed();
+    if (links.length && !sections.length && !preserveSections) {
       sections = [ensureDefaultCustomSection()];
       links.forEach(function (link) { link.sectionId = sections[0].id; });
       saveCustomLinks(links);
     }
-    var sectionIds = {};
+    var sectionIds = Object.create(null);
     sections.forEach(function (section) { sectionIds[section.id] = true; });
-    if (links.some(function (link) { return !sectionIds[link.sectionId]; }) && sections.length) {
-      links.forEach(function (link) { if (!sectionIds[link.sectionId]) link.sectionId = sections[0].id; });
-      saveCustomLinks(links);
+    if (links.some(function (link) { return !sectionIds[link.sectionId]; })) {
+      if (preserveSections) {
+        // Display orphaned links without replacing damaged section bytes or
+        // rewriting their original section references before a backup exists.
+        var recoveryId = "roost-recovered-custom-links";
+        while (sectionIds[recoveryId] || document.getElementById(recoveryId)) recoveryId += "-recovered";
+        sections.push({ id: recoveryId, title: "Recovered custom links", hidden: false, recovery: true });
+      } else if (sections.length) {
+        links.forEach(function (link) { if (!sectionIds[link.sectionId]) link.sectionId = sections[0].id; });
+        saveCustomLinks(links);
+      }
     }
     var launcher = document.querySelector(".v3-section-launcher");
     var tabs = document.getElementById("nav-tabs");
     sections.forEach(function (section) {
-      var sectionLinks = links.filter(function (link) { return link.sectionId === section.id && !link.hidden; });
+      var sectionLinks = links.filter(function (link) { return !link.hidden && (link.sectionId === section.id || (section.recovery && !sectionIds[link.sectionId])); });
       if (section.hidden && !sectionLinks.length) return;
       var el = document.createElement("div");
-      el.className = "section roost-custom-section" + (section.hidden ? " roost-custom-section-hidden roost-hidden" : "");
+      el.className = "section roost-custom-section" + (section.hidden ? " roost-custom-section-hidden roost-hidden" : "") + (section.recovery ? " roost-custom-recovery" : "");
       el.id = section.id;
       el.setAttribute("role", "region");
       el.setAttribute("aria-labelledby", section.id + "-heading");
       el.setAttribute("data-v3-group", "life");
       el.innerHTML =
         '<div class="section-header" role="button" tabindex="0" aria-expanded="true"><div class="section-icon" aria-hidden="true">+</div><h2 id="' + esc(section.id) + '-heading">' + esc(section.title) + '</h2><span class="section-count">' + sectionLinks.length + '</span></div>' +
+        (section.recovery ? '<p class="roost-custom-empty">Some saved sections could not be read. Your original data is unchanged. Export a backup before repairing it in Custom Links or restoring a previous backup.</p>' : '') +
         '<div class="link-grid">' + (sectionLinks.map(customLinkCardHtml).join("") || '<p class="roost-custom-empty">No custom links in this section yet.</p>') + '</div>';
       main.appendChild(el);
       setupGenericSectionCollapse(el);
@@ -11090,9 +11145,9 @@
     card.appendChild(btn);
     syncPinButton(card, btn);
   }
-  function readPins() { return LS.read("kfl_pins_v1", []); }
+  function readPins() { return LS.read("kfl_pins_v1", []).filter(function (item) { return item && safeCustomUrl(item.href); }); }
   function writePins(pins) { LS.write("kfl_pins_v1", pins.slice(0, 24)); }
-  function readRecent() { return LS.read("kfl_recent_v1", []); }
+  function readRecent() { return LS.read("kfl_recent_v1", []).filter(function (item) { return item && safeCustomUrl(item.href); }); }
   function writeRecent(recent) { LS.write("kfl_recent_v1", recent.slice(0, 8)); }
   function syncCustomFavoritesToPins() {
     var pins = readPins();
@@ -11934,27 +11989,54 @@
   };
   var wireHeadlineOffsets = {};
   var sectionHeadlineOffsets = {};
+  var wireLoadSequence = 0;
 
   /* ---------- resilient feed fetch (CORS proxies + cache) ---------- */
   var CACHE_TTL = 30 * 60 * 1000; // 30 min
   var SECTION_HEADLINE_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
+  var feedRequests = Object.create(null);
+  var feedControllers = [];
+  var headlineObserver = null;
   var PROXIES = [
     function (u) { return { url: "https://api.allorigins.win/raw?url=" + encodeURIComponent(u), json: false }; },
     function (u) { return { url: "https://corsproxy.io/?url=" + encodeURIComponent(u), json: false }; },
     function (u) { return { url: "https://api.allorigins.win/get?url=" + encodeURIComponent(u), json: true }; }
   ];
   function cacheKey(u) { return "roost_feed_" + u.replace(/[^a-z0-9]/gi, "").slice(0, 60) + "_" + u.length; }
+  function normalizedFeedItems(items) {
+    if (!Array.isArray(items)) return [];
+    return items.slice(0, 100).filter(function (item) {
+      return item && typeof item === "object" && typeof item.title === "string" && item.title.trim() && safeHttpUrl(item.link);
+    }).map(function (item) {
+      return { title: item.title.slice(0, 300), link: safeHttpUrl(item.link), desc: String(item.desc || "").slice(0, 1200), date: String(item.date || "").slice(0, 100), source: String(item.source || "").slice(0, 80) };
+    });
+  }
+  function readFeedCache(url) {
+    var cached = LS.read(cacheKey(url), null);
+    if (!cached || !isFinite(Number(cached.t)) || Number(cached.t) <= 0) return null;
+    var items = normalizedFeedItems(cached.items);
+    return items.length ? { t: Math.min(Number(cached.t), Date.now()), items: items } : null;
+  }
+  function feedItemsWithFreshness(items, timestamp, live) {
+    return items.map(function (item) {
+      return Object.assign({}, item, { _feedFetchedAt: timestamp, _feedLive: !!live });
+    });
+  }
+  function pauseHeadlineRequests() {
+    if (headlineObserver) { headlineObserver.disconnect(); headlineObserver = null; }
+    feedControllers.forEach(function (controller) { controller.abort(); });
+  }
   function feedCacheMeta(urls) {
     var newest = 0, oldest = 0, count = 0;
     (urls || []).forEach(function (url) {
-      var cached = LS.read(cacheKey(url), null);
+      var cached = readFeedCache(url);
       if (!cached || !cached.t || !cached.items || !cached.items.length) return;
       count++;
       newest = Math.max(newest, Number(cached.t) || 0);
       oldest = oldest ? Math.min(oldest, Number(cached.t) || 0) : Number(cached.t) || 0;
     });
     if (!count || !newest) return null;
-    var age = Math.max(0, Date.now() - newest);
+    var age = Math.max(0, Date.now() - oldest);
     return { count: count, age: age, newest: newest, oldest: oldest || newest, stale: age > CACHE_TTL };
   }
   function compactDuration(ms) {
@@ -11964,11 +12046,13 @@
     if (hours < 48) return hours + "h";
     return Math.round(hours / 24) + "d";
   }
-  function feedFreshnessHtml(urls) {
-    var meta = feedCacheMeta(urls);
+  function feedFreshnessHtml(urls, item) {
+    var meta = item && item._feedFetchedAt ? { age: Math.max(0, Date.now() - item._feedFetchedAt) } : feedCacheMeta(urls);
     if (!meta) return "";
-    var label = (meta.stale ? "Stale " : "Cached ") + compactDuration(meta.age);
-    var title = meta.stale ? "Showing older cached headlines because live feeds may be slow or unavailable." : "Showing cached headlines while the feed refreshes in the background.";
+    meta.stale = meta.age > CACHE_TTL;
+    var live = item && item._feedLive && !meta.stale;
+    var label = live ? "Live" : (meta.stale ? "Stale " : "Cached ") + compactDuration(meta.age);
+    var title = live ? "Fetched from the feed during this visit." : (meta.stale ? "Saved more than 30 minutes ago. Live feeds may be slow or unavailable." : "Saved locally within the last 30 minutes.");
     return '<span class="roost-news-age' + (meta.stale ? ' stale' : '') + '" title="' + esc(title) + '">' + esc(label) + '</span>';
   }
 
@@ -11977,7 +12061,7 @@
     try {
       var doc = new DOMParser().parseFromString(xmlText, "text/xml");
       if (doc.querySelector("parsererror")) return out;
-      var items = doc.querySelectorAll("item");
+      var items = Array.from(doc.querySelectorAll("item")).slice(0, 100);
       if (items.length) {
         items.forEach(function (it) {
           var t = txt(it, "title"), l = txt(it, "link"),
@@ -11987,9 +12071,9 @@
         });
       } else {
         // Atom
-        doc.querySelectorAll("entry").forEach(function (it) {
+        Array.from(doc.querySelectorAll("entry")).slice(0, 100).forEach(function (it) {
           var t = txt(it, "title");
-          var linkEl = it.querySelector("link");
+          var linkEl = it.querySelector('link[rel="alternate"], link:not([rel])');
           var l = linkEl ? (linkEl.getAttribute("href") || linkEl.textContent) : "";
           var d = txt(it, "summary") || txt(it, "content");
           var p = txt(it, "updated") || txt(it, "published");
@@ -11997,7 +12081,7 @@
         });
       }
     } catch (e) {}
-    return out;
+    return normalizedFeedItems(out);
   }
   function txt(parent, tag) { var el = parent.getElementsByTagName(tag)[0]; return el ? el.textContent : ""; }
   function clean(s) { return (s || "").replace(/<!\[CDATA\[|\]\]>/g, "").trim(); }
@@ -12017,46 +12101,64 @@
     if (/[<>]/.test(decoded)) return stripHtml(decoded);
     return decoded.replace(/\s+/g, " ").trim();
   }
-  function stripHtml(s) { var tmp = document.createElement("div"); tmp.innerHTML = clean(s); return decodeHtmlEntities(tmp.textContent || "").trim(); }
+  function stripHtml(s) { var tmp = document.createElement("template"); tmp.innerHTML = clean(s); return decodeHtmlEntities(tmp.content.textContent || "").trim(); }
 
 
   function fetchOne(url, label, opts) {
     opts = opts || {};
     var ck = cacheKey(url);
-    var cached = LS.read(ck, null);
+    var cached = readFeedCache(url);
+    var saved = cached ? feedItemsWithFreshness(cached.items, cached.t, false) : [];
+    if (!settings.headlines || navigator.onLine === false) return Promise.resolve(saved);
     if (!opts.force && cached && (Date.now() - cached.t) < CACHE_TTL && cached.items && cached.items.length) {
-      return Promise.resolve(cached.items);
+      return Promise.resolve(saved);
     }
     if (!opts.force && opts.preferCache && cached && cached.items && cached.items.length) {
       refreshFeed(url, label, ck, cached, opts.limit || 12);
-      return Promise.resolve(cached.items);
+      return Promise.resolve(saved);
     }
     return refreshFeed(url, label, ck, cached, opts.limit || 12);
   }
-  function fetchWithTimeout(url) {
+  function fetchWithTimeout(url, asJson) {
     var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    if (controller) feedControllers.push(controller);
     var timer = controller ? setTimeout(function () { controller.abort(); }, 6500) : null;
     return fetch(url, { cache: "no-store", signal: controller ? controller.signal : undefined })
-      .finally(function () { if (timer) clearTimeout(timer); });
+      .then(function (response) {
+        if (!response.ok) throw new Error("status " + response.status);
+        return asJson ? response.json() : response.text();
+      })
+      .finally(function () {
+        if (timer) clearTimeout(timer);
+        if (controller) feedControllers = feedControllers.filter(function (entry) { return entry !== controller; });
+      });
   }
   function refreshFeed(url, label, ck, cached, limit) {
+    // Wire and section strips share sources, including during repeated setup.
+    if (feedRequests[url]) return feedRequests[url];
     var i = 0;
+    var fallback = cached ? feedItemsWithFreshness(cached.items, cached.t, false) : [];
     function attempt() {
-      if (i >= PROXIES.length) return Promise.resolve(cached && cached.items ? cached.items : []);
+      if (!settings.headlines || navigator.onLine === false || i >= PROXIES.length) return Promise.resolve(fallback);
       var spec = PROXIES[i++](url);
-      return fetchWithTimeout(spec.url)
-        .then(function (r) { if (!r.ok) throw new Error("status " + r.status); return spec.json ? r.json() : r.text(); })
+      return fetchWithTimeout(spec.url, spec.json)
         .then(function (body) {
           var xml = spec.json ? (body && body.contents) : body;
-          if (!xml) throw new Error("empty");
+          if (typeof xml !== "string" || !xml || xml.length > 2000000) throw new Error("empty or oversized feed");
           var items = parseFeed(xml, label);
           if (!items.length) throw new Error("no items");
-          LS.write(ck, { t: Date.now(), items: items.slice(0, limit) });
-          return items;
+          var timestamp = Date.now();
+          items = items.slice(0, Math.max(12, limit));
+          LS.write(ck, { t: timestamp, items: items });
+          return feedItemsWithFreshness(items, timestamp, true);
         })
         .catch(function () { return attempt(); });
     }
-    return attempt();
+    var request = attempt().finally(function () {
+      if (feedRequests[url] === request) delete feedRequests[url];
+    });
+    feedRequests[url] = request;
+    return request;
   }
 
   function fetchSection(cfg, opts) {
@@ -12069,10 +12171,12 @@
   function mergeFeedItems(lists, keyLen) {
     var merged = [];
     lists.forEach(function (l) { merged = merged.concat(l || []); });
-    var seen = {}, dedup = [];
+    var seen = Object.create(null), seenLinks = Object.create(null), dedup = [];
     merged.forEach(function (it) {
+      if (!it || typeof it !== "object") return;
       var k = (it.title || "").toLowerCase().slice(0, keyLen || 60);
-      if (k && !seen[k] && safeHttpUrl(it.link)) { seen[k] = 1; dedup.push(it); }
+      var href = safeHttpUrl(it.link);
+      if (k && !seen[k] && href && !seenLinks[href]) { seen[k] = 1; seenLinks[href] = 1; dedup.push(it); }
     });
     return dedup;
   }
@@ -12087,7 +12191,7 @@
       var parsed = Date.parse(item && item.date);
       if (!isFinite(parsed)) return true;
       var age = Date.now() - parsed;
-      return age < 0 || age <= SECTION_HEADLINE_MAX_AGE;
+      return age >= -24 * 60 * 60 * 1000 && age <= SECTION_HEADLINE_MAX_AGE;
     });
   }
   function setRefreshBusy(btn, busy) {
@@ -12282,6 +12386,9 @@
 
   var offlineStatusEl = null;
   var offlineStatusOverride = null;
+  var shellReadyThisVisit = false;
+  var shellUpdateAvailable = false;
+  var offlineStatusBound = false;
   function shellStatus() {
     var data = LS.read(SHELL_STATUS_KEY, {});
     data = data && typeof data === "object" ? data : {};
@@ -12316,11 +12423,15 @@
     if (!el) return;
     var data = shellStatus();
     var offline = offlineStatusOverride === null ? navigator.onLine === false : !!offlineStatusOverride;
-    var ready = data.serviceWorker === "ready" || !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+    var ready = shellReadyThisVisit || !!(navigator.serviceWorker && navigator.serviceWorker.controller);
     el.classList.toggle("is-offline", offline);
     if (offline) {
       el.hidden = false;
-      el.innerHTML = '<strong>Offline</strong><span>Links and local tools still work; live headlines pause.' + (data.lastShellReadyAt ? " Shell last checked " + esc(shortDateTime(data.lastShellReadyAt)) + "." : "") + '</span>';
+      el.innerHTML = '<strong>Offline</strong><span>Your library, saved data, and local tools remain available. External sites need a connection; live headlines pause.</span>';
+    } else if (shellUpdateAvailable) {
+      el.hidden = false;
+      el.innerHTML = '<strong>Roost updated</strong><span>A newer app is ready. Reload when you are ready.</span><button class="wb-btn" type="button" data-roost-reload>Reload</button>';
+      el.querySelector("[data-roost-reload]").addEventListener("click", function () { location.reload(); });
     } else if (ready) {
       el.hidden = false;
       el.innerHTML = '<strong>Offline-ready</strong><span>App shell cached locally for this browser.</span>';
@@ -12333,13 +12444,17 @@
     ensureOfflineStatus();
     if (navigator.onLine !== false) writeShellStatus({ lastOnlineAt: new Date().toISOString() });
     renderOfflineStatus();
+    if (offlineStatusBound) return;
+    offlineStatusBound = true;
     window.addEventListener("online", function () {
       offlineStatusOverride = null;
       writeShellStatus({ lastOnlineAt: new Date().toISOString() });
       renderOfflineStatus();
+      if (settings.headlines) applyHeadlineVisibility();
     });
     window.addEventListener("offline", function () {
       offlineStatusOverride = null;
+      pauseHeadlineRequests();
       renderOfflineStatus();
     });
   }
@@ -12470,9 +12585,11 @@
   }
   function loadWire(opts) {
     opts = opts || {};
+    if (!settings.headlines || !moduleEnabled("wire")) return Promise.resolve(0);
     var wrap = document.querySelector(".roost-wire");
     var grid = document.getElementById("roost-wire-grid");
     if (!wrap || !grid) return Promise.resolve(0);
+    var sequence = ++wireLoadSequence;
     wrap.classList.remove("roost-hidden");
     renderWireLoading(grid);
     var selected = selectedWireBuckets();
@@ -12481,16 +12598,20 @@
       return loadWireTopic(grid, item.idx, item.bucket, opts);
     })).then(function (lists) {
       var ready = lists.filter(function (items) { return items && items.length; }).length;
-      if (!ready) wrap.classList.add("roost-hidden");
+      if (!ready && settings.headlines && moduleEnabled("wire") && sequence === wireLoadSequence) {
+        grid.innerHTML = '<div class="roost-wire-cell"><div class="topic">Unavailable</div><div class="headline">No recent headlines right now. Your library and local tools are ready.</div></div>';
+      }
       return ready;
     });
   }
   function loadWireTopic(grid, idx, bucket, opts) {
     opts = opts || {};
+    if (!settings.headlines || !moduleEnabled("wire")) return Promise.resolve([]);
     return Promise.all(bucket.feeds.map(function (u) {
       return fetchOne(u, bucket.label, { force: !!opts.force, preferCache: !!opts.preferCache, limit: 10 });
     })).then(function (lists) {
-      var items = mergeFeedItems(lists, 70);
+      var items = recentSectionHeadlines(mergeFeedItems(lists, 70));
+      if (!settings.headlines || !moduleEnabled("wire")) return items;
       var rotated = rotateFeedItems(items, wireHeadlineOffsets, String(idx), !!opts.advance);
       renderWireTopic(grid, idx, bucket, rotated[0]);
       return items;
@@ -12522,7 +12643,7 @@
     }
     var cell = document.createElement("div");
     var href = safeHttpUrl(item.link);
-    var freshness = feedFreshnessHtml(bucket.feeds);
+    var freshness = feedFreshnessHtml(bucket.feeds, item);
     cell.className = "roost-wire-cell";
     cell.setAttribute("data-wire-topic", idx);
     cell.innerHTML = wireTopicActionHtml(idx, bucket.label) + '<a class="roost-wire-link" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer"><div class="headline">' + esc(item.title) + '</div><div class="meta">' + esc(item.source || bucket.label) + (relTime(item.date) ? ' - ' + esc(relTime(item.date)) : '') + freshness + '</div></a>' + articleSaveButton(item, bucket.label);
@@ -12560,11 +12681,12 @@
      2) PER-SECTION HEADLINES (lazy via IntersectionObserver)
      ================================================================= */
   function setupHeadlines() {
+    if (headlineObserver) { headlineObserver.disconnect(); headlineObserver = null; }
     if (!settings.headlines) return;
     var ids = sectionFeedIds();
-    var io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver(function (entries, obs) {
+    var io = headlineObserver = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver(function (entries, obs) {
       entries.forEach(function (en) {
-        if (!en.isIntersecting) return;
+        if (!settings.headlines || !en.isIntersecting) return;
         obs.unobserve(en.target);
         loadSectionHeads(en.target);
       });
@@ -12592,10 +12714,12 @@
   }
   function loadSectionHeads(sec, opts) {
     opts = opts || {};
+    if (!settings.headlines) return Promise.resolve([]);
     var strip = sec.querySelector(".roost-heads");
     if (!strip || !strip._cfg) return Promise.resolve([]);
     if (opts.button) setRefreshBusy(opts.button, true);
     return fetchSection(strip._cfg, { force: !!opts.force, preferCache: !opts.force, limit: 10 }).then(function (items) {
+      if (!settings.headlines) return [];
       if (!items.length) {
         strip.setAttribute("data-state", "empty");
         strip.innerHTML = sectionRefreshButtonHtml() + '<div class="roost-heads-msg">Headlines unavailable right now - links below are unaffected.</div>';
@@ -12613,7 +12737,7 @@
       var rotated = rotateFeedItems(freshItems, sectionHeadlineOffsets, sec.id || strip._cfg.label, !!opts.advance);
       var feat = rotated[0];
       var rows = rotated.slice(1, 4);
-      var freshness = feedFreshnessHtml(strip._cfg.feeds);
+      var freshness = feedFreshnessHtml(strip._cfg.feeds, feat);
       var html = sectionRefreshButtonHtml() +
         '<div class="roost-feat-wrap"><a class="roost-feat" href="' + esc(feat.link) + '" target="_blank" rel="noopener noreferrer">' +
           '<span class="eyebrow">&#9733; Featured &middot; ' + esc(feat.source || "") + '</span>' +
@@ -12625,7 +12749,7 @@
           rows.map(function (it) {
             return '<div class="roost-row-wrap"><a class="roost-row" href="' + esc(it.link) + '" target="_blank" rel="noopener noreferrer">' +
               '<div><div class="rt">' + esc(it.title) + '</div>' +
-              '<div class="rm">' + esc(it.source || "") + (relTime(it.date) ? ' &middot; ' + esc(relTime(it.date)) : '') + freshness + '</div></div></a>' + articleSaveButton(it, strip._cfg.label) + '</div>';
+              '<div class="rm">' + esc(it.source || "") + (relTime(it.date) ? ' &middot; ' + esc(relTime(it.date)) : '') + feedFreshnessHtml(strip._cfg.feeds, it) + '</div></div></a>' + articleSaveButton(it, strip._cfg.label) + '</div>';
           }).join("") +
         '</div>';
       strip.innerHTML = html;
@@ -12667,15 +12791,21 @@
   function readMissionState() {
     if (missionState) return missionState;
     missionState = LS.read(MISSION_STATE_KEY, null);
-    if (!missionState) missionState = migrateMissionControlState() || defaultMissionState();
-    missionState.completed = missionState.completed || {};
-    missionState.notes = missionState.notes || {};
+    if (!missionState || typeof missionState !== "object" || Array.isArray(missionState)) {
+      var hasSavedMission = true;
+      try { hasSavedMission = localStorage.getItem(MISSION_STATE_KEY) !== null; } catch (e) {}
+      missionState = (!hasSavedMission && migrateMissionControlState()) || defaultMissionState();
+    }
+    ["completed", "notes", "resourceStatus", "sideQuests", "leadership", "projects"].forEach(function (key) {
+      if (key === "projects" && !missionState.projects) missionState.projects = missionState.projectData;
+      if (!missionState[key] || typeof missionState[key] !== "object" || Array.isArray(missionState[key])) missionState[key] = {};
+    });
     missionState.selectedWeek = clampWeek(missionState.selectedWeek || 1);
     missionState.filterTrack = missionState.filterTrack || "all";
     missionState.filterMode = missionState.filterMode || "all";
-    missionState.missionStatement = (missionState.missionStatement || "").slice(0, 500);
+    missionState.missionStatement = String(missionState.missionStatement || "").slice(0, 500);
     missionState.resourceStatus = missionState.resourceStatus || {};
-    missionState.resourceQuery = (missionState.resourceQuery || "").slice(0, 80);
+    missionState.resourceQuery = String(missionState.resourceQuery || "").slice(0, 80);
     missionState.resourceCat = missionState.resourceCat || "all";
     missionState.sideQuests = missionState.sideQuests || {};
     missionState.questTrack = missionState.questTrack || "all";
@@ -12741,9 +12871,10 @@
   function missionProjectState(project) {
     var st = readMissionState();
     var existing = (st.projects || {})[project.id] || {};
-    if (!existing.subtasks) {
+    if (!existing || typeof existing !== "object" || Array.isArray(existing)) existing = {};
+    if (!Array.isArray(existing.subtasks)) {
       existing.subtasks = (project.defaultTasks || []).map(function (task, idx) { return { id: project.id + "_st" + idx, text: task, done: false }; });
-    }
+    } else existing.subtasks = existing.subtasks.filter(function (task) { return task && typeof task === "object" && !Array.isArray(task); });
     existing.status = existing.status || "Not Started";
     existing.github = existing.github || "";
     existing.video = existing.video || "";
@@ -13334,7 +13465,7 @@
   function layoutDefaultTopIds(defs) {
     var available = {};
     layoutGroupIds(defs, "top").forEach(function (id) { available[id] = true; });
-    return ["launcher", "wire", "today"].filter(function (id) { return available[id]; });
+    return ["launcher", "today", "wire"].filter(function (id) { return available[id]; });
   }
   function layoutPriorityOrder(defaults, priority) {
     var present = {};
@@ -13748,7 +13879,7 @@
     return {
       version: VIEWS_VERSION,
       activeId: String(raw.activeId || ""),
-      custom: custom.map(function (view) {
+      custom: custom.filter(function (view) { return view && typeof view === "object" && !Array.isArray(view); }).map(function (view) {
         return {
           id: String(view.id || customId("view")).replace(/[^a-zA-Z0-9_-]/g, "") || customId("view"),
           name: String(view.name || "Custom View").slice(0, 60),
@@ -14099,7 +14230,7 @@
     var feeds = Array.isArray(raw.feeds) ? raw.feeds : [];
     return {
       version: CUSTOM_FEEDS_VERSION,
-      feeds: feeds.map(function (feed) {
+      feeds: feeds.filter(function (feed) { return feed && typeof feed === "object" && !Array.isArray(feed); }).map(function (feed) {
         var url = safeCustomUrl(feed.url || feed.xmlUrl);
         if (!url) return null;
         return {
@@ -14453,6 +14584,8 @@
     recentCommands: recentCommands,
     backupPayload: backupPayload,
     safeRestoreData: safeRestoreData,
+    applyStorageRestore: applyStorageRestore,
+    storageRestorePreview: storageRestorePreview,
     configPackPayload: configPackPayload,
     safeConfigPackData: safeConfigPackData,
     importConfigPackText: importConfigPackText,
@@ -14623,6 +14756,7 @@
     if (ht) ht.innerHTML = "Headlines: " + (settings.headlines ? "on" : "off") + "<br><small>Toggle the wire</small>";
   }
   function applyHeadlineVisibility() {
+    if (!settings.headlines) pauseHeadlineRequests();
     var wire = document.querySelector(".roost-wire");
     var wireAllowed = moduleEnabled("wire");
     if (settings.headlines && wireAllowed) {
@@ -14723,6 +14857,7 @@
       '<div class="wb-bar">' +
         '<input id="wb-title" placeholder="Note title…" style="flex:1;min-width:150px;background:var(--bg-deep);color:var(--text-primary);border:1px solid var(--border-card);border-radius:6px;padding:8px 11px;font-size:.8rem;">' +
         '<button class="wb-btn primary" id="wb-save">Save</button>' +
+        '<button class="wb-btn" id="wb-new">New note</button>' +
         '<button class="wb-btn" id="wb-copy">Copy</button>' +
         '<button class="wb-btn" id="wb-download">Download .md</button>' +
         '<span class="wb-status" id="wb-status"></span>' +
@@ -14731,10 +14866,11 @@
       keys.map(function (k) { return '<option value="' + esc(WB_METHODS[k].name) + '">' + esc(WB_METHODS[k].name) + '</option>'; }).join("") +
       '</select></div><div id="wb-list"></div></div>';
 
-    var cur = keys[0];
+    var cur = keys[0], loadedNoteId = "", loadedMethod = "";
     var nameEl = body.querySelector("#wb-mname"), blurbEl = body.querySelector("#wb-mblurb"), textEl = body.querySelector("#wb-text");
     function applyMethod(k, force) {
       cur = k;
+      loadedMethod = "";
       nameEl.textContent = WB_METHODS[k].name; blurbEl.textContent = WB_METHODS[k].blurb;
       if (force || !textEl.value.trim()) textEl.value = WB_METHODS[k].scaffold;
       body.querySelectorAll(".wb-tab").forEach(function (t) { t.classList.toggle("on", t.getAttribute("data-m") === k); });
@@ -14753,9 +14889,22 @@
     body.querySelector("#wb-save").addEventListener("click", function () {
       var notes = workbenchNotes();
       var title = (body.querySelector("#wb-title").value || WB_METHODS[cur].name).trim();
-      notes.unshift({ id: customId("note"), title: title, method: WB_METHODS[cur].name, body: textEl.value, t: new Date().toISOString(), pinned: false });
+      var existing = notes.filter(function (note) { return note.id === loadedNoteId; })[0];
+      var saved = { id: existing ? existing.id : customId("note"), title: title, method: loadedMethod || WB_METHODS[cur].name, body: textEl.value, t: new Date().toISOString(), pinned: existing ? existing.pinned : false };
+      if (existing) notes = notes.map(function (note) { return note.id === saved.id ? saved : note; });
+      else notes.unshift(saved);
+      loadedNoteId = saved.id;
+      body.querySelector("#wb-save").textContent = "Save changes";
       saveWorkbenchNotes(notes); renderNotes(body); checkRoostAchievements("workbench"); renderTodayDashboard(); toast("Saved");
       body.querySelector("#wb-status").textContent = "Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    });
+    body.querySelector("#wb-new").addEventListener("click", function () {
+      if (textEl.value.trim() && !confirm("Start a new note? Save any changes first.")) return;
+      loadedNoteId = ""; loadedMethod = "";
+      body.querySelector("#wb-title").value = "";
+      body.querySelector("#wb-save").textContent = "Save";
+      applyMethod(cur, true);
+      textEl.focus();
     });
     body.querySelector("#wb-copy").addEventListener("click", function () {
       navigator.clipboard && navigator.clipboard.writeText(textEl.value).then(function () { toast("Copied to clipboard"); });
@@ -14832,13 +14981,21 @@
           });
           saveWorkbenchNotes(notes);
           renderNotes(scope);
+          renderTodayDashboard();
           toast(pinned ? "Note pinned" : "Note unpinned");
         });
       });
       list.querySelectorAll("[data-load]").forEach(function (b) {
         b.addEventListener("click", function () {
           var n = workbenchNotes().filter(function (x) { return x.id === b.getAttribute("data-load"); })[0];
-          if (n) { textEl.value = n.body; scope.querySelector("#wb-title").value = n.title; toast("Loaded"); textEl.scrollIntoView({ behavior: "smooth", block: "center" }); }
+          if (n) {
+            var methodKey = keys.filter(function (key) { return WB_METHODS[key].name === n.method; })[0];
+            if (methodKey) applyMethod(methodKey, false);
+            loadedNoteId = n.id; loadedMethod = n.method;
+            textEl.value = n.body; scope.querySelector("#wb-title").value = n.title;
+            scope.querySelector("#wb-save").textContent = "Save changes";
+            toast("Loaded"); textEl.scrollIntoView({ behavior: "auto", block: "center" });
+          }
         });
       });
       list.querySelectorAll("[data-del]").forEach(function (b) {
@@ -15151,7 +15308,12 @@
     }
   ];
   function boards() {
-    return LS.read(BOARDS_KEY, []);
+    return LS.read(BOARDS_KEY, []).filter(function (board) { return board && typeof board === "object" && !Array.isArray(board); }).map(function (board) {
+      return Object.assign({}, board, {
+        name: String(board.name || "Untitled board").slice(0, 80),
+        links: (Array.isArray(board.links) ? board.links : []).filter(function (link) { return link && safeHttpUrl(link.href); })
+      });
+    });
   }
   function saveBoards(list) {
     LS.write(BOARDS_KEY, list.slice(0, 40));
@@ -15853,6 +16015,42 @@
     });
   }
 
+  // Resume points are derived from explicit local saves, never usage scores.
+  function todayResumePoints() {
+    var points = [], session = activeSessionState();
+    if (session) points.push({ kind: "session", title: session.goal, reason: "Unfinished session · " + session.timebox + " min" });
+    var note = moduleEnabled("workbench") && workbenchNotes().filter(function (item) { return item.pinned; }).sort(function (a, b) { return String(b.t).localeCompare(String(a.t)); })[0];
+    if (note) points.push({ kind: "workbench", id: note.id, title: note.title, reason: "Pinned Workbench note" });
+    var article = readLaterActiveItems().slice().sort(function (a, b) {
+      var rank = function (item) { return (item.priority === "high" ? 2 : 0) + (item.status === "reading" ? 1 : 0); };
+      return rank(b) - rank(a) || String(b.savedAt || "").localeCompare(String(a.savedAt || ""));
+    })[0];
+    if (article) points.push({ kind: "readlater", id: article.link, title: article.title, reason: (article.priority === "high" ? "High priority · " : "") + (article.status === "reading" ? "Continue reading" : "Saved to Read Later") });
+    var board = boards().filter(function (item) { return item.links && item.links.length; }).slice().sort(function (a, b) {
+      function edited(item) { return item.updatedAt || (item.links[0] || {}).addedAt || item.createdAt || ""; }
+      return String(edited(b)).localeCompare(String(edited(a)));
+    })[0];
+    if (board) points.push({ kind: "board", id: board.id, title: board.name, reason: "Saved board · " + board.links.length + " links" });
+    if (moduleEnabled("missionExample") && !nextStepSkippedToday()) {
+      var next = currentFocusItems(currentMissionWeek())[0];
+      if (next) points.push({ kind: "focus", title: next.activity.name, reason: "Next learning step · Cycle " + currentMissionWeek() });
+    }
+    return points.slice(0, 3);
+  }
+  function browseRoostLibrary() {
+    var center = document.getElementById("command-center"), input = document.getElementById("search-input");
+    if (!center) return;
+    closeCommandLauncher(false);
+    if (input && input.value) { input.value = ""; input.dispatchEvent(new Event("input", { bubbles: true })); }
+    var toggle = document.getElementById("v3-launcher-toggle");
+    if (center.classList.contains("roost-launcher-minimized") && toggle) toggle.click();
+    // A layout can hide navigation; reveal it for this visit without changing the saved view.
+    center.classList.remove("roost-layout-hidden");
+    center.hidden = false;
+    center.scrollIntoView({ behavior: "auto", block: "start" });
+    var target = center.querySelector(".v3-section-launcher a") || toggle;
+    if (target) target.focus({ preventScroll: true });
+  }
   function renderTodayDashboard() {
     var wrap = document.getElementById("roost-today");
     if (!moduleEnabled("today")) {
@@ -15867,31 +16065,37 @@
       wrap.id = "roost-today";
       anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
     }
+    var expanded = !!wrap.querySelector("details[open]");
     wrap.classList.remove("roost-hidden");
     var missionOn = moduleEnabled("missionExample");
-    var summary = missionOn ? missionSummary() : { done: 0, total: 0 };
-    var current = missionOn ? currentMissionWeek() : 0;
-    var focus = missionOn ? currentFocusItems(current).slice(0, 2) : [];
+    var focus = missionOn ? currentFocusItems(currentMissionWeek()).slice(0, 2) : [];
+    var points = todayResumePoints();
     var achievements = checkRoostAchievements("dashboard");
-    var unlocked = Object.keys(achievements).length;
-    var statusText = missionOn ? ("Cycle " + current + " - " + summary.done + "/" + summary.total + " missions complete") : "Local setup, saves, boards, and notes live only in this browser.";
-    var focusHtml = missionOn ? (focus.map(function (item) { return '<button type="button" data-dashboard-mission="' + esc(item.key) + '">' + esc(item.activity.name) + '</button>'; }).join("") || '<span>No focus items left for this cycle.</span>') : '<span>Enable the Mission Control example profile from Setup to use focus missions.</span>';
-    var focusButton = missionOn ? '<button class="roost-mini-action" type="button" data-open-tool="focus">Focus</button>' : "";
-    wrap.innerHTML = '<div class="roost-surface-header"><div><h2>Today</h2><span>' + (missionOn ? "Mission progress, saves, boards, notes, and badges" : "Saves, boards, notes, and badges") + '</span></div>' + surfaceToggleHtml("today", "Today", "roost-today-body") + '</div><div class="roost-today-inner" id="roost-today-body">' +
-      '<section class="roost-today-card"><h3>Today</h3><p>' + esc(statusText) + '</p>' + homeViewStripHtml() + sessionSummaryHtml() + dailyQuestDeckHtml() + nextLearningStepHtml(focus) + '<div class="roost-today-focus">' + focusHtml + '</div>' + dailyTipHtml() + '<div class="roost-mini-actions">' + focusButton + '<button class="roost-mini-action" type="button" data-open-tool="session">Session</button><button class="roost-mini-action" type="button" data-open-tool="readlater">Read Later</button><button class="roost-mini-action" type="button" data-toggle-cozy>Cozy</button></div></section>' +
-      '<section class="roost-today-card"><h4>Read Later</h4><strong>' + readLaterActiveItems().length + '</strong><span>active articles</span></section>' +
-      '<section class="roost-today-card"><h4>Boards</h4><strong>' + boards().length + '</strong><span>personal boards</span></section>' +
-      '<section class="roost-today-card"><h4>Notes</h4><strong>' + Object.keys(linkNotes()).length + '</strong><span>annotated links</span></section>' +
-      '<section class="roost-today-card"><h4>Badges</h4><strong>' + unlocked + '/' + ROOST_ACHIEVEMENTS.length + '</strong><span>unlocked</span></section>' +
-      '</div>';
-    wrap.querySelectorAll("[data-dashboard-mission]").forEach(function (btn) {
-      btn.addEventListener("click", function () { toggleMission(btn.getAttribute("data-dashboard-mission")); });
+    var resume = points.length ? '<div class="roost-resume-grid">' + points.map(function (point, index) {
+      return '<button class="roost-resume-point" type="button" data-resume-point="' + index + '"><span>' + esc(point.reason) + '</span><strong>' + esc(point.title) + '</strong><span class="roost-resume-open">' + (point.kind === "session" ? "Resume session" : "Open") + ' →</span></button>';
+    }).join("") + '</div>' : '<p class="roost-today-empty">A clear desk. Find a destination, or plan one thing to work on. Your saved work will appear here.</p>';
+    wrap.innerHTML = '<div class="roost-surface-header"><div><h2>Today</h2><span>Pick up where you left off</span></div>' + surfaceToggleHtml("today", "Today", "roost-today-body") + '</div><div class="roost-today-inner" id="roost-today-body">' +
+      '<section class="roost-today-card roost-daily-desk" aria-label="Continue your work">' + resume +
+      '<div class="roost-mini-actions"><button class="roost-mini-action" type="button" data-browse-library>Browse library</button><button class="roost-mini-action" type="button" data-open-tool="session">Plan a session</button><button class="roost-mini-action" type="button" data-open-tool="views">Home Views</button></div>' +
+      '<details class="roost-today-details"' + (expanded ? ' open' : '') + '><summary>' + (missionOn ? 'Learning, quests & local tools' : 'Quests & local tools') + '</summary><div class="roost-today-extra">' +
+      '<p>Resume points use your unfinished session, pinned note, active reading, saved board, then enabled learning step. Up to three; all stored in this browser.</p>' +
+      homeViewStripHtml() + sessionSummaryHtml() + nextLearningStepHtml(focus) + dailyQuestDeckHtml() + dailyTipHtml() +
+      '<div class="roost-mini-actions"><button class="roost-mini-action" type="button" data-open-tool="readlater">Read Later · ' + readLaterActiveItems().length + '</button><button class="roost-mini-action" type="button" data-open-tool="boards">Boards · ' + boards().length + '</button>' +
+      (moduleEnabled("workbench") ? '<button class="roost-mini-action" type="button" data-open-tool="workbench">Workbench</button>' : '') +
+      (missionOn ? '<button class="roost-mini-action" type="button" data-open-tool="focus">Focus missions</button>' : '') +
+      '<button class="roost-mini-action" type="button" data-open-tool="achievements">Badges · ' + Object.keys(achievements).length + '/' + ROOST_ACHIEVEMENTS.length + '</button><button class="roost-mini-action" type="button" data-toggle-cozy>Cozy</button></div></div></details></section></div>';
+    wrap.querySelectorAll("[data-resume-point]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var point = points[Number(btn.getAttribute("data-resume-point"))];
+        if (point.kind === "session" || point.kind === "focus") openModal(point.kind);
+        else openSavedLauncherItem(point);
+      });
     });
     wrap.querySelectorAll("[data-open-tool]").forEach(function (btn) {
       btn.addEventListener("click", function () { openModal(btn.getAttribute("data-open-tool")); });
     });
-    var cozy = wrap.querySelector("[data-toggle-cozy]");
-    if (cozy) cozy.addEventListener("click", toggleAmbientMode);
+    wrap.querySelector("[data-browse-library]").addEventListener("click", browseRoostLibrary);
+    wrap.querySelector("[data-toggle-cozy]").addEventListener("click", toggleAmbientMode);
     bindHomeViewControls(wrap);
     bindDailyQuestDeck(wrap);
     bindNextLearningStep(wrap);
@@ -15900,6 +16104,8 @@
     applySurfaceCollapsed("today");
     try { applyLayoutState({ silent: true }); } catch (e) {}
   }
+  window.roostTestHooks.todayResumePoints = todayResumePoints;
+  window.roostTestHooks.browseRoostLibrary = browseRoostLibrary;
 
   function installSearchScopes() {
     var input = document.getElementById("search-input");
@@ -15930,34 +16136,34 @@
     var noResults = document.getElementById("no-results");
     var q = (input.value || "").toLowerCase().trim();
     var scope = settings.searchScope || "all";
+    var context = launcherSearchContext(q);
     var visible = 0;
     if (document.activeElement === input && commandLauncherState.panel && !commandLauncherState.open) {
       openCommandLauncher({ restore: false });
     }
-    document.querySelectorAll("main .link-card").forEach(function (card) {
-      var section = card.closest(".section");
-      var sectionId = section ? section.id : "";
-      var href = safeHttpUrl(card.href);
-      var hay = [card.getAttribute("data-name"), card.getAttribute("data-desc-search"), card.textContent, sectionId, linkNoteTerms(href)].join(" ").toLowerCase();
-      var inScope = scope === "all" || scope === "links" || (scope === "news" && !!sectionFeedConfig(sectionId));
-      var match = !q || (inScope && hay.indexOf(q) !== -1);
-      card.setAttribute("data-hidden", match ? "false" : "true");
+    var matchedSections = new Set();
+    context.records.forEach(function (record) {
+      var card = record.card;
+      var inScope = scope === "all" || scope === "links" || (scope === "news" && !!context.news[record.sectionId]);
+      var match = !q || (inScope && launcherRecordScore(record, context) > 0);
+      var hidden = match ? "false" : "true";
+      if (card.getAttribute("data-hidden") !== hidden) card.setAttribute("data-hidden", hidden);
+      if (match) matchedSections.add(record.sectionId);
       if (match) visible++;
     });
     document.querySelectorAll("main .section").forEach(function (section) {
       var missionMatch = section.id === "mission-control" && (scope === "all" || scope === "mission") && (!q || section.textContent.toLowerCase().indexOf(q) !== -1 || missionConfigSearch(q));
-      var linkMatch = !!section.querySelector('.link-card:not([data-hidden="true"])');
+      var linkMatch = matchedSections.has(section.id);
       section.setAttribute("data-hidden", missionMatch || linkMatch || !q ? "false" : "true");
     });
     if (scope === "saved" && q) {
-      var savedHits = readLaterItems().concat(LS.read(WB_KEY, [])).filter(function (item) { return JSON.stringify(item).toLowerCase().indexOf(q) !== -1; }).length;
-      visible += savedHits;
+      visible += launcherSavedItems(q).length;
     }
     if (count) {
       if (q) { count.textContent = visible + " found"; count.classList.add("visible"); }
       else count.classList.remove("visible");
     }
-    var launcherHits = renderCommandLauncherResults(q);
+    var launcherHits = renderCommandLauncherResults(q, context);
     if (noResults) noResults.classList.toggle("visible", !!q && visible === 0 && !launcherHits);
   }
 
@@ -15972,13 +16178,12 @@
     panel.className = "roost-command-panel";
     panel.id = "roost-command-panel";
     panel.hidden = true;
-    panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-label", "Launcher results");
-    panel.setAttribute("aria-modal", "false");
     wrap.appendChild(panel);
     commandLauncherState.panel = panel;
     input.setAttribute("role", "combobox");
     input.setAttribute("aria-haspopup", "listbox");
+    input.setAttribute("aria-autocomplete", "list");
     input.setAttribute("aria-controls", "roost-command-list");
     input.setAttribute("aria-expanded", "false");
     input.addEventListener("focus", function () { openCommandLauncher({ restore: false }); });
@@ -15990,11 +16195,14 @@
       var inEditable = active && (active.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].indexOf(active.tagName) !== -1);
       if ((e.ctrlKey || e.metaKey) && key === "k") {
         e.preventDefault();
+        e.stopImmediatePropagation();
+        if (roostActiveLayer) return;
         openCommandLauncher({ restore: true });
         return;
       }
-      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && !inEditable) {
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && !inEditable && !roostActiveLayer) {
         e.preventDefault();
+        e.stopImmediatePropagation();
         openCommandLauncher({ restore: true });
       }
     }, true);
@@ -16008,6 +16216,7 @@
   }
   function openCommandLauncher(opts) {
     opts = opts || {};
+    if (roostActiveLayer) return;
     var st = commandLauncherState;
     var input = st.input || document.getElementById("search-input");
     var panel = st.panel || document.getElementById("roost-command-panel");
@@ -16048,10 +16257,10 @@
     }
     if (e.key === "ArrowDown") {
       claim();
-      setCommandLauncherActive(st.active + 1);
+      setCommandLauncherActive(st.active + 1, true);
     } else if (e.key === "ArrowUp") {
       claim();
-      setCommandLauncherActive(st.active - 1);
+      setCommandLauncherActive(st.active - 1, true);
     } else if (e.key === "Enter") {
       claim();
       if (st.active >= 0 && st.items[st.active]) {
@@ -16060,9 +16269,11 @@
     } else if (e.key === "Escape") {
       claim();
       closeCommandLauncher(true);
+    } else if (e.key === "Tab") {
+      closeCommandLauncher(false);
     }
   }
-  function setCommandLauncherActive(idx) {
+  function setCommandLauncherActive(idx, scroll) {
     var st = commandLauncherState;
     if (!st.items.length) {
       st.active = -1;
@@ -16076,12 +16287,18 @@
       btn.setAttribute("aria-selected", on ? "true" : "false");
       if (on) {
         st.input.setAttribute("aria-activedescendant", btn.id);
-        btn.scrollIntoView({ block: "nearest" });
+        if (scroll) {
+          var panelRect = st.panel.getBoundingClientRect();
+          var itemRect = btn.getBoundingClientRect();
+          if (itemRect.top < panelRect.top) st.panel.scrollTop -= panelRect.top - itemRect.top;
+          else if (itemRect.bottom > panelRect.bottom) st.panel.scrollTop += itemRect.bottom - panelRect.bottom;
+        }
       }
     });
   }
   function recentCommands() {
-    return LS.read(RECENT_COMMANDS_KEY, []).filter(function (item) {
+    var raw = LS.read(RECENT_COMMANDS_KEY, []);
+    return (Array.isArray(raw) ? raw : []).filter(function (item) {
       return item && item.title;
     }).slice(0, 6);
   }
@@ -16105,16 +16322,16 @@
       var exact = matches.filter(function (cmd) { return cmd.title === entry.title; })[0] || matches[0];
       if (!exact || seen[exact.title]) return null;
       seen[exact.title] = true;
-      return Object.assign({}, exact, { kind: "Recent", meta: "Recent - " + (exact.meta || entry.meta || "Command") });
+      return Object.assign({}, exact, { meta: "Recent - " + (exact.meta || entry.meta || "Command") });
     }).filter(Boolean);
   }
-  function renderCommandLauncherResults(query) {
+  function renderCommandLauncherResults(query, context) {
     var st = commandLauncherState;
     if (!st.panel || !st.input) return 0;
     query = query == null ? (st.input.value || "") : String(query || "");
     var queryChanged = query !== st.query;
     st.query = query;
-    var groups = buildCommandLauncherGroups(query);
+    var groups = buildCommandLauncherGroups(query, context);
     var flat = [];
     var html = '<div class="roost-command-status" aria-live="polite">' + esc(query ? "Results for \"" + query + "\"" : "Ready to launch") + '</div><div id="roost-command-list" role="listbox" aria-label="Launcher results">';
     groups.forEach(function (group) {
@@ -16124,7 +16341,7 @@
         var idx = flat.length;
         item._idx = idx;
         flat.push(item);
-        html += '<button class="roost-command-item" id="roost-command-option-' + idx + '" type="button" role="option" aria-selected="false" data-command-index="' + idx + '">' +
+        html += '<button class="roost-command-item" id="roost-command-option-' + idx + '" type="button" tabindex="-1" role="option" aria-selected="false" data-command-index="' + idx + '">' +
           '<span><strong>' + esc(item.title) + '</strong><span>' + esc(item.meta || "") + '</span></span><span class="roost-command-kind">' + esc(item.kind || group.label) + '</span></button>';
       });
       html += '</div>';
@@ -16139,25 +16356,130 @@
       btn.addEventListener("click", function () { activateCommandLauncherItem(st.items[Number(btn.getAttribute("data-command-index"))]); });
     });
     setCommandLauncherActive(flat.length ? ((queryChanged || st.active < 0 || st.active >= flat.length) ? 0 : st.active) : -1);
+    if (queryChanged && st.open) requestAnimationFrame(function () { if (st.open && st.query === query) st.panel.scrollTop = 0; });
     return flat.length;
   }
-  function buildCommandLauncherGroups(query) {
+  function buildCommandLauncherGroups(query, context) {
+    context = context || launcherSearchContext(query);
     var recent = launcherRecentCommands(query);
     var recentTitles = {};
     recent.forEach(function (item) { recentTitles[item.title] = true; });
     var commands = launcherCommands(query).filter(function (item) { return !recentTitles[item.title]; });
-    return [
+    var groups = [
       { label: "Recent Commands", items: recent },
       { label: "Commands", items: commands },
       { label: "Sections", items: launcherSections(query) },
-      { label: "Links", items: launcherLinks(query) }
+      { label: "Links", items: launcherLinks(query, context) },
+      { label: "Saved", items: launcherSavedItems(query) }
     ];
+    if (String(query || "").trim()) {
+      var best = null;
+      groups.forEach(function (group) { group.items.forEach(function (item) { if (!best || item.score > best.score) best = item; }); });
+      if (best) {
+        groups.forEach(function (group) { group.items = group.items.filter(function (item) { return item !== best; }); });
+        groups.unshift({ label: "Best match", items: [best] });
+      }
+    }
+    return groups;
   }
   function queryMatches(value, query) {
     var q = String(query || "").toLowerCase().trim();
     if (!q) return true;
     var text = String(value || "").toLowerCase();
     return q.split(/\s+/).filter(Boolean).every(function (token) { return text.indexOf(token) !== -1; });
+  }
+  // Relevance tiers dominate the small, transparent favorite/recent tie-breaks.
+  // Read local annotations once per search, not once for every card.
+  var launcherIndexCache = null;
+  var launcherIndexObserver = null;
+  function launcherIndexChanged(records) {
+    return records.some(function (record) {
+      if (record.type === "attributes") return record.target.matches(".link-card");
+      if (record.target.closest && record.target.closest(".card-label, .card-desc")) return true;
+      return Array.from(record.addedNodes || []).concat(Array.from(record.removedNodes || [])).some(function (node) {
+        return node.nodeType === 1 && (node.matches(".link-card, .card-label, .card-desc") || !!node.querySelector(".link-card"));
+      });
+    });
+  }
+  function launcherCardIndex() {
+    var main = document.querySelector("main");
+    if (!main) return [];
+    if (!launcherIndexObserver) {
+      launcherIndexObserver = new MutationObserver(function (records) { if (launcherIndexChanged(records)) launcherIndexCache = null; });
+      launcherIndexObserver.observe(main, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["href", "data-name", "data-desc-search", "data-domain"] });
+    }
+    if (launcherIndexChanged(launcherIndexObserver.takeRecords())) launcherIndexCache = null;
+    if (!launcherIndexCache) {
+      var primary = [], utility = [];
+      main.querySelectorAll(".link-card[href]").forEach(function (card) {
+        var href = safeHttpUrl(card.href);
+        if (!href) return;
+        var section = card.closest(".section");
+        var sectionId = section ? section.id : "";
+        var sectionTitle = section ? ((section.querySelector("h2") || {}).textContent || sectionId).trim() : "";
+        var title = ((card.querySelector(".card-label") || {}).textContent || card.getAttribute("data-name") || href).trim();
+        var domain = card.dataset.domain || new URL(href).hostname;
+        var record = { card: card, href: href, title: title, name: title.toLowerCase(), domain: domain, section: section, sectionId: sectionId, sectionTitle: sectionTitle };
+        record.search = [title, domain, sectionTitle, sectionId, card.getAttribute("data-name"), card.getAttribute("data-desc-search")].join(" ").toLowerCase();
+        (sectionId === "pinned" || sectionId === "recent" ? utility : primary).push(record);
+      });
+      launcherIndexCache = primary.concat(utility);
+    }
+    return launcherIndexCache;
+  }
+  function launcherSearchContext(query) {
+    var context = { notes: linkNotes(), annotations: {}, favorites: new Set(), recent: new Set(), news: {}, records: launcherCardIndex(), scores: new Map() };
+    context.query = String(query || "").toLowerCase().trim().replace(/\s+/g, " ");
+    context.tokens = context.query.split(/\s+/).filter(Boolean);
+    Object.keys(context.notes).forEach(function (href) {
+      var note = context.notes[href] || {};
+      var tags = linkNoteTags(note).join(", ");
+      context.annotations[href] = { tags: tags, terms: [tags, note.note, note.status].join(" ").toLowerCase() };
+    });
+    [["kfl_pins_v1", context.favorites], ["kfl_recent_v1", context.recent]].forEach(function (entry) {
+      var items = LS.read(entry[0], []);
+      (Array.isArray(items) ? items : []).forEach(function (item) {
+        var href = safeHttpUrl(item && item.href);
+        if (href) entry[1].add(href);
+      });
+    });
+    sectionFeedIds().forEach(function (id) { context.news[id] = true; });
+    return context;
+  }
+  function launcherRecordScore(record, context) {
+    if (context.scores.has(record)) return context.scores.get(record);
+    var score = 1;
+    var q = context.query;
+    if (q) {
+      var note = context.annotations[record.href];
+      var hay = record.search + (note ? " " + note.terms : "");
+      score = !context.tokens.every(function (token) { return hay.indexOf(token) !== -1; }) ? 0 :
+        record.name === q ? 600 : record.name.indexOf(q) === 0 ? 500 :
+        context.tokens.every(function (token) { return record.name.indexOf(token) !== -1; }) ? 400 : 100;
+    }
+    context.scores.set(record, score);
+    return score;
+  }
+  function launcherMatchScore(title, terms, query) {
+    var q = String(query || "").toLowerCase().trim().replace(/\s+/g, " ");
+    var name = String(title || "").toLowerCase().trim().replace(/\s+/g, " ");
+    if (!q) return 1;
+    if (!queryMatches(name + " " + terms, q)) return 0;
+    if (name === q) return 600;
+    if (name.replace(/^open /, "") === q) return 550;
+    if (name.indexOf(q) === 0) return 500;
+    if (queryMatches(name, q)) return 400;
+    return 100;
+  }
+  function rankLauncherItems(items, query, limit) {
+    return items.map(function (item, index) {
+      item.score = launcherMatchScore(item.title, item.terms || item.meta || "", query);
+      item.order = index;
+      if (item.score) item.score += Math.min(6, item.boost || 0);
+      return item;
+    }).filter(function (item) { return item.score > 0; }).sort(function (a, b) {
+      return b.score - a.score || a.order - b.order;
+    }).slice(0, limit);
   }
 
   var roostActiveLayer = null;
@@ -16179,6 +16501,8 @@
       if (roostActiveLayer === layer) releaseRoostLayer();
       return;
     }
+    if (roostActiveLayer === layer) return;
+    closeCommandLauncher(false);
     if (roostActiveLayer && roostActiveLayer !== layer) releaseRoostLayer();
     roostActiveLayer = layer;
     roostLayerHidden = [];
@@ -16198,11 +16522,12 @@
   var roostHelpLastFocus = null;
   function openCustomLinksTab(tab, returnFocus) {
     ensureModal();
+    var alreadyOpen = modalEl.classList.contains("open");
+    if (!alreadyOpen) modalLastFocus = returnFocus || document.activeElement;
     modalTitle.textContent = "Custom Links";
     buildCustomManager(modalBody, tab || "links");
     modalBody._mode = "customlinks";
     modalEl.classList.add("open");
-    modalLastFocus = returnFocus || document.activeElement;
     setRoostLayer(modalEl, true);
     var first = modalBody.querySelector("button, input, select, textarea, a[href]");
     if (first && first.focus) {
@@ -16387,50 +16712,142 @@
       commands.push({ title: "Apply " + view.name, meta: view.desc || "Saved home view", terms: "view views " + view.name + " " + (view.desc || ""), kind: "Command", run: function () { applyHomeView(view.id); } });
     });
     commands.push({ title: "Surprise Me", meta: "Open a random link", terms: "random surprise link", kind: "Command", run: randomLink });
-    return commands.filter(function (cmd) { return queryMatches(cmd.title + " " + cmd.meta + " " + cmd.terms, query); }).slice(0, query ? 9 : 7);
+    commands.forEach(function (cmd) { cmd.terms += " " + cmd.meta; });
+    return rankLauncherItems(commands, query, query ? 9 : 7);
   }
   function launcherSections(query) {
     var jumps = Array.from(document.querySelectorAll(".v3-section-launcher a[href^='#']"));
-    return jumps.filter(function (a) {
-      return !a.hidden && queryMatches(a.textContent + " " + a.getAttribute("href"), query);
-    }).slice(0, query ? 8 : 5).map(function (a) {
+    return rankLauncherItems(jumps.filter(function (a) {
+      return !a.hidden;
+    }).map(function (a) {
       var id = (a.getAttribute("href") || "").slice(1);
       return {
         title: (a.querySelector("span") || a).textContent.trim(),
         meta: "Jump to section",
+        terms: a.textContent + " " + id,
         kind: "Section",
         run: function () {
           var sec = document.getElementById(id);
           closeCommandLauncher(false);
           if (!sec) return;
           if (sec.classList.contains("collapsed")) setStoredSectionCollapsed(sec, false);
-          sec.scrollIntoView({ block: "start", behavior: "smooth" });
+          var input = document.getElementById("search-input");
+          input.value = "";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          closeCommandLauncher(false);
+          sec.scrollIntoView({ block: "start", behavior: "auto" });
+          var heading = sec.querySelector(".section-header");
+          if (heading) heading.focus({ preventScroll: true });
           try { history.replaceState(null, "", "#" + id); } catch (e) {}
         }
       };
-    });
+    }), query, query ? 8 : 5);
   }
-  function launcherLinks(query) {
-    var cards = Array.from(document.querySelectorAll("main .link-card:not([data-hidden='true'])")).filter(function (card) {
-      return safeHttpUrl(card.href) && !card.closest(".roost-hidden");
+  function launcherLinks(query, context) {
+    context = context || launcherSearchContext(query);
+    var scope = settings.searchScope || "all";
+    if (scope === "saved" || (query && scope === "mission")) return [];
+    var bestByHref = new Map();
+    var allowed = new Map();
+    context.records.forEach(function (record, order) {
+      if (!allowed.has(record.section)) {
+        var section = record.section;
+        allowed.set(section, !section || (!section.classList.contains("roost-hidden") && (query || !section.classList.contains("roost-layout-hidden"))));
+      }
+      if (!allowed.get(record.section) || (query && scope === "news" && !context.news[record.sectionId])) return;
+      var score = launcherRecordScore(record, context);
+      if (!score) return;
+      score += (context.favorites.has(record.href) ? 4 : 0) + (context.recent.has(record.href) ? 2 : 0);
+      var previous = bestByHref.get(record.href);
+      if (!previous || score > previous.score) bestByHref.set(record.href, { record: record, score: score, order: order });
     });
-    return cards.slice(0, query ? 12 : 8).map(function (card) {
-      var section = card.closest(".section");
-      var sectionTitle = section ? ((section.querySelector("h2") || {}).textContent || section.id) : "";
-      var title = (card.querySelector(".card-label") || {}).textContent || card.textContent.trim() || card.href;
-      var domain = card.dataset.domain || "";
-      var tags = linkNoteTags(linkNotes()[safeHttpUrl(card.href)]).join(", ");
+    var matches = Array.from(bestByHref.values());
+    return matches.sort(function (a, b) { return b.score - a.score || a.order - b.order; }).slice(0, query ? 12 : 8).map(function (match) {
+      var record = match.record;
+      var note = context.annotations[record.href];
+      var favorite = context.favorites.has(record.href);
+      var recent = context.recent.has(record.href);
       return {
-        title: title.trim(),
-        meta: [sectionTitle.trim(), domain, tags ? "Tags: " + tags : ""].filter(Boolean).join(" - "),
+        title: record.title,
+        meta: [record.sectionTitle, record.domain, favorite ? "Favorite" : (recent ? "Recent" : ""), note && note.tags ? "Tags: " + note.tags : ""].filter(Boolean).join(" - "),
+        score: match.score,
         kind: "Link",
-        run: function () {
-          closeCommandLauncher(false);
-          window.open(card.href, "_blank", "noopener");
-        }
+        run: function () { record.card.click(); }
       };
     });
   }
+  function launcherSavedItems(query) {
+    var scope = settings.searchScope || "all";
+    if (scope !== "saved" && scope !== "all") return [];
+    if (!String(query || "").trim() && scope !== "saved") return [];
+    var items = readLaterItems().map(function (item) {
+      return {
+        title: item.title,
+        meta: "Read Later - " + item.status + (item.priority === "high" ? " - High priority" : ""),
+        terms: [item.source, item.note, item.link, "read later"].join(" "),
+        boost: item.priority === "high" ? 4 : 0,
+        kind: "Article",
+        run: function () { openSavedLauncherItem({ kind: "readlater", id: item.link }); }
+      };
+    });
+    if (moduleEnabled("workbench")) workbenchNotes().forEach(function (note) {
+      items.push({
+        title: note.title,
+        meta: "Workbench - " + note.method + (note.pinned ? " - Pinned" : ""),
+        terms: note.body + " " + note.method + " workbench note",
+        boost: note.pinned ? 4 : 0,
+        kind: "Note",
+        run: function () { openSavedLauncherItem({ kind: "workbench", id: note.id }); }
+      });
+    });
+    var list = boards();
+    (Array.isArray(list) ? list : []).forEach(function (board) {
+      if (!board || !board.id || !board.name) return;
+      var links = Array.isArray(board.links) ? board.links : [];
+      items.push({
+        title: String(board.name),
+        meta: "Board - " + links.length + " links",
+        terms: "board " + links.map(function (link) { return link && [link.title, link.desc, link.section].join(" "); }).join(" "),
+        kind: "Board",
+        run: function () { openSavedLauncherItem({ kind: "board", id: board.id }); }
+      });
+    });
+    return rankLauncherItems(items, query, 12);
+  }
+  function openSavedLauncherItem(item) {
+    if (!item) return;
+    closeCommandLauncher(false);
+    var target = null;
+    if (item.kind === "workbench" && moduleEnabled("workbench")) {
+      openModal("workbench");
+      target = Array.from(modalBody.querySelectorAll("[data-load]")).filter(function (button) { return button.getAttribute("data-load") === String(item.id); })[0];
+      if (target) {
+        target.click();
+        target = modalBody.querySelector("#wb-text");
+      }
+    } else if (item.kind === "readlater") {
+      readLaterFilter = "all";
+      openModal("readlater");
+      target = Array.from(modalBody.querySelectorAll(".roost-list-row a[href]")).filter(function (link) { return safeHttpUrl(link.href) === safeHttpUrl(item.id); })[0];
+    } else if (item.kind === "board") {
+      openModal("boards");
+      var button = Array.from(modalBody.querySelectorAll("[data-board-rename]")).filter(function (entry) { return entry.getAttribute("data-board-rename") === String(item.id); })[0];
+      target = button && button.closest("section").querySelector("h4");
+      if (target) target.setAttribute("tabindex", "-1");
+    }
+    if (target) {
+      target.scrollIntoView({ block: "center", behavior: "auto" });
+      target.focus({ preventScroll: true });
+    }
+  }
+  Object.assign(window.roostTestHooks, {
+    buildCommandLauncherGroups: function (query) {
+      return buildCommandLauncherGroups(query).map(function (group) {
+        return { label: group.label, items: group.items.map(function (item) { return { title: item.title, meta: item.meta, kind: item.kind, score: item.score }; }) };
+      });
+    },
+    openSavedLauncherItem: openSavedLauncherItem
+  });
   function activateCommandLauncherItem(item) {
     if (!item || !item.run) return;
     saveRecentCommand(item);
@@ -16446,7 +16863,7 @@
   var BACKUP_META_KEY = "roost_backup_meta_v1";
   var CONFIG_PACK_KEYS = [CUSTOM_SECTIONS_KEY, CUSTOM_LINKS_KEY, CUSTOM_FEEDS_KEY, VIEWS_KEY, BOARDS_KEY, ACCESSIBILITY_KEY, LAYOUT_KEY];
   function isRoostStorageKey(k, includeFeeds) {
-    if (!k) return false;
+    if (typeof k !== "string" || !k) return false;
     if (k === RESTORE_UNDO_KEY) return false;
     if (k.indexOf("roost_feed_") === 0) return !!includeFeeds;
     return k.indexOf("roost_") === 0 || k.indexOf("kfl_") === 0 || k === LEGACY_MISSION_KEY;
@@ -16472,6 +16889,7 @@
       exportedAt: new Date().toISOString(),
       href: location.href,
       includesFeedCache: !!includeFeeds,
+      metadata: storageExportMetadata(data, includeFeeds),
       data: data
     };
   }
@@ -16494,7 +16912,7 @@
   }
   function parseConfigPackText(text) {
     var parsed = JSON.parse(text || "{}");
-    if (!parsed || parsed.schema !== CONFIG_PACK_SCHEMA || !parsed.data || typeof parsed.data !== "object") {
+    if (!parsed || parsed.schema !== CONFIG_PACK_SCHEMA || !storageRecord(parsed.data)) {
       throw new Error("This does not look like a The Roost configuration pack.");
     }
     return parsed;
@@ -16504,18 +16922,93 @@
     CONFIG_PACK_KEYS.forEach(function (k) { allowed[k] = true; });
     var safe = {};
     Object.keys(data || {}).forEach(function (k) {
-      if (allowed[k] && typeof data[k] === "string") safe[k] = data[k];
+      if (Object.prototype.hasOwnProperty.call(allowed, k)) { validateStorageValue(k, data[k]); safe[k] = data[k]; }
     });
     return safe;
   }
   function importConfigPackText(text) {
     var payload = parseConfigPackText(text);
     var safe = safeConfigPackData(payload.data);
-    var keys = Object.keys(safe);
-    keys.forEach(function (k) {
-      try { localStorage.setItem(k, safe[k]); } catch (e) {}
+    var result = applyStorageRestore(safe);
+    result.payload = payload;
+    return result;
+  }
+  function storageRecord(value) { return !!value && typeof value === "object" && !Array.isArray(value); }
+  function storageCategory(key) {
+    if (/^roost_feed_/.test(key)) return "Headline cache";
+    if (/mission/.test(key) || key === LEGACY_MISSION_KEY) return "Learning progress";
+    if (/workbench|readlater|session|quests|link_notes|boards|achievements/.test(key)) return "Saved work";
+    if (/custom_|pins|recent/.test(key)) return "Links and sources";
+    if (/shell_status|backup_meta|link_health/.test(key)) return "Local status";
+    return "Preferences and layout";
+  }
+  function storageExportMetadata(data, includeFeeds) {
+    var keys = Object.keys(data), categories = [];
+    keys.forEach(function (key) { var category = storageCategory(key); if (categories.indexOf(category) < 0) categories.push(category); });
+    return { schemaVersion: 1, categories: categories.sort(), keyCount: keys.length,
+      approximateBytes: keys.reduce(function (sum, key) { return sum + backupBytes(key) + backupBytes(data[key]); }, 0),
+      excluded: includeFeeds ? ["One-step restore recovery", "Session-only learning skip"] : ["Headline cache", "One-step restore recovery", "Session-only learning skip"] };
+  }
+  function validateStorageValue(key, raw) {
+    if (typeof raw !== "string") throw new Error(key + ": expected a stored text value.");
+    // The two original display preferences were never JSON. Preserve them as-is.
+    if (key === "kfl_v3_view" || key === "kfl_v3_compact") return;
+    var arrays = ["kfl_pins_v1", "kfl_recent_v1", "kfl_collapsed_v1", CUSTOM_LINKS_KEY, CUSTOM_SECTIONS_KEY, READ_LATER_KEY, BOARDS_KEY, WB_KEY, IMPORT_HISTORY_KEY, RECENT_COMMANDS_KEY];
+    var records = [SETTINGS_KEY, ONBOARDING_KEY, MISSION_INTRO_KEY, SHELL_STATUS_KEY, TIP_STATE_KEY, VIEWS_KEY, ACCESSIBILITY_KEY, LINK_HEALTH_KEY, SESSION_KEY, QUEST_KEY, LINK_NOTES_KEY, ACHIEVEMENTS_KEY, MISSION_STATE_KEY, LEGACY_MISSION_KEY, LAYOUT_KEY, BACKUP_META_KEY];
+    var feedCache = key.indexOf("roost_feed_") === 0;
+    var known = arrays.indexOf(key) >= 0 || records.indexOf(key) >= 0 || key === CUSTOM_FEEDS_KEY || key === MISSION_TAB_KEY || key === "roost_launcher_minimized_v1" || feedCache;
+    // Future/local extension keys remain opaque for backward-compatible recovery.
+    if (!known) return;
+    var value;
+    try { value = JSON.parse(raw); } catch (e) { throw new Error(key + ": invalid JSON. Nothing was changed."); }
+    function requireShape(ok, expected) { if (!ok) throw new Error(key + ": expected " + expected + ". Nothing was changed."); }
+    function recordList(list, label) { requireShape(Array.isArray(list) && list.every(storageRecord), label + " records"); }
+    function optionalMap(object, field) { if (object[field] != null) requireShape(storageRecord(object[field]), field + " object"); }
+    if (arrays.indexOf(key) >= 0) {
+      requireShape(Array.isArray(value), "an array");
+      if (key === "kfl_collapsed_v1") requireShape(value.every(function (item) { return typeof item === "string"; }), "section IDs");
+      else recordList(value, "array of");
+    }
+    if (records.indexOf(key) >= 0 || feedCache) requireShape(storageRecord(value), "an object");
+    if (key === MISSION_TAB_KEY) requireShape(typeof value === "string", "a tab name");
+    if (key === "roost_launcher_minimized_v1") requireShape(value === 0 || value === 1, "0 or 1");
+    if (key === CUSTOM_FEEDS_KEY) {
+      requireShape(Array.isArray(value) || storageRecord(value), "a feed list or object");
+      recordList(Array.isArray(value) ? value : value.feeds, "feed");
+    }
+    if (key === "kfl_pins_v1" || key === "kfl_recent_v1" || key === CUSTOM_LINKS_KEY || key === READ_LATER_KEY) {
+      requireShape(value.every(function (item) { return !!safeCustomUrl(item.url || item.link || item.href); }), "safe HTTP(S) links");
+    }
+    if (key === BOARDS_KEY) value.forEach(function (board) {
+      if (board.links != null) { recordList(board.links, "board link"); requireShape(board.links.every(function (link) { return !!safeHttpUrl(link.href); }), "safe board links"); }
     });
-    return { keys: keys, payload: payload };
+    if (key === CUSTOM_FEEDS_KEY) requireShape((Array.isArray(value) ? value : value.feeds).every(function (feed) { return !!safeCustomUrl(feed.url || feed.xmlUrl); }), "safe feed URLs");
+    if (key === VIEWS_KEY && value.custom != null) {
+      recordList(value.custom, "view"); value.custom.forEach(function (view) { optionalMap(view, "layout"); optionalMap(view, "settings"); });
+    }
+    if (key === ONBOARDING_KEY) { optionalMap(value, "data"); if (value.data) optionalMap(value.data, "modules"); }
+    if (key === MISSION_STATE_KEY || key === LEGACY_MISSION_KEY) ["completed", "notes", "resourceStatus", "sideQuests", "leadership", "projects", "projectData", "activities", "bonusQuests", "leadershipStatus"].forEach(function (field) { optionalMap(value, field); });
+    if (key === MISSION_STATE_KEY || key === LEGACY_MISSION_KEY) ["projects", "projectData"].forEach(function (field) {
+      Object.keys(value[field] || {}).forEach(function (id) { var project = value[field][id]; requireShape(storageRecord(project), "project records"); if (project.subtasks != null) recordList(project.subtasks, "project subtask"); });
+    });
+    if (key === LAYOUT_KEY) { optionalMap(value, "hidden"); optionalMap(value, "sizes"); }
+    if (key === LINK_HEALTH_KEY) optionalMap(value, "results");
+    if (key === QUEST_KEY && value.quests != null) recordList(value.quests, "quest");
+    if (feedCache) recordList(value.items, "cached headline");
+  }
+  function storageRestorePreview(data) {
+    var result = { added: 0, replaced: 0, unchanged: 0, bytes: 0, categories: [] };
+    Object.keys(data).forEach(function (key) {
+      var prior = localStorage.getItem(key), category = storageCategory(key);
+      result[prior === data[key] ? "unchanged" : prior === null ? "added" : "replaced"]++;
+      result.bytes += backupBytes(data[key]);
+      if (result.categories.indexOf(category) < 0) result.categories.push(category);
+    });
+    return result;
+  }
+  function storageRestorePreviewHtml(data) {
+    var preview = storageRestorePreview(data);
+    return '<p class="roost-backup-status">' + preview.added + ' new, ' + preview.replaced + ' replaced, ' + preview.unchanged + ' unchanged · ' + Math.ceil(preview.bytes / 1024) + ' KB approx.</p><p class="roost-backup-status">' + esc(preview.categories.join(", ")) + '. Missing categories stay as they are. A one-step undo is saved before any changes.</p>';
   }
   function backupBytes(s) {
     return new Blob([String(s || "")]).size;
@@ -16561,23 +17054,24 @@
   }
   function parseBackupText(text) {
     var parsed = JSON.parse(text || "{}");
-    if (!parsed || parsed.schema !== BACKUP_SCHEMA || !parsed.data || typeof parsed.data !== "object") {
+    if (!parsed || parsed.schema !== BACKUP_SCHEMA || !storageRecord(parsed.data)) {
       throw new Error("This does not look like a The Roost backup.");
     }
     return parsed;
   }
   function safeRestoreData(data) {
+    if (!storageRecord(data)) throw new Error("Backup data must be an object. Nothing was changed.");
     var safe = {};
     Object.keys(data || {}).forEach(function (k) {
-      if (isRoostStorageKey(k, true) && typeof data[k] === "string") safe[k] = data[k];
+      if (isRoostStorageKey(k, true)) { validateStorageValue(k, data[k]); safe[k] = data[k]; }
     });
     return safe;
   }
   function restoreUndoState() {
     var state = LS.read(RESTORE_UNDO_KEY, null);
-    if (!state || state.version !== 1 || !state.previous || typeof state.previous !== "object") return null;
+    if (!state || state.version !== 1 || !storageRecord(state.previous)) return null;
     var keys = Array.isArray(state.keys) ? state.keys.filter(function (k) { return isRoostStorageKey(k, true); }) : Object.keys(state.previous).filter(function (k) { return isRoostStorageKey(k, true); });
-    if (!keys.length) return null;
+    if (!keys.length || !keys.every(function (key) { var prior = state.previous[key]; return storageRecord(prior) && typeof prior.existed === "boolean" && (!prior.existed || typeof prior.value === "string"); })) return null;
     return {
       version: 1,
       createdAt: String(state.createdAt || ""),
@@ -16589,11 +17083,7 @@
     var previous = {};
     (keys || []).forEach(function (k) {
       if (!isRoostStorageKey(k, true)) return;
-      var value = null, existed = false;
-      try {
-        value = localStorage.getItem(k);
-        existed = value !== null;
-      } catch (e) {}
+      var value = localStorage.getItem(k), existed = value !== null;
       previous[k] = { existed: existed, value: value };
     });
     var undo = {
@@ -16602,24 +17092,58 @@
       keys: Object.keys(previous).sort(),
       previous: previous
     };
-    if (undo.keys.length) LS.write(RESTORE_UNDO_KEY, undo);
+    if (undo.keys.length) {
+      var serialized = JSON.stringify(undo);
+      localStorage.setItem(RESTORE_UNDO_KEY, serialized);
+      if (localStorage.getItem(RESTORE_UNDO_KEY) !== serialized) throw new Error("Recovery snapshot could not be saved.");
+    }
     return undo;
+  }
+  function writeStorageTransaction(values) {
+    var before = {}, written = [];
+    try {
+      Object.keys(values).forEach(function (key) { before[key] = localStorage.getItem(key); });
+      Object.keys(values).forEach(function (key) {
+        if (values[key] === before[key]) return;
+        if (values[key] === null) localStorage.removeItem(key); else localStorage.setItem(key, values[key]);
+        written.push(key);
+        if (localStorage.getItem(key) !== values[key]) throw new Error("Storage did not retain a restored value.");
+      });
+      return { ok: true, keys: Object.keys(values), written: written.length };
+    } catch (e) {
+      var rollbackFailed = false;
+      written.reverse().forEach(function (key) {
+        try { if (before[key] === null) localStorage.removeItem(key); else localStorage.setItem(key, before[key]); }
+        catch (rollbackError) { rollbackFailed = true; }
+      });
+      return { ok: false, keys: [], written: 0, rollbackFailed: rollbackFailed,
+        error: rollbackFailed ? "Storage failed and some values could not be rolled back. Keep this page open and use Undo Last Restore after freeing browser storage." : "Storage failed. Previous values were restored; no imported changes were kept." };
+    }
+  }
+  function applyStorageRestore(data) {
+    var safe, changed;
+    try {
+      safe = safeRestoreData(data);
+      changed = Object.keys(safe).filter(function (key) { return localStorage.getItem(key) !== safe[key]; });
+      if (!changed.length) return { ok: true, keys: Object.keys(safe), written: 0 };
+      captureRestoreUndo(changed);
+    } catch (e) {
+      return { ok: false, keys: [], written: 0, error: "Nothing changed. " + (e.message || "A recovery snapshot could not be saved; browser storage may be full.") };
+    }
+    return writeStorageTransaction(safe);
   }
   function applyRestoreUndo() {
     var undo = restoreUndoState();
     if (!undo) return { ok: false, restored: 0 };
-    var restored = 0;
+    var values = {};
     undo.keys.forEach(function (k) {
-      var prior = undo.previous[k] || {};
-      try {
-        if (prior.existed) localStorage.setItem(k, String(prior.value || ""));
-        else localStorage.removeItem(k);
-        restored++;
-      } catch (e) {}
+      var prior = undo.previous[k];
+      values[k] = prior.existed ? prior.value : null;
     });
-    try { localStorage.removeItem(RESTORE_UNDO_KEY); } catch (e) {}
-    renderTodayDashboard();
-    return { ok: !!restored, restored: restored };
+    var result = writeStorageTransaction(values);
+    if (result.ok) try { localStorage.removeItem(RESTORE_UNDO_KEY); } catch (e) {}
+    result.restored = result.ok ? undo.keys.length : 0;
+    return result;
   }
   function buildBackupRestore(body) {
     body.innerHTML =
@@ -16630,13 +17154,13 @@
           '<div id="backup-current"></div>' +
           '<div class="roost-backup-actions"><button class="wb-btn primary" id="backup-download">Download Backup</button><button class="wb-btn" id="backup-copy">Copy JSON</button><button class="wb-btn" id="backup-clear-recent-commands">Clear Recent Commands</button></div>' +
           '<div class="roost-backup-status" id="backup-export-status"></div></section>' +
-        '<section class="roost-backup-card"><h4>Restore From Backup</h4><p>Restore writes imported keys back into this browser. It does not delete any other local data.</p>' +
-          '<input class="roost-backup-drop" id="backup-file" type="file" accept="application/json,.json">' +
-          '<textarea class="roost-backup-text" id="backup-text" spellcheck="false" placeholder="Paste The Roost backup JSON here..."></textarea>' +
+        '<section class="roost-backup-card"><h4>Restore From Backup</h4><p>Preview what changes, then restore. Known data formats are checked before writing, and Undo Last Restore also covers configuration packs. Other local data stays in place.</p>' +
+          '<input class="roost-backup-drop" id="backup-file" type="file" accept="application/json,.json" aria-label="Choose Roost backup JSON file">' +
+          '<textarea class="roost-backup-text" id="backup-text" spellcheck="false" aria-label="Backup JSON" placeholder="Paste The Roost backup JSON here..."></textarea>' +
           '<div class="roost-backup-actions"><button class="wb-btn" id="backup-preview">Preview</button><button class="wb-btn primary" id="backup-restore">Restore Backup</button><button class="wb-btn" id="backup-undo-restore" disabled>Undo Last Restore</button><button class="wb-btn" id="backup-reload" disabled>Reload Page</button></div>' +
           '<div id="backup-preview-box"></div><div class="roost-backup-status" id="backup-restore-status"></div></section>' +
         '<section class="roost-backup-card"><h4>Configuration Pack</h4><p>Export or import shareable local setup pieces: custom links, custom feeds, saved views, boards, accessibility preferences, and layout. Packs exclude Mission progress, recents, Read Later, notes, and other personal memory.</p>' +
-          '<textarea class="roost-backup-text" id="pack-text" spellcheck="false" placeholder="Paste The Roost configuration pack JSON here..."></textarea>' +
+          '<textarea class="roost-backup-text" id="pack-text" spellcheck="false" aria-label="Configuration pack JSON" placeholder="Paste The Roost configuration pack JSON here..."></textarea>' +
           '<div class="roost-backup-actions"><button class="wb-btn primary" id="pack-download" type="button">Download Pack</button><button class="wb-btn" id="pack-copy" type="button">Copy Pack JSON</button><button class="wb-btn" id="pack-preview" type="button">Preview Pack</button><button class="wb-btn" id="pack-apply" type="button">Apply Pack</button></div>' +
           '<div id="pack-preview-box"></div><div class="roost-backup-status" id="pack-status"></div></section>' +
       '</div>';
@@ -16657,7 +17181,7 @@
       var payload = backupPayload(includeFeeds.checked);
       var keys = Object.keys(payload.data);
       if (health) health.innerHTML = backupMemoryHealthHtml(backupPayload(false));
-      current.innerHTML = '<p class="roost-backup-status">' + keys.length + ' keys ready to export.</p>' + backupKeyListHtml(keys, payload.data);
+      current.innerHTML = '<p class="roost-backup-status">Schema 1 · ' + keys.length + ' keys · ' + Math.ceil(payload.metadata.approximateBytes / 1024) + ' KB approx. · ' + esc(new Date(payload.exportedAt).toLocaleString()) + '</p><p class="roost-backup-status">Includes: ' + esc(payload.metadata.categories.join(", ")) + '. Excludes: ' + esc(payload.metadata.excluded.join(", ")) + '.</p><details><summary>Included storage keys</summary>' + backupKeyListHtml(keys, payload.data) + '</details>';
       renderUndoControl();
       bindRoostEmptyActions(body);
     }
@@ -16676,7 +17200,7 @@
         var payload = parseConfigPackText(packText.value);
         var safe = safeConfigPackData(payload.data);
         var keys = Object.keys(safe).sort();
-        packPreviewBox.innerHTML = '<p class="roost-backup-status good">' + keys.length + ' configuration key(s) found from ' + esc(payload.exportedAt || "unknown date") + '.</p>' + backupKeyListHtml(keys, safe);
+        packPreviewBox.innerHTML = '<p class="roost-backup-status good">' + keys.length + ' configuration key(s) found from ' + esc(payload.exportedAt || "unknown date") + '.</p>' + storageRestorePreviewHtml(safe) + '<details><summary>Included storage keys</summary>' + backupKeyListHtml(keys, safe) + '</details>';
         setStatus(packStatus, "Pack preview ready.", "good");
         return { payload: payload, safe: safe, keys: keys };
       } catch (e) {
@@ -16696,7 +17220,7 @@
         var payload = parseBackupText(text.value);
         var safe = safeRestoreData(payload.data);
         var keys = Object.keys(safe).sort();
-        previewBox.innerHTML = '<p class="roost-backup-status good">' + keys.length + ' restorable keys found from ' + esc(payload.exportedAt || "unknown date") + '.</p>' + backupKeyListHtml(keys, safe);
+        previewBox.innerHTML = '<p class="roost-backup-status good">' + keys.length + ' restorable keys found from ' + esc(payload.exportedAt || "unknown date") + '.</p>' + storageRestorePreviewHtml(safe) + '<details><summary>Included storage keys</summary>' + backupKeyListHtml(keys, safe) + '</details>';
         setStatus(restoreStatus, "Preview ready.", "good");
         return { payload: payload, safe: safe, keys: keys };
       } catch (e) {
@@ -16761,10 +17285,10 @@
       if (!preview || !preview.keys.length) return;
       if (!confirm("Apply " + preview.keys.length + " configuration key(s)? This can overwrite matching local configuration surfaces, but not personal progress keys.")) return;
       var applied = importConfigPackText(packText.value);
-      setStatus(packStatus, "Applied " + applied.keys.length + " configuration key(s). Reload when ready.", applied.keys.length ? "good" : "bad");
-      reload.disabled = !applied.keys.length;
+      setStatus(packStatus, applied.ok ? "Applied " + applied.written + " configuration change(s). Reload when ready." : applied.error, applied.ok ? "good" : "bad");
+      reload.disabled = !applied.ok;
       renderCurrent();
-      toast(applied.keys.length ? "Configuration pack applied" : "Pack apply failed");
+      toast(applied.ok ? "Configuration pack applied" : "Pack apply failed");
     });
     body.querySelector("#backup-file").addEventListener("change", function (e) {
       var file = e.target.files && e.target.files[0];
@@ -16779,15 +17303,11 @@
       var preview = previewBackup();
       if (!preview || !preview.keys.length) return;
       if (!confirm("Restore " + preview.keys.length + " The Roost memory keys into this browser? Existing matching keys will be overwritten.")) return;
-      captureRestoreUndo(preview.keys);
-      var written = 0;
-      preview.keys.forEach(function (k) {
-        try { localStorage.setItem(k, preview.safe[k]); written++; } catch (e) {}
-      });
-      setStatus(restoreStatus, "Restored " + written + " keys. Reload the page when you are ready to apply restored UI state.", written ? "good" : "bad");
-      reload.disabled = !written;
+      var result = applyStorageRestore(preview.safe);
+      setStatus(restoreStatus, result.ok ? "Restored " + result.written + " changed keys. Reload the page when you are ready to apply restored UI state." : result.error, result.ok ? "good" : "bad");
+      reload.disabled = !result.ok;
       renderUndoControl();
-      toast(written ? "Backup restored" : "Restore failed");
+      toast(result.ok ? "Backup restored" : "Restore failed");
     });
     if (undoRestore) undoRestore.addEventListener("click", function () {
       var undo = restoreUndoState();
@@ -16798,7 +17318,7 @@
       }
       if (!confirm("Undo the last restore for " + undo.keys.length + " key(s)?")) return;
       var result = applyRestoreUndo();
-      setStatus(restoreStatus, result.ok ? "Undo restored " + result.restored + " previous key value(s). Reload when ready." : "Undo failed.", result.ok ? "good" : "bad");
+      setStatus(restoreStatus, result.ok ? "Undo restored " + result.restored + " previous key value(s). Reload when ready." : result.error || "Undo failed. The recovery snapshot is still available.", result.ok ? "good" : "bad");
       reload.disabled = !result.ok;
       renderCurrent();
       toast(result.ok ? "Restore undone" : "Undo failed");
@@ -16833,6 +17353,7 @@
       return;
     }
     ensureModal();
+    if (!modalEl.classList.contains("open")) modalLastFocus = document.activeElement;
     if (which === "addlink") {
       modalTitle.textContent = "Add Link";
       buildCustomLinkForm(modalBody); modalBody._mode = "addlink";
@@ -16891,7 +17412,6 @@
       buildLinkNote(modalBody); modalBody._mode = "linknote";
     }
     modalEl.classList.add("open");
-    modalLastFocus = document.activeElement;
     setRoostLayer(modalEl, true);
     var first = modalEl.querySelector("#roost-modal-x, button, input, select, textarea, a[href]");
     if (first && first.focus) {
@@ -16917,8 +17437,10 @@
     if (!modalEl) return;
     modalEl.classList.remove("open");
     setRoostLayer(modalEl, false);
-    if (modalLastFocus && modalLastFocus.focus) {
-      try { modalLastFocus.focus({ preventScroll: true }); } catch (e) {}
+    var returnFocus = modalLastFocus;
+    if (!returnFocus || !returnFocus.isConnected || returnFocus.offsetParent === null || returnFocus.closest("[inert], [hidden]")) returnFocus = document.getElementById("search-input");
+    if (returnFocus && returnFocus.focus) {
+      try { returnFocus.focus({ preventScroll: true }); } catch (e) {}
     }
     modalLastFocus = null;
   }
@@ -16926,11 +17448,30 @@
   /* =================================================================
      6) PWA — register service worker if present (safe no-op otherwise)
      ================================================================= */
-  if ("serviceWorker" in navigator && location.protocol === "https:") {
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || /(^|\.)localhost$/.test(location.hostname) || /^(127\.0\.0\.1|\[::1\])$/.test(location.hostname))) {
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("sw.js").then(function () {
+      var wasControlled = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        shellReadyThisVisit = true;
+        if (wasControlled) shellUpdateAvailable = true;
+        wasControlled = true;
+        renderOfflineStatus();
+      });
+      navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).then(function (registration) {
+        if (registration.waiting && wasControlled) shellUpdateAvailable = true;
+        registration.addEventListener("updatefound", function () {
+          var installing = registration.installing;
+          if (!installing) return;
+          installing.addEventListener("statechange", function () {
+            if (installing.state === "installed" && wasControlled) {
+              shellUpdateAvailable = true;
+              renderOfflineStatus();
+            }
+          });
+        });
         return navigator.serviceWorker.ready;
       }).then(function () {
+        shellReadyThisVisit = true;
         writeShellStatus({ serviceWorker: "ready", lastShellReadyAt: new Date().toISOString() });
         renderOfflineStatus();
       }).catch(function () {

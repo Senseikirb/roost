@@ -8,8 +8,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 
 const checks = [];
-const EXPECTED_LINK_CARDS = 786;
-const EXPECTED_STATIC_SECTIONS = 34;
+const EXPECTED_LINK_CARDS = 785;
+const EXPECTED_STATIC_SECTIONS = 35; // 33 curated sections plus Favorites and Recent.
 
 function record(name, ok, detail = "") {
   checks.push({ name, ok: !!ok, detail });
@@ -36,13 +36,15 @@ function validateStructure() {
   const html = read("index.html");
   const manifest = JSON.parse(read("manifest.json"));
   const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
+  // Count real markup, never HTML templates inside JavaScript; include Kid Zone's second class.
+  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
   scripts.forEach((match, index) => {
     new vm.Script(match[1], { filename: `index-inline-${index + 1}.js` });
   });
 
   const counts = {
-    linkCards: (html.match(/class="link-card"/g) || []).length,
-    sections: (html.match(/<div\s+class="section"\s+id="[^"]+"/g) || []).length,
+    linkCards: (markup.match(/<a\b[^>]*class="link-card"/g) || []).length,
+    sections: (markup.match(/<div\s+class="section(?: [^"]*)?"\s+id="[^"]+"/g) || []).length,
     divOpen: (html.match(/<div\b/g) || []).length,
     divClose: (html.match(/<\/div>/g) || []).length,
     scriptOpen: (html.match(/<script\b/g) || []).length,
@@ -57,7 +59,7 @@ function validateStructure() {
   record("script tag balance", counts.scriptOpen === counts.scriptClose, `${counts.scriptOpen}/${counts.scriptClose}`);
   record("style tag balance", counts.styleOpen === counts.styleClose, `${counts.styleOpen}/${counts.styleClose}`);
   record("inline script syntax", true, `${scripts.length} inline scripts`);
-  const countMismatches = [...html.matchAll(/<div class="section" id="([^"]+)"[\s\S]*?(?=<div class="section" id=|<\/main>)/g)]
+  const countMismatches = [...markup.matchAll(/<div class="section(?: [^"]*)?" id="([^"]+)"[\s\S]*?(?=<div class="section(?: [^"]*)?" id=|<\/main>)/g)]
     .map((match) => {
       const block = match[0];
       const label = block.match(/<span class="section-count"[^>]*>([\s\S]*?)<\/span>/);
@@ -114,15 +116,22 @@ function main() {
 
   runNode(["--check", "sw.js"], "service worker syntax");
   runNode(["tests/run-custom-import-parser-tests.mjs"], "custom import parser fixtures");
+  runNode(["tests/run-storage-tests.mjs"], "storage validation and recovery");
+  runNode(["tests/run-offline-tests.mjs"], "service worker isolation and fallback");
 
   if (process.env.ROOST_CDP_PORT && process.env.ROOST_APP_URL) {
     runNode(["tests/run-layout-cdp-tests.mjs"], "layout and runtime CDP suite");
+    runNode(["tests/run-daily-cdp-tests.mjs"], "daily opening CDP journeys");
+    runNode(["tests/run-launcher-cdp-tests.mjs"], "launcher CDP journeys");
+    runNode(["tests/run-storage-cdp-tests.mjs"], "storage recovery CDP journeys");
+    runNode(["tests/run-feed-cdp-tests.mjs"], "feed and offline CDP journeys");
   } else {
-    record("layout and runtime CDP suite", true, "skipped; set ROOST_CDP_PORT and ROOST_APP_URL to enable");
+    checks.push({name: "browser CDP suites", ok: true, skipped: true});
+    console.log("SKIP browser CDP suites - set ROOST_CDP_PORT and ROOST_APP_URL to enable");
   }
 
   const failed = checks.filter((check) => !check.ok);
-  console.log(JSON.stringify({ total: checks.length, failed: failed.length }, null, 2));
+  console.log(JSON.stringify({ total: checks.length, failed: failed.length, skipped: checks.filter(check => check.skipped).length }, null, 2));
   if (failed.length) process.exit(1);
 }
 
