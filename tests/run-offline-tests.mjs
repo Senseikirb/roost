@@ -110,6 +110,6 @@ self.registration.scope = "https://example.test/";
 vm.runInNewContext(source, { self, caches, URL, Set, Promise, Response, fetch: async () => new Response("root shell") });
 await lifecycle("activate");
 assert.ok(stores.has("roost-shell-v3"), "root scope must preserve the sibling Roost's legacy cache");
-assert.ok(stores.has(`roost-shell:${scope}:v4`), "root scope must preserve the sibling Roost's scoped cache");
+assert.ok(stores.has(`roost-shell:${scope}:v5`), "root scope must preserve the sibling Roost's scoped cache");
 
 console.log("PASS production service worker: scoped lifecycle, optional failure, request boundaries, offline shell/tools, revalidation lifetime");

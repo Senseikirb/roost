@@ -1,0 +1,40 @@
+[
+  {
+    "width": 390,
+    "readsPerSearch": 1,
+    "searchMs": [
+      4.199999809265137,
+      2,
+      1.8000001907348633,
+      1.2999999523162842,
+      1.2000000476837158,
+      1.5999999046325684,
+      2.5
+    ],
+    "domElements": 7228,
+    "todayHeight": 438,
+    "pageHeight": 2492,
+    "domContentLoadedMs": 989.5,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "readsPerSearch": 1,
+    "searchMs": [
+      3.299999952316284,
+      2,
+      1.6000001430511475,
+      1.5999999046325684,
+      1.6000001430511475,
+      1.8999998569488525,
+      2.4000000953674316
+    ],
+    "domElements": 7228,
+    "todayHeight": 290,
+    "pageHeight": 1326,
+    "domContentLoadedMs": 1022.4000000953674,
+    "overflow": false,
+    "errors": []
+  }
+]

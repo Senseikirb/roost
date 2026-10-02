@@ -8345,6 +8345,46 @@
     font-size: 1.25rem;
     line-height: 1.1;
   }
+  #roost-storage-warning:not([hidden]) { position: fixed; bottom: 12px; left: 12px; right: 12px; z-index: 10001; padding: 16px; border: 2px solid #ffb454; background: #231b12; color: #fff2d9; font-size: .9rem; line-height: 1.5; }
+  .roost-surface-away { display: none !important; }
+  #roost-home-nav { display: flex; gap: 6px; padding: 10px 24px; flex-wrap: wrap; border-bottom: 1px solid var(--border-subtle); }
+  #roost-home-nav button { min-height: 44px; padding: 8px 18px; background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-card); border-radius: 8px; cursor: pointer; font: inherit; }
+  #roost-home-nav button[aria-pressed="true"] { color: var(--gold); border-color: var(--gold); background: var(--bg-card-hover); }
+  body[data-home-surface="desk"] .nav-tabs, body[data-home-surface="library"] .nav-tabs { display: none; }
+  body[data-home-surface="desk"] .site-header, body[data-home-surface="library"] .site-header { padding-top: 20px; padding-bottom: 16px; }
+  body[data-home-surface="desk"] .site-header h1, body[data-home-surface="library"] .site-header h1 { font-size: clamp(1.8rem, 5vw, 3rem); }
+  #roost-library-controls { padding: 12px 0; }
+  #roost-library-controls label { display: block; color: var(--text-secondary); margin-bottom: 8px; }
+  #roost-library-filter { width: 100%; min-height: 44px; background: var(--bg-deep); color: var(--text-primary); border: 1px solid var(--border-card); border-radius: 8px; padding: 10px 12px; font: inherit; }
+  #roost-library-count { color: var(--text-secondary); font-size: .85rem; }
+  #roost-library-context:not([hidden]) { display: flex; align-items: center; gap: 16px; margin: 16px 0; padding: 8px 0; position: sticky; top: 8px; z-index: 22; background: var(--bg-deep); }
+  #roost-library-context strong { overflow-wrap: anywhere; }
+  #roost-library-context button { min-height: 44px; flex-shrink: 0; }
+  /* Focused browsing can reveal layout-hidden sections without changing the saved layout. */
+  body[data-home-surface="library"] .roost-library-current { display: block !important; }
+  body[data-home-surface="library"] .roost-library-directory { display: flex !important; flex-direction: column; gap: 10px; padding: 16px; }
+  body[data-home-surface="library"] .roost-library-directory .v3-command-grid,
+  body[data-home-surface="library"] .roost-library-directory .v3-controls { display: contents; }
+  body[data-home-surface="library"] .roost-library-directory .v3-eyebrow { display: none; }
+  #roost-library-options summary { cursor: pointer; padding: 12px 0; min-height: 44px; color: var(--text-secondary); }
+  body:not([data-home-surface="library"]) #roost-library-options summary { display: none; }
+  body[data-home-surface="library"] .roost-library-directory .v3-section-launcher { display: grid !important; }
+  body[data-home-surface="library"] .roost-library-directory .v3-viewbar { display: flex !important; }
+  body[data-home-surface="library"] .v3-viewbar button, body[data-home-surface="library"] .v3-btn { min-height: 44px; }
+  body[data-home-surface="library"] .roost-library-directory .v3-section-jump[hidden] { display: none !important; }
+  body[data-home-surface="library"] .roost-library-directory .v3-section-jump { min-height: 64px; }
+  body[data-home-surface="library"] .roost-library-directory .v3-section-jump span { white-space: normal; overflow: visible; text-overflow: clip; }
+  body[data-home-surface="library"] .roost-library-directory .v3-launcher-toggle,
+  body[data-home-surface="library"] .roost-library-directory #v3-collapse-all-toggle { display: none; }
+  @media (max-width: 600px) {
+    #roost-home-nav { padding: 8px 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    #roost-home-nav button { padding: 8px 4px; font-size: .83rem; }
+    body[data-home-surface="library"] .v3-section-launcher { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    body[data-home-surface="library"] .roost-library-directory .v3-viewbar { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    body[data-home-surface="library"] .v3-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    body[data-home-surface="library"] .v3-section-jump { overflow-wrap: anywhere; }
+  }
+
   /* Today is a short continuation surface; the existing deep tools stay one disclosure away. */
   #roost-today .roost-today-inner { grid-template-columns: minmax(0, 1fr); }
   .roost-resume-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -10566,10 +10606,20 @@
         return value;
       } catch (e) { return d; }
     },
-    write: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+    write: function (k, v) {
+      try { localStorage.setItem(k, JSON.stringify(v)); if (typeof reportStorageWrite === "function") reportStorageWrite(k, true); return true; }
+      catch (e) { if (typeof reportStorageWrite === "function") reportStorageWrite(k, false); return false; }
+    }
   };
   var SETTINGS_KEY = "roost_settings_v1";
   var settings = LS.read(SETTINGS_KEY, { headlines: true });
+  // Additive preference migration: preserve explicitly saved layouts / legacy groups.
+  // New or unconfigured homes start at the desk. No layout or collapse data is rewritten.
+  if (["desk", "library", "full"].indexOf(settings.homeSurface) < 0) {
+    var priorLayout = LS.read("roost_layout_v1", null), priorGroup = "all";
+    try { priorGroup = localStorage.getItem("kfl_v3_view") || "all"; } catch (e) {}
+    settings.homeSurface = priorLayout && typeof priorLayout === "object" || priorGroup !== "all" ? "full" : "desk";
+  }
   if (settings.headlines !== false) settings.headlines = true;
   settings.newsMode = settings.newsMode || "all";
   settings.searchScope = settings.searchScope || "all";
@@ -10626,6 +10676,46 @@
     { id: "kidZone", label: "Kid Zone", desc: "Show child-friendly learning section." }
   ];
   var roostOnboarding = readOnboardingState();
+
+  var failedStorageKeys = new Set(), modalEditor = null;
+  function reportStorageWrite(key, ok) {
+    // Feed caches and visit status are disposable; don't interrupt writing for those.
+    if (/^roost_feed_|^roost_shell_status_/.test(key)) return;
+    if (!failedStorageKeys) return;
+    if (ok) failedStorageKeys.delete(key); else failedStorageKeys.add(key);
+    if (!document.body) return;
+    var banner = document.getElementById("roost-storage-warning");
+    if (!banner && failedStorageKeys.size) {
+      banner = document.createElement("div"); banner.id = "roost-storage-warning";
+      banner.setAttribute("role", "alert"); document.body.appendChild(banner);
+    }
+    if (banner) {
+      banner.hidden = !failedStorageKeys.size;
+      banner.textContent = failedStorageKeys.size ? "Some changes could not be saved in this browser. Keep this page open. Copy or download your writing before leaving, then free browser storage and try saving again." : "";
+    }
+  }
+  function watchEditor(body, selectors, label, statusId, extraValue) {
+    function value() { return JSON.stringify(selectors.map(function (selector) { var field = body.querySelector(selector); return field ? field.value : ""; }).concat(extraValue ? extraValue() : "")); }
+    var baseline = value();
+    var editor = {
+      body: body, label: label,
+      dirty: function () { return body.isConnected && value() !== baseline; },
+      saved: function () { baseline = value(); },
+      status: function (message) { var status = body.querySelector(statusId); if (status) { status.textContent = message; status.setAttribute("role", "status"); } }
+    };
+    modalEditor = editor;
+    selectors.forEach(function (selector) {
+      var field = body.querySelector(selector);
+      if (field) field.addEventListener("input", function () { editor.status(editor.dirty() ? "Unsaved changes · stays here until you save" : "No unsaved changes"); });
+    });
+    return editor;
+  }
+  function allowEditorLeave() {
+    return !modalEditor || !modalEditor.dirty() || confirm("Discard unsaved " + modalEditor.label + " changes? Choose Cancel to keep writing, save, or export first.");
+  }
+  window.addEventListener("beforeunload", function (event) {
+    if (modalEditor && modalEditor.dirty()) { event.preventDefault(); event.returnValue = ""; }
+  });
 
   /* ---------- toast ---------- */
   var toastEl;
@@ -13617,6 +13707,7 @@
     reorderJumpSurface(document.querySelector(".v3-section-launcher"), state.sectionOrder);
     syncMissionSurfaceStats();
     updateCollapseAllSectionsButton();
+    applyHomeSurface();
     if (!opts.silent) renderCommandLauncherResults();
     return state;
   }
@@ -13660,6 +13751,8 @@
     });
   }
   function openLayoutEditor() {
+    if (!allowEditorLeave()) return;
+    if (modalEl && modalEl.classList.contains("open")) { modalEditor = null; closeModal(); }
     ensureLayoutEditor();
     layoutEditorReturnFocus = document.activeElement;
     layoutEditorEl.classList.add("open");
@@ -13955,6 +14048,9 @@
   function applyHomeView(id) {
     var view = typeof id === "string" ? findHomeView(id) : id;
     if (!view) return null;
+    settings.homeSurface = "full";
+    librarySelectedId = "";
+    clearRoostSectionHash();
     writeLayoutState(prioritizedLayoutState(view));
     settings.searchScope = view.searchScope || (view.settings && view.settings.searchScope) || settings.searchScope || "all";
     settings.newsMode = view.newsMode || (view.settings && view.settings.newsMode) || settings.newsMode || "all";
@@ -14834,7 +14930,7 @@
     }).filter(function (note) { return !!note.body || !!note.title; }).slice(0, 100);
   }
   function saveWorkbenchNotes(notes) {
-    LS.write(WB_KEY, (Array.isArray(notes) ? notes : []).map(function (note) {
+    return LS.write(WB_KEY, (Array.isArray(notes) ? notes : []).map(function (note) {
       note = note && typeof note === "object" ? note : {};
       return {
         id: String(note.id || customId("note")).replace(/[^a-zA-Z0-9_-]/g, "") || customId("note"),
@@ -14853,9 +14949,9 @@
     }).join("") + '</div>';
     body.innerHTML = tabs +
       '<div class="wb-method"><h4 id="wb-mname"></h4><p id="wb-mblurb"></p></div>' +
-      '<textarea class="wb-scaffold" id="wb-text" spellcheck="true"></textarea>' +
+      '<textarea class="wb-scaffold" id="wb-text" aria-label="Workbench note" maxlength="12000" spellcheck="true"></textarea>' +
       '<div class="wb-bar">' +
-        '<input id="wb-title" placeholder="Note title…" style="flex:1;min-width:150px;background:var(--bg-deep);color:var(--text-primary);border:1px solid var(--border-card);border-radius:6px;padding:8px 11px;font-size:.8rem;">' +
+        '<input id="wb-title" aria-label="Note title" maxlength="120" placeholder="Note title…" style="flex:1;min-width:150px;background:var(--bg-deep);color:var(--text-primary);border:1px solid var(--border-card);border-radius:6px;padding:8px 11px;font-size:.8rem;">' +
         '<button class="wb-btn primary" id="wb-save">Save</button>' +
         '<button class="wb-btn" id="wb-new">New note</button>' +
         '<button class="wb-btn" id="wb-copy">Copy</button>' +
@@ -14876,13 +14972,17 @@
       body.querySelectorAll(".wb-tab").forEach(function (t) { t.classList.toggle("on", t.getAttribute("data-m") === k); });
     }
     applyMethod(cur, true);
+    var editor = watchEditor(body, ["#wb-title", "#wb-text"], "Workbench", "#wb-status", function () { return loadedMethod || WB_METHODS[cur].name; });
+    var loadedRevision = "";
+    function revision(note) { return note ? JSON.stringify([note.title, note.method, note.body]) : ""; }
     body.querySelectorAll(".wb-tab").forEach(function (t) {
       t.addEventListener("click", function () {
         var k = t.getAttribute("data-m");
         if (textEl.value.trim() && textEl.value !== WB_METHODS[cur].scaffold) {
-          if (!confirm("Switch template? Current text stays unless empty. Replace with the " + WB_METHODS[k].name + " scaffold?")) { applyMethod(k, false); return; }
+          if (!confirm("Replace this text with the " + WB_METHODS[k].name + " template? Choose Cancel to save or download your writing first.")) return;
           applyMethod(k, true);
         } else applyMethod(k, true);
+        editor.status("Template changed · save to keep it");
       });
     });
 
@@ -14893,21 +14993,30 @@
       var saved = { id: existing ? existing.id : customId("note"), title: title, method: loadedMethod || WB_METHODS[cur].name, body: textEl.value, t: new Date().toISOString(), pinned: existing ? existing.pinned : false };
       if (existing) notes = notes.map(function (note) { return note.id === saved.id ? saved : note; });
       else notes.unshift(saved);
+      if (loadedNoteId && revision(existing) !== loadedRevision) {
+        editor.status("This note changed or was deleted in another tab. Your text is still here. Download it before loading the newer note.");
+        return;
+      }
+      if (!saveWorkbenchNotes(notes)) { editor.status("Not saved. Your text is still here; copy or download it before leaving."); return; }
       loadedNoteId = saved.id;
+      loadedRevision = revision(saved);
+      editor.saved();
       body.querySelector("#wb-save").textContent = "Save changes";
-      saveWorkbenchNotes(notes); renderNotes(body); checkRoostAchievements("workbench"); renderTodayDashboard(); toast("Saved");
+      renderNotes(body); checkRoostAchievements("workbench"); renderTodayDashboard(); toast("Saved");
       body.querySelector("#wb-status").textContent = "Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     });
     body.querySelector("#wb-new").addEventListener("click", function () {
-      if (textEl.value.trim() && !confirm("Start a new note? Save any changes first.")) return;
+      if (!allowEditorLeave()) return;
       loadedNoteId = ""; loadedMethod = "";
       body.querySelector("#wb-title").value = "";
       body.querySelector("#wb-save").textContent = "Save";
       applyMethod(cur, true);
+      loadedRevision = ""; editor.saved(); editor.status("New note · not saved yet");
       textEl.focus();
     });
     body.querySelector("#wb-copy").addEventListener("click", function () {
-      navigator.clipboard && navigator.clipboard.writeText(textEl.value).then(function () { toast("Copied to clipboard"); });
+      if (navigator.clipboard) navigator.clipboard.writeText(textEl.value).then(function () { toast("Copied to clipboard"); }).catch(function () { editor.status("Copy failed. Select the text to copy manually, or Download .md."); });
+      else editor.status("Clipboard unavailable. Select the text to copy manually, or Download .md.");
     });
     body.querySelector("#wb-download").addEventListener("click", function () {
       var title = (body.querySelector("#wb-title").value || WB_METHODS[cur].name).trim().replace(/[^\w\-]+/g, "_");
@@ -14939,7 +15048,9 @@
         list.querySelectorAll("[data-empty-action]").forEach(function (btn) {
           btn.addEventListener("click", function () {
             var target = btn.getAttribute("data-empty-action") === "wb-cornell" ? "cornell" : "brainstorm";
+            if (!allowEditorLeave()) return;
             applyMethod(target, true);
+            editor.saved();
             textEl.focus();
           });
         });
@@ -14979,7 +15090,7 @@
               pinned = n.pinned;
             }
           });
-          saveWorkbenchNotes(notes);
+          if (!saveWorkbenchNotes(notes)) return;
           renderNotes(scope);
           renderTodayDashboard();
           toast(pinned ? "Note pinned" : "Note unpinned");
@@ -14989,19 +15100,24 @@
         b.addEventListener("click", function () {
           var n = workbenchNotes().filter(function (x) { return x.id === b.getAttribute("data-load"); })[0];
           if (n) {
+            if (!allowEditorLeave()) return;
             var methodKey = keys.filter(function (key) { return WB_METHODS[key].name === n.method; })[0];
             if (methodKey) applyMethod(methodKey, false);
             loadedNoteId = n.id; loadedMethod = n.method;
             textEl.value = n.body; scope.querySelector("#wb-title").value = n.title;
             scope.querySelector("#wb-save").textContent = "Save changes";
+            loadedRevision = revision(n); editor.saved(); editor.status("Saved note loaded");
             toast("Loaded"); textEl.scrollIntoView({ behavior: "auto", block: "center" });
           }
         });
       });
       list.querySelectorAll("[data-del]").forEach(function (b) {
         b.addEventListener("click", function () {
+          if (!confirm("Delete this saved note?")) return;
           var notes = workbenchNotes().filter(function (x) { return x.id !== b.getAttribute("data-del"); });
-          saveWorkbenchNotes(notes); renderNotes(scope); renderTodayDashboard(); toast("Deleted");
+          if (!saveWorkbenchNotes(notes)) return;
+          if (loadedNoteId === b.getAttribute("data-del")) { loadedNoteId = ""; loadedRevision = ""; body.querySelector("#wb-save").textContent = "Save as new note"; }
+          renderNotes(scope); renderTodayDashboard(); toast("Deleted");
         });
       });
     }
@@ -15121,9 +15237,10 @@
     return notes && typeof notes === "object" ? notes : {};
   }
   function saveLinkNotes(notes) {
-    LS.write(LINK_NOTES_KEY, notes || {});
+    if (!LS.write(LINK_NOTES_KEY, notes || {})) return false;
     checkRoostAchievements("link-note");
     markAnnotatedCards();
+    return true;
   }
   function linkNoteTags(note) {
     return normalizeTags(note && note.tags || "");
@@ -15177,6 +15294,7 @@
     if (!data) { body.innerHTML = '<p class="roost-backup-status">No link selected.</p>'; return; }
     var notes = linkNotes();
     var current = notes[data.href] || {};
+    var savedRevision = JSON.stringify(current);
     body.innerHTML =
       '<div class="roost-panel-grid"><section class="roost-tool-card"><h4>' + esc(data.title) + '</h4><p>' + esc(data.desc || data.href) + '</p>' +
       '<label class="roost-field">Status<select id="link-note-status"><option value="">No status</option><option value="useful">Useful</option><option value="review">Needs review</option><option value="dead">Possibly dead</option></select></label>' +
@@ -15184,11 +15302,13 @@
       '<label class="roost-field">Local tags<input id="link-note-tags" maxlength="220" placeholder="comma, separated" value="' + esc(linkNoteTags(current).join(", ")) + '"></label>' +
       (linkNoteTags(current).length ? '<div class="roost-link-tags">' + linkNoteTags(current).map(function (tag) { return '<span class="roost-link-tag">' + esc(tag) + '</span>'; }).join("") + '</div>' : '') +
       '<label class="roost-field">Note<textarea id="link-note-body" maxlength="1000" placeholder="Why this link matters, what to use it for, or what needs checking...">' + esc(current.note || "") + '</textarea></label>' +
-      '<div class="roost-backup-actions"><button class="wb-btn primary" id="link-note-save">Save Note</button><button class="wb-btn" id="link-note-clear">Clear</button><a class="wb-btn" href="' + esc(data.href) + '" target="_blank" rel="noopener noreferrer">Open Link</a></div></section></div>';
+      '<div class="roost-backup-actions"><span id="link-note-message" role="status"></span><button class="wb-btn primary" id="link-note-save">Save Note</button><button class="wb-btn" id="link-note-clear">Clear</button><a class="wb-btn" href="' + esc(data.href) + '" target="_blank" rel="noopener noreferrer">Open Link</a></div></section></div>';
     body.querySelector("#link-note-status").value = current.status || "";
     body.querySelector("#link-note-rating").value = current.rating || "";
+    var editor = watchEditor(body, ["#link-note-status", "#link-note-rating", "#link-note-tags", "#link-note-body"], "link note", "#link-note-message");
     body.querySelector("#link-note-save").addEventListener("click", function () {
       var next = linkNotes();
+      if (JSON.stringify(next[data.href] || {}) !== savedRevision) { editor.status("This note changed in another tab. Copy your edits before reopening it."); return; }
       next[data.href] = {
         title: data.title,
         section: data.section,
@@ -15198,14 +15318,19 @@
         note: body.querySelector("#link-note-body").value.slice(0, 1000),
         updatedAt: new Date().toISOString()
       };
-      saveLinkNotes(next);
+      if (!saveLinkNotes(next)) { editor.status("Not saved. Your note is still here; copy it before leaving."); return; }
+      savedRevision = JSON.stringify(next[data.href]);
+      editor.saved(); editor.status("Saved locally");
       toast("Link note saved");
       renderTodayDashboard();
     });
     body.querySelector("#link-note-clear").addEventListener("click", function () {
       var next = linkNotes();
+      if (JSON.stringify(next[data.href] || {}) !== savedRevision) { editor.status("This note changed in another tab. Reopen it before clearing."); return; }
       delete next[data.href];
-      saveLinkNotes(next);
+      if (!confirm("Clear this link note and any unsaved changes?")) return;
+      if (!saveLinkNotes(next)) return;
+      editor.saved();
       toast("Link note cleared");
       closeModal();
       renderTodayDashboard();
@@ -15226,6 +15351,7 @@
         var action = btn.getAttribute("data-empty-action");
         if (action === "wire") {
           closeModal();
+          setHomeSurface("desk");
           var wire = document.querySelector(".roost-wire");
           if (wire && wire.scrollIntoView) wire.scrollIntoView({ behavior: "smooth", block: "start" });
         } else if (action === "news") {
@@ -15233,8 +15359,7 @@
           saveSettings();
           applyHeadlineVisibility();
           closeModal();
-          var news = document.getElementById("news") || document.querySelector(".roost-wire");
-          if (news && news.scrollIntoView) news.scrollIntoView({ behavior: "smooth", block: "start" });
+          navigateRoostSection("news");
         } else if (action === "addlink") {
           modalTitle.textContent = "Add Link";
           buildCustomLinkForm(modalBody);
@@ -15584,14 +15709,16 @@
     state.createdAt = state.createdAt || now;
     state.updatedAt = now;
     if (!state.status && state.goal) state.status = "active";
-    if (sessionHasContent(state)) LS.write(SESSION_KEY, state);
-    else try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+    if (sessionHasContent(state)) { if (!LS.write(SESSION_KEY, state)) return null; }
+    else if (!clearSessionState()) return null;
     renderTodayDashboard();
     return state;
   }
   function clearSessionState() {
-    try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+    try { localStorage.removeItem(SESSION_KEY); reportStorageWrite(SESSION_KEY, true); }
+    catch (e) { reportStorageWrite(SESSION_KEY, false); return false; }
     renderTodayDashboard();
+    return true;
   }
   function activeSessionState() {
     var state = sessionState();
@@ -15624,6 +15751,8 @@
         (state.goal ? '<div class="roost-list"><div class="roost-list-row"><strong>' + esc(state.goal) + '</strong><span>' + esc((state.status || "active") + " - " + state.timebox + " minutes") + '</span><span>' + esc(state.updatedAt ? "Updated " + new Date(state.updatedAt).toLocaleString() : "Not saved yet") + '</span></div></div>' : '<p class="roost-backup-status">No session planned yet.</p>') +
         '</section></div>';
       body.querySelector("#session-status-select").value = state.status === "done" ? "done" : "active";
+      var editor = watchEditor(body, ["#session-goal", "#session-timebox", "#session-status-select", "#session-links", "#session-note", "#session-summary"], "session", "#session-status");
+      var savedRevision = JSON.stringify(state);
       function readForm(forceStatus) {
         var existing = sessionState();
         var next = {
@@ -15649,7 +15778,9 @@
           status.className = "roost-backup-status bad";
           return;
         }
-        saveSessionState(next);
+        if (JSON.stringify(sessionState()) !== savedRevision) { editor.status("This session changed in another tab. Copy your edits before reopening it."); return; }
+        if (!saveSessionState(next)) { editor.status("Not saved. Keep this page open and copy your edits before leaving."); return; }
+        editor.saved();
         toast("Session saved");
         render();
       });
@@ -15661,13 +15792,17 @@
           status.className = "roost-backup-status bad";
           return;
         }
-        saveSessionState(next);
+        if (JSON.stringify(sessionState()) !== savedRevision) { editor.status("This session changed in another tab. Copy your edits before reopening it."); return; }
+        if (!saveSessionState(next)) { editor.status("Not saved. Keep this page open and copy your edits before leaving."); return; }
+        editor.saved();
         toast("Session completed");
         render();
       });
       body.querySelector("#session-clear").addEventListener("click", function () {
-        if (sessionHasContent(sessionState()) && !confirm("Clear the current local session?")) return;
-        clearSessionState();
+        if (JSON.stringify(sessionState()) !== savedRevision) { editor.status("This session changed in another tab. Reopen it before clearing."); return; }
+        if ((sessionHasContent(sessionState()) || editor.dirty()) && !confirm("Clear the current session, including unsaved edits?")) return;
+        if (!clearSessionState()) return;
+        editor.saved();
         toast("Session cleared");
         render();
       });
@@ -15693,7 +15828,7 @@
     var academy = body.querySelector("#focus-open-academy");
     if (academy) academy.addEventListener("click", function () {
       closeModal();
-      location.hash = "#mission-control";
+      navigateRoostSection("mission-control");
     });
   }
 
@@ -15803,6 +15938,9 @@
     } else if (action === "quest") {
       closeModal();
       renderTodayDashboard();
+      setHomeSurface("desk");
+      var details = document.querySelector("#roost-today details");
+      if (details) details.open = true;
       var deck = document.getElementById("roost-quest-deck");
       if (deck && deck.scrollIntoView) deck.scrollIntoView({ behavior: "smooth", block: "center" });
     } else {
@@ -16015,6 +16153,161 @@
     });
   }
 
+  /* One document, three ways to browse it. Surface visibility never edits layouts. */
+  var librarySelectedId = "", libraryQuery = "", libraryGroup = "all", homeSurfaceReady = false;
+  function homeSurfaceMode() { return document.body.classList.contains("roost-layout-editing") ? "full" : settings.homeSurface; }
+  function clearRoostSectionHash() {
+    var section = document.getElementById(location.hash.slice(1));
+    if (section && section.classList.contains("section")) {
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    }
+  }
+  function librarySections() {
+    return Array.from(document.querySelectorAll('main .section[id]')).filter(function (section) {
+      return !section.classList.contains("roost-hidden") && !section.classList.contains("roost-custom-section-hidden");
+    });
+  }
+  function setHomeSurface(mode, sectionId) {
+    if (["desk", "library", "full"].indexOf(mode) < 0) return;
+    settings.homeSurface = mode;
+    librarySelectedId = mode === "library" && librarySections().some(function (section) { return section.id === sectionId; }) ? sectionId : "";
+    if (!librarySelectedId) clearRoostSectionHash();
+    closeCommandLauncher(false);
+    var input = document.getElementById("search-input");
+    if (input && input.value) { input.value = ""; input.dispatchEvent(new Event("input", { bubbles: true })); closeCommandLauncher(false); }
+    saveSettings();
+    applyHomeSurface();
+    var target = librarySelectedId ? document.getElementById(librarySelectedId).querySelector(".section-header") :
+      mode === "library" ? document.getElementById("command-center-heading") : document.querySelector('#roost-home-nav [data-home-surface="' + mode + '"]');
+    if (target) {
+      target.scrollIntoView({ block: mode === "library" ? "start" : "center", behavior: "auto" });
+      target.focus({ preventScroll: true });
+    }
+  }
+  function applyHomeSurface() {
+    if (!homeSurfaceReady) return;
+    var mode = homeSurfaceMode(), input = document.getElementById("search-input"), searching = !!(input && input.value.trim());
+    var sections = librarySections();
+    if (librarySelectedId && !sections.some(function (section) { return section.id === librarySelectedId; })) librarySelectedId = "";
+    document.body.dataset.homeSurface = mode;
+    document.body.classList.toggle("roost-library-reading", mode === "library" && !!librarySelectedId);
+    document.querySelectorAll("#roost-home-nav [data-home-surface]").forEach(function (button) { button.setAttribute("aria-pressed", String(button.dataset.homeSurface === mode)); });
+    document.querySelectorAll("#roost-today, .roost-wire, #roost-mission-intro").forEach(function (el) { el.classList.toggle("roost-surface-away", mode === "library"); });
+    var center = document.getElementById("command-center");
+    var options = document.getElementById("roost-library-options");
+    if (options.dataset.surface !== mode) {
+      // Keep keyboard/reading order aligned with the visible directory order.
+      var groups = center.querySelector(".v3-viewbar"), directory = center.querySelector(".v3-section-launcher");
+      if (mode === "library") { directory.before(groups); directory.before(options); }
+      else { center.querySelector(".v3-controls").append(options, groups); }
+      options.open = mode !== "library"; options.dataset.surface = mode;
+    }
+    center.querySelector("#command-center-heading").textContent = mode === "library" ? "Explore the library" : "Every section, right up front";
+    center.classList.toggle("roost-surface-away", mode === "desk" || (mode === "library" && !!librarySelectedId));
+    center.classList.toggle("roost-library-directory", mode === "library" && !librarySelectedId);
+    sections.forEach(function (section) {
+      var groupOk = libraryGroup === "all" || section.dataset.v3Group === libraryGroup || section.id === "pinned" || section.id === "recent";
+      // Global search bypasses the group and surface filters; layout settings remain untouched.
+      var show = searching || (mode === "full" ? groupOk : mode === "desk" ? ["quick-access", "pinned", "recent"].indexOf(section.id) >= 0 : section.id === librarySelectedId);
+      section.classList.toggle("roost-surface-away", !show);
+      section.classList.remove("v3-hidden-by-view");
+      section.classList.toggle("roost-library-current", !searching && mode === "library" && section.id === librarySelectedId);
+    });
+    var current = document.getElementById(librarySelectedId), context = document.getElementById("roost-library-context");
+    context.hidden = mode !== "library" || !current;
+    context.querySelector("strong").textContent = current ? ((current.querySelector("h2") || {}).textContent || "Library") : "Library";
+    center.after(context);
+    var count = 0;
+    center.querySelectorAll('.v3-section-launcher a[href^="#"]').forEach(function (link) {
+      var section = document.getElementById(link.getAttribute("href").slice(1));
+      var available = section && sections.indexOf(section) >= 0;
+      var matches = available && (libraryGroup === "all" || section.dataset.v3Group === libraryGroup) && (!libraryQuery || link.textContent.toLowerCase().indexOf(libraryQuery) >= 0);
+      if (mode === "library") link.hidden = !matches;
+      else link.hidden = !available || link.hasAttribute("data-layout-hidden");
+      if (matches) count++;
+    });
+    document.getElementById("roost-library-count").textContent = count + " sections" + (count ? " · choose a section to explore" : " · try another group or name");
+    document.getElementById("roost-library-controls").hidden = mode !== "library";
+    center.querySelectorAll("[data-v3-view]").forEach(function (button) { button.setAttribute("aria-pressed", String(button.dataset.v3View === libraryGroup)); });
+  }
+  function navigateRoostSection(id) {
+    var section = document.getElementById(id);
+    if (!section || !section.classList.contains("section") || section.classList.contains("roost-hidden")) return false;
+    if (homeSurfaceMode() !== "full" || section.classList.contains("roost-layout-hidden")) {
+      if (section.classList.contains("collapsed")) setStoredSectionCollapsed(section, false);
+      setHomeSurface("library", id);
+    }
+    else {
+      libraryGroup = "all";
+      var input = document.getElementById("search-input");
+      input.value = ""; input.dispatchEvent(new Event("input", { bubbles: true })); closeCommandLauncher(false);
+      applyHomeSurface();
+      if (section.classList.contains("collapsed")) setStoredSectionCollapsed(section, false);
+      section.scrollIntoView({ block: "start", behavior: "auto" });
+      var heading = section.querySelector(".section-header");
+      if (heading) heading.focus({ preventScroll: true });
+    }
+    try { history.replaceState(null, "", "#" + id); } catch (e) {}
+    return true;
+  }
+  function installHomeSurface() {
+    if (homeSurfaceReady) { applyHomeSurface(); return; }
+    var launcher = ensureLauncherLayoutWidget(), center = document.getElementById("command-center");
+    if (!launcher || !center) return;
+    center.querySelector("#command-center-heading").setAttribute("tabindex", "-1");
+    try { libraryGroup = localStorage.getItem("kfl_v3_view") || "all"; } catch (e) {}
+    if (!center.querySelector('[data-v3-view="' + String(libraryGroup).replace(/[^a-z]/g, "") + '"]')) libraryGroup = "all";
+    var nav = document.createElement("nav");
+    nav.id = "roost-home-nav"; nav.setAttribute("aria-label", "Roost browsing mode");
+    nav.innerHTML = '<button type="button" data-home-surface="desk">Daily desk</button><button type="button" data-home-surface="library">Library</button><button type="button" data-home-surface="full">Full page</button>';
+    launcher.prepend(nav);
+    nav.addEventListener("click", function (event) { var button = event.target.closest("[data-home-surface]"); if (button) setHomeSurface(button.dataset.homeSurface); });
+    var controls = document.createElement("div"); controls.id = "roost-library-controls";
+    controls.innerHTML = '<label for="roost-library-filter">Find a section</label><input id="roost-library-filter" type="search" placeholder="AI, cooking, RF, history…"><p id="roost-library-count" role="status"></p>';
+    center.querySelector(".v3-section-launcher").before(controls);
+    controls.querySelector("input").addEventListener("input", function (event) { libraryQuery = event.target.value.toLowerCase().trim(); applyHomeSurface(); });
+    var actions = center.querySelector(".v3-actions"), options = document.createElement("details");
+    options.id = "roost-library-options"; options.innerHTML = "<summary>Library tools</summary>";
+    actions.before(options); options.append(actions);
+    var context = document.createElement("div"); context.id = "roost-library-context"; context.hidden = true;
+    context.innerHTML = '<button type="button" class="wb-btn">← All sections</button><strong></strong>';
+    center.after(context);
+    context.querySelector("button").addEventListener("click", function () { setHomeSurface("library"); });
+    // Replace the old group handlers, which maintained a separate hidden-card state.
+    var groupBar = center.querySelector("#v3-viewbar"), cleanBar = groupBar.cloneNode(true);
+    groupBar.replaceWith(cleanBar);
+    cleanBar.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-v3-view]"); if (!button) return;
+      libraryGroup = button.dataset.v3View;
+      try { localStorage.setItem("kfl_v3_view", libraryGroup); reportStorageWrite("kfl_v3_view", true); } catch (e) { reportStorageWrite("kfl_v3_view", false); }
+      applyHomeSurface();
+    });
+    var random = center.querySelector("#v3-random-link"), cleanRandom = random.cloneNode(true);
+    random.replaceWith(cleanRandom);
+    cleanRandom.addEventListener("click", function () {
+      var candidates = [];
+      librarySections().forEach(function (section) {
+        if (["pinned", "recent"].indexOf(section.id) >= 0 || (libraryGroup !== "all" && section.dataset.v3Group !== libraryGroup)) return;
+        candidates = candidates.concat(Array.from(section.querySelectorAll('.link-card:not([data-hidden="true"])')));
+      });
+      var card = candidates[Math.floor(Math.random() * candidates.length)];
+      if (!card) return;
+      navigateRoostSection(card.closest(".section").id);
+      card.scrollIntoView({ block: "center", behavior: "auto" }); card.focus({ preventScroll: true });
+    });
+    document.addEventListener("click", function (event) {
+      var link = event.target.closest('.v3-section-launcher a[href^="#"], #nav-tabs a[href^="#"]');
+      if (!link || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+      if (navigateRoostSection(link.getAttribute("href").slice(1))) { event.preventDefault(); event.stopImmediatePropagation(); }
+    }, true);
+    homeSurfaceReady = true;
+    // Clear the legacy group's per-card flags once; subsequent filtering has one owner.
+    document.getElementById("search-input").dispatchEvent(new Event("input", { bubbles: true }));
+    var hashId = location.hash.slice(1);
+    if (hashId && document.getElementById(hashId)) navigateRoostSection(hashId);
+    window.addEventListener("hashchange", function () { navigateRoostSection(location.hash.slice(1)); });
+  }
+
   // Resume points are derived from explicit local saves, never usage scores.
   function todayResumePoints() {
     var points = [], session = activeSessionState();
@@ -16037,20 +16330,7 @@
     }
     return points.slice(0, 3);
   }
-  function browseRoostLibrary() {
-    var center = document.getElementById("command-center"), input = document.getElementById("search-input");
-    if (!center) return;
-    closeCommandLauncher(false);
-    if (input && input.value) { input.value = ""; input.dispatchEvent(new Event("input", { bubbles: true })); }
-    var toggle = document.getElementById("v3-launcher-toggle");
-    if (center.classList.contains("roost-launcher-minimized") && toggle) toggle.click();
-    // A layout can hide navigation; reveal it for this visit without changing the saved view.
-    center.classList.remove("roost-layout-hidden");
-    center.hidden = false;
-    center.scrollIntoView({ behavior: "auto", block: "start" });
-    var target = center.querySelector(".v3-section-launcher a") || toggle;
-    if (target) target.focus({ preventScroll: true });
-  }
+  function browseRoostLibrary() { setHomeSurface("library"); }
   function renderTodayDashboard() {
     var wrap = document.getElementById("roost-today");
     if (!moduleEnabled("today")) {
@@ -16106,6 +16386,7 @@
   }
   window.roostTestHooks.todayResumePoints = todayResumePoints;
   window.roostTestHooks.browseRoostLibrary = browseRoostLibrary;
+  Object.assign(window.roostTestHooks, { setHomeSurface: setHomeSurface, applyHomeSurface: applyHomeSurface, installHomeSurface: installHomeSurface, navigateRoostSection: navigateRoostSection });
 
   function installSearchScopes() {
     var input = document.getElementById("search-input");
@@ -16128,6 +16409,7 @@
       });
     });
     input.addEventListener("input", runScopedSearch, true);
+    input.addEventListener("search", runScopedSearch, true);
   }
   function runScopedSearch(event) {
     event.stopImmediatePropagation();
@@ -16165,6 +16447,7 @@
     }
     var launcherHits = renderCommandLauncherResults(q, context);
     if (noResults) noResults.classList.toggle("visible", !!q && visible === 0 && !launcherHits);
+    applyHomeSurface();
   }
 
   var commandLauncherState = { input: null, panel: null, items: [], active: -1, open: false, query: "", returnFocus: null };
@@ -16521,6 +16804,8 @@
 
   var roostHelpLastFocus = null;
   function openCustomLinksTab(tab, returnFocus) {
+    if (!allowEditorLeave()) return false;
+    modalEditor = null;
     ensureModal();
     var alreadyOpen = modalEl.classList.contains("open");
     if (!alreadyOpen) modalLastFocus = returnFocus || document.activeElement;
@@ -16718,7 +17003,8 @@
   function launcherSections(query) {
     var jumps = Array.from(document.querySelectorAll(".v3-section-launcher a[href^='#']"));
     return rankLauncherItems(jumps.filter(function (a) {
-      return !a.hidden;
+      var section = document.getElementById((a.getAttribute("href") || "").slice(1));
+      return section && !section.classList.contains("roost-hidden");
     }).map(function (a) {
       var id = (a.getAttribute("href") || "").slice(1);
       return {
@@ -16727,18 +17013,7 @@
         terms: a.textContent + " " + id,
         kind: "Section",
         run: function () {
-          var sec = document.getElementById(id);
-          closeCommandLauncher(false);
-          if (!sec) return;
-          if (sec.classList.contains("collapsed")) setStoredSectionCollapsed(sec, false);
-          var input = document.getElementById("search-input");
-          input.value = "";
-          input.dispatchEvent(new Event("input", { bubbles: true }));
-          closeCommandLauncher(false);
-          sec.scrollIntoView({ block: "start", behavior: "auto" });
-          var heading = sec.querySelector(".section-header");
-          if (heading) heading.focus({ preventScroll: true });
-          try { history.replaceState(null, "", "#" + id); } catch (e) {}
+          navigateRoostSection(id);
         }
       };
     }), query, query ? 8 : 5);
@@ -16819,7 +17094,7 @@
     closeCommandLauncher(false);
     var target = null;
     if (item.kind === "workbench" && moduleEnabled("workbench")) {
-      openModal("workbench");
+      if (openModal("workbench") === false) return;
       target = Array.from(modalBody.querySelectorAll("[data-load]")).filter(function (button) { return button.getAttribute("data-load") === String(item.id); })[0];
       if (target) {
         target.click();
@@ -16827,10 +17102,10 @@
       }
     } else if (item.kind === "readlater") {
       readLaterFilter = "all";
-      openModal("readlater");
+      if (openModal("readlater") === false) return;
       target = Array.from(modalBody.querySelectorAll(".roost-list-row a[href]")).filter(function (link) { return safeHttpUrl(link.href) === safeHttpUrl(item.id); })[0];
     } else if (item.kind === "board") {
-      openModal("boards");
+      if (openModal("boards") === false) return;
       var button = Array.from(modalBody.querySelectorAll("[data-board-rename]")).filter(function (entry) { return entry.getAttribute("data-board-rename") === String(item.id); })[0];
       target = button && button.closest("section").querySelector("h4");
       if (target) target.setAttribute("tabindex", "-1");
@@ -17344,7 +17619,10 @@
     modalEl.addEventListener("keydown", trapRoostModalKeyboard);
   }
   function openModal(which) {
+    if (!allowEditorLeave()) return false;
+    modalEditor = null;
     if (which === "setup") {
+      if (modalEl && modalEl.classList.contains("open")) closeModal();
       openOnboarding(true);
       return;
     }
@@ -17434,7 +17712,8 @@
     }
   }
   function closeModal() {
-    if (!modalEl) return;
+    if (!modalEl || !allowEditorLeave()) return false;
+    modalEditor = null;
     modalEl.classList.remove("open");
     setRoostLayer(modalEl, false);
     var returnFocus = modalLastFocus;
@@ -17506,6 +17785,7 @@
     try { buildDock(); } catch (e) {}
     try { applyProfileConfig({ applyStarter: false }); } catch (e) {}
     try { applyLayoutState({ silent: true }); } catch (e) {}
+    try { installHomeSurface(); } catch (e) {}
     try { if (shouldShowOnboarding()) openOnboarding(false); } catch (e) {}
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

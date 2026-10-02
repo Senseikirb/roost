@@ -1,6 +1,6 @@
 # Local storage and recovery
 
-Source audit: September 2026. `index.html` remains the schema source of truth. All data belongs to the current browser origin; standalone Where To and RFSoC Explorer hold their controls in memory and do not add persistent keys. There is no server, account, synchronization, or usage telemetry.
+Source audit: September 2026; browsing preference and writing safeguards updated October 2, 2026. `index.html` remains the schema source of truth. All data belongs to the current browser origin; standalone Where To and RFSoC Explorer hold their controls in memory and do not add persistent keys. There is no server, account, synchronization, or usage telemetry.
 
 ## Recovery contract
 
@@ -23,7 +23,7 @@ The shared storage reader uses defaults for malformed JSON and unexpected top-le
 | `kfl_collapsed_v1` | Key version 1; array of collapsed section IDs | Original and upgrade section controls share the same set; dynamic IDs may remain after a section disappears. | No |
 | `kfl_v3_view` | Legacy raw string; selected original section view, such as `all` | Not JSON; preserved verbatim. | No |
 | `kfl_v3_compact` | Legacy raw `0` / `1`; global card density | Not a JSON envelope; onboarding mirrors its density here. | No |
-| `roost_settings_v1` | Key version 1; object with `headlines`, `newsMode`, `searchScope`, `ambient`, `wireCollapsed`, `todayCollapsed` and additive settings | Defaults merged in memory; old settings remain valid. Onboarding also mirrors news and density choices. | No |
+| `roost_settings_v1` | Key version 1; object with `headlines`, `newsMode`, `searchScope`, `ambient`, `wireCollapsed`, `todayCollapsed`, additive `homeSurface` (`desk`, `library`, `full`) and other settings | Defaults merged in memory; old settings remain valid. Missing/invalid `homeSurface` selects `full` if an existing layout object or non-`all` legacy group exists, otherwise `desk`; saved through the existing settings path. No layout/collapse rewrite. Onboarding mirrors news and density choices. | No |
 | `roost_onboarding_v1` | `{version:1,profile,completed,skipped,step,data,layoutApplied,createdAt,updatedAt}`; `data` contains display name, use, modules, news, density, visual mode, starter sections | Meaningful pre-onboarding data creates a `legacy-personal` profile with `migratedFrom`. Defaults fill missing fields; existing user data remains. Name 40 chars, custom use 80. | No; contains personal name |
 | `roost_launcher_minimized_v1` | JSON number `0` / `1`; Section Launcher disclosure | Existing numeric flag retained. | No |
 | `roost_mission_intro_v1` | Key version 1; `{hidden,updatedAt}` | Missing state shows optional intro when Academy is disabled. | No |
@@ -54,6 +54,8 @@ The shared storage reader uses defaults for malformed JSON and unexpected top-le
 | `roost_next_step_skipped` | **sessionStorage**, raw current-day key | Session-only Next learning step dismissal; never included in localStorage backup/restore. | No |
 
 ## Remaining bounded scope
+
+Workbench, Session Planner and Link Notes now keep unsaved edits in the open editor on write failure and guard tool changes/dismissal. Before saving, each compares the current persisted record with the record loaded into the editor and rejects stale overwrites. This is a best-effort conflict check, not an atomic transaction across tabs. Workbench compares title/method/body so independent pin changes remain compatible. Editor baselines and errors are in memory; there is no autosave key or duplicate private draft store. Shared `LS.write` reports failed ordinary writes through a persistent warning, excluding disposable feed/shell-status writes. Successful retries clear the corresponding warning; older direct-storage paths are not all covered.
 
 The recovery change does not rename keys, change schema versions, delete orphan references, impose new destructive global limits, or silently rewrite a damaged collection. Large custom collections, manual board lists, note maps, and health history can still approach browser quota. Ordinary feature save helpers return a failure signal, but not every existing feature surfaces that signal yet. A full backup may contain privately named boards, notes, reading history, and progress; configuration packs deliberately include board names/URLs and custom link/source configuration, so review those before sharing.
 

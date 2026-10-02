@@ -31,6 +31,20 @@ $env:ROOST_CDP_PORT='9223'
 node tests/run-roost-validation.mjs
 ```
 
+## Opening And Browsing
+
+Use **Daily desk**, **Library**, or **Full page** above the launcher. Daily desk keeps the everyday surfaces in view. Library reuses the Section Launcher, with a section-name filter, categories, and one section at a time. **All sections** stays available while scrolling a section. The original whole-page layout remains in Full page.
+
+Library moves focus to its heading, so opening it does not automatically summon a phone keyboard. Tab or tap into **Find a section** to filter. The global launcher searches across categories. **Library tools** holds the less frequent layout, density, random, and map-copy actions.
+
+Your presentation is saved as the additive `homeSurface` preference (`desk`, `library`, or `full`) in `roost_settings_v1`. When absent, a saved layout or legacy category preserves Full page; other homes start at Daily desk. No layout, collection, or progress migration is performed. Applying a Home View chooses Full page; Layout Editor temporarily exposes the complete page for editing.
+
+## Writing Safely
+
+Workbench, Session Planner, and Link Notes ask before discarding unsaved changes when closing or switching tools. Failed saves retain the editor contents and display an error. A newer save in another tab blocks an overwrite; copy or download your draft before reopening the newer content. Workbench also reports clipboard failures. Changes stay in memory until Save succeeds; browser termination can still lose unsaved work.
+
+A storage warning means at least one ordinary save failed. Keep the page open, copy or download unsaved writing, free browser storage, and retry. Backup / Restore remains the recovery path for already saved data. The warning does not make older feature saves transactional or coordinate simultaneous tabs.
+
 ## Launcher Shortcuts
 
 The search surface directly under the header is the main launcher for links, sections, and Roost tools.
@@ -189,7 +203,7 @@ Use the dock's "Headlines: on/off" control to disable or re-enable headline surf
 
 ## Mission Control Academy
 
-The Academy is integrated into The Roost as an optional native section directly under Quick Access. It uses `ROOST_MISSION_CONFIG` in the bottom upgrade layer and saves progress under `roost_mission_v1`.
+The Academy is integrated into The Roost as an optional native section in Library and Full page, with focus actions in Today. It uses `ROOST_MISSION_CONFIG` in the bottom upgrade layer and saves progress under `roost_mission_v1`.
 
 Current Academy data:
 
@@ -227,7 +241,7 @@ The Roost stores memory only in the browser's `localStorage`; there is no accoun
 - Saved Home Views use `roost_views_v1` for named local contexts.
 - Accessibility preferences use `roost_accessibility_v1` for text size, contrast, focus rings, and reduced motion.
 - Manual link-health results use `roost_link_health_v1`.
-- `roost_settings_v1` stores the headline toggle, Roost Wire mode, search scope, Cozy Mode, and the remembered Wire/Today collapsed state.
+- `roost_settings_v1` stores the browsing presentation, headline toggle, Roost Wire mode, search scope, Cozy Mode, and the remembered Wire/Today collapsed state.
 - Mission Control Academy stores completed missions, notes, selected filters, mission statement, resource status, side quests, leadership lessons, project data, and the active tab.
 - Workbench stores saved notes and local pin state under `roost_workbench_v1`.
 - Read Later stores saved headline/article links, status, priority, and local notes under `roost_readlater_v1`.

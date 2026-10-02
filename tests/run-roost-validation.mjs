@@ -125,6 +125,7 @@ function main() {
     runNode(["tests/run-launcher-cdp-tests.mjs"], "launcher CDP journeys");
     runNode(["tests/run-storage-cdp-tests.mjs"], "storage recovery CDP journeys");
     runNode(["tests/run-feed-cdp-tests.mjs"], "feed and offline CDP journeys");
+    runNode(["tests/run-workflow-cdp-tests.mjs"], "library and writing safety CDP journeys");
   } else {
     checks.push({name: "browser CDP suites", ok: true, skipped: true});
     console.log("SKIP browser CDP suites - set ROOST_CDP_PORT and ROOST_APP_URL to enable");
