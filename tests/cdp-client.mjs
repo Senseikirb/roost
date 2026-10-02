@@ -45,6 +45,7 @@ export async function connectApp({ url = process.env.ROOST_APP_URL || 'http://12
   // Ordinary journeys must execute the current source, not a prior development shell.
   // The dedicated offline suite explicitly re-enables its real worker after installation.
   await send('Network.setBypassServiceWorker', { bypass: true });
+  await send('Network.setCacheDisabled', { cacheDisabled: true });
   // External content does not determine these local journeys.
   await send('Network.setBlockedURLs', { urls: ['https://*', 'http://*.com/*'] });
   if (seed) await send('Page.addScriptToEvaluateOnNewDocument', { source: typeof seed === 'string' ? seed : `localStorage.clear(); Object.entries(${JSON.stringify(seed)}).forEach(([key,value])=>localStorage.setItem(key,JSON.stringify(value)));` });

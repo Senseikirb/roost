@@ -125,6 +125,7 @@ try {
   localStorage.removeItem("roost_quests_v1");
   localStorage.removeItem("roost_achievements_v1");
   localStorage.setItem("roost_settings_v1", JSON.stringify({
+    homeSurface: "full",
     headlines: true,
     newsMode: "all",
     searchScope: "all",
@@ -195,6 +196,7 @@ async function main() {
   await send("Network.enable");
   await send("Network.setBlockedURLs", { urls: ["https://*"] });
   await send("Network.setBypassServiceWorker", { bypass: true });
+  await send("Network.setCacheDisabled", { cacheDisabled: true });
   await send("Page.addScriptToEvaluateOnNewDocument", { source: seedStorageScript });
 
   async function evalValue(expression) {
@@ -345,18 +347,18 @@ async function main() {
     const jumpBriefing = document.querySelector('.v3-section-launcher a[href="#briefing-room"][data-v3-group="learn"]');
     const learnButton = document.querySelector('[data-v3-view="learn"]');
     if (learnButton) learnButton.click();
-    const learnShowsBriefing = !!briefing && briefing.getAttribute("data-hidden") !== "true";
-    const learnShowsBattle = !!battle && battle.getAttribute("data-hidden") !== "true";
-    const learnShowsPhilosophy = !!philosophy && philosophy.getAttribute("data-hidden") !== "true";
-    const learnShowsLeadership = !!leadership && leadership.getAttribute("data-hidden") !== "true";
-    const learnHidesDefense = !!defense && defense.getAttribute("data-hidden") === "true";
+    const learnShowsBriefing = !!briefing && briefing.getBoundingClientRect().height > 0;
+    const learnShowsBattle = !!battle && battle.getBoundingClientRect().height > 0;
+    const learnShowsPhilosophy = !!philosophy && philosophy.getBoundingClientRect().height > 0;
+    const learnShowsLeadership = !!leadership && leadership.getBoundingClientRect().height > 0;
+    const learnHidesDefense = !!defense && defense.getBoundingClientRect().height === 0;
     const mediaButton = document.querySelector('[data-v3-view="media"]');
     if (mediaButton) mediaButton.click();
-    const mediaShowsDefense = !!defense && defense.getAttribute("data-hidden") !== "true";
-    const mediaHidesBriefing = !!briefing && briefing.getAttribute("data-hidden") === "true";
-    const mediaHidesBattle = !!battle && battle.getAttribute("data-hidden") === "true";
-    const mediaHidesPhilosophy = !!philosophy && philosophy.getAttribute("data-hidden") === "true";
-    const mediaHidesLeadership = !!leadership && leadership.getAttribute("data-hidden") === "true";
+    const mediaShowsDefense = !!defense && defense.getBoundingClientRect().height > 0;
+    const mediaHidesBriefing = !!briefing && briefing.getBoundingClientRect().height === 0;
+    const mediaHidesBattle = !!battle && battle.getBoundingClientRect().height === 0;
+    const mediaHidesPhilosophy = !!philosophy && philosophy.getBoundingClientRect().height === 0;
+    const mediaHidesLeadership = !!leadership && leadership.getBoundingClientRect().height === 0;
     const allButton = document.querySelector('[data-v3-view="all"]');
     if (allButton) allButton.click();
     const input = document.getElementById("search-input");
