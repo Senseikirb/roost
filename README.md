@@ -20,7 +20,7 @@ It is intentionally vanilla: one main HTML file, one manifest, one service worke
 
 - **785 curated link cards** across AI, coding, RF, embedded systems, game dev, writing, philosophy, leadership, finance, security, defense, battle history, family, homestead, cooking, news, sports, Kid Zone, and more.
 - **First-run setup wizard** for display name, use case, modules, news, density, visual mode, and starter sections.
-- **Mission Control Academy** available as an optional local example profile directly under Quick Access.
+- **Mission Control Academy** available as an optional local example profile in Library and Full page, with focus actions in Today.
 - **24-cycle learning plan** with 240 core missions, 97 resources, 120 side quests, 23 leadership lessons, 6 projects, and 18 achievements.
 - **Today** offers up to three direct resume points from an unfinished session, pinned Workbench note, active reading, saved board, or enabled learning step. Quests, tips, badges, and deeper tools remain available under a disclosure.
 - **Command launcher** directly under the header for links, sections, and Roost tools.
@@ -46,9 +46,23 @@ It is intentionally vanilla: one main HTML file, one manifest, one service worke
 - **Daily local tip** inside Today for gentle feature discovery without tracking.
 - **Workbench** for saving, searching, filtering, and pinning local notes from structured thinking templates.
 - **Concept Diagrams** for quick visual explanations.
-- **Section Launcher** with minimize and collapse/expand-all controls.
+- **Library browsing** reuses the Section Launcher to find a section and explore it on its own; Full page keeps the original complete homepage.
 - **Offline-first PWA shell** for GitHub Pages and iOS home-screen install.
 - **No framework, no build step, no npm install, no server.**
+
+## Daily Desk And Library
+
+Choose how much of Roost to see using the three buttons above the launcher:
+
+- **Daily desk**: Today, enabled Wire, Quick Access, Favorites, and Recent. Saved layouts still determine their order and visibility.
+- **Library**: find a section by name or category, then browse that section with a persistent **All sections** return. Library tools contains density, random exploration, map copying, and layout controls.
+- **Full page**: the original complete homepage with its saved layout, section groups, and collapse controls.
+
+These are three presentations of the same content. All 785 curated cards remain intact, and global launcher searches cross the library's category filter. Section jumps can temporarily reveal a layout-hidden section without changing the layout. Opening a collapsed section expands it as before.
+
+The choice is stored in `roost_settings_v1.homeSurface`. Missing preferences default to Daily desk unless an existing saved layout or legacy category choice should be preserved; those users retain Full page. Home Views apply their layout in Full page. Layout editing temporarily shows Full page, then returns to your chosen presentation. No new storage key or tracking is involved.
+
+Workbench, Session Planner, and Link Notes protect unsaved edits when closing or switching tools, report failed saves without clearing the editor, and check for newer saved content before overwriting it. Keep a backup: these checks are not cross-tab synchronization, and browser shutdown warnings cannot protect against a crash or an OS terminating the app.
 
 ## First-Run Setup And Privacy
 
@@ -378,7 +392,7 @@ The Roost is designed as a daily-use operational page, not a marketing site. The
 
 The result is intentionally personal: a little command center, a little library, a little classroom, a little dashboard.
 
-See [Daily-use audit](docs/DAILY_USE_AUDIT.md) for the product choices, measured checks, and deliberately deferred work.
+See [Product review](docs/PRODUCT_REVIEW.md) for the latest priorities, measurements, validation, and remaining work; the [Daily-use audit](docs/DAILY_USE_AUDIT.md) records the preceding improvement pass.
 
 ## Current Integrity Snapshot
 

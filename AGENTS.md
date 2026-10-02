@@ -27,6 +27,8 @@ The Roost is a local-first, static personal homepage and command center. It is a
 - `tests/run-custom-import-parser-tests.mjs`: production parser fixture wiring check.
 - `docs/STORAGE_SCHEMAS.md`: local keys, migrations, backup/restore and configuration-pack boundaries.
 - `docs/DAILY_USE_AUDIT.md`: system map, decisions, measurements and deferred work.
+- `docs/PRODUCT_REVIEW.md`: current product review, library/writing changes, evidence and remaining priorities.
+- `tests/run-workflow-cdp-tests.mjs`: presentation, legacy layout/group, deep-link, failed-save and stale-edit journeys.
 - Focused browser journeys supplement the original CDP suite; use an isolated browser profile because fixtures replace test-origin storage.
 
 ## Runtime And Tooling
@@ -71,6 +73,7 @@ node tests/run-roost-validation.mjs
 - Preserve PWA install/offline behavior when touching shell files or app paths.
 - Preserve localStorage data. Add explicit migrations for schema changes and keep them backward compatible.
 - Keep personal-use features and productization ideas distinct unless the user asks to combine them.
+- Browsing modes share the original DOM. Route section jumps through `navigateRoostSection`; do not rewrite layouts to change presentation or bypass the editor dismissal guard.
 
 ## Git And PR Workflow
 

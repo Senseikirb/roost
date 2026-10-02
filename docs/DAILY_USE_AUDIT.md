@@ -1,5 +1,7 @@
 # Daily-use improvement audit
 
+Historical record of the first pass, merged in PR #6. See [Product review](PRODUCT_REVIEW.md) for the October follow-up, including focused library browsing, writing safety, and updated limitations.
+
 Inspected from `main` at `6411653` (merged PRs #1–#5). Scope: connect existing daily surfaces and make local recovery dependable while preserving the static, private command-center identity.
 
 ## Product map
