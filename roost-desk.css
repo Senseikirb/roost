@@ -388,3 +388,14 @@ body[data-home-surface="full"] .top-bar-inner .nav-tabs { grid-row: 2; grid-colu
   #roost-home-nav .roost-customize-desk { margin: 0; }
   .roost-scope-caption { width: 100%; }
 }
+
+/* Separate the link destination and its controls in the reading and tab order. */
+.roost-card-frame > .link-card { padding-bottom: 2.75rem; }
+.roost-card-frame .pin-btn { min-width: 1.75rem; min-height: 1.75rem; }
+.roost-card-tools > button { min-height: 1.75rem; padding-inline: .55rem; font: 600 .75rem/1 var(--font-body); }
+.roost-card-frame button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+@media (hover: none), (pointer: coarse) {
+  .roost-card-frame .pin-btn, .roost-card-frame .roost-card-tools { opacity: 1; transform: none; pointer-events: auto; }
+  .roost-card-frame > .link-card, #quick-access .roost-card-frame > .link-card { padding-block-end: 3.15rem; }
+  .roost-card-tools > button, .roost-card-frame .pin-btn { min-height: 2rem; min-width: 2rem; }
+}
