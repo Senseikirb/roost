@@ -24,13 +24,15 @@ jobs:
         shell: bash
         env:
           ROOST_APP_URL: http://127.0.0.1:8765/roost/index.html
+          ROOST_FEED_APP_URL: http://roost.localhost:8765/roost/index.html
+          ROOST_WORKFLOW_APP_URL: http://workflow.localhost:8765/roost/index.html
           ROOST_CDP_PORT: '9223'
         run: |
           set -euo pipefail
           site_root="$(mktemp -d)"
           profile="$(mktemp -d)"
           mkdir "$site_root/roost"
-          find . -maxdepth 1 -type f \( -name '*.html' -o -name '*.css' -o -name '*.js' -o -name '*.png' -o -name 'manifest.json' \) -exec cp {} "$site_root/roost/" \;
+          find . -maxdepth 1 -type f \( -name '*.html' -o -name '*.css' -o -name '*.js' -o -name '*.png' -o -name '*.jpg' -o -name '*.webp' -o -name '*.svg' -o -name 'manifest.json' \) -exec cp {} "$site_root/roost/" \;
           python3 -m http.server 8765 --bind 127.0.0.1 --directory "$site_root" >"$RUNNER_TEMP/roost-http.log" 2>&1 &
           server_pid=$!
           google-chrome --headless --disable-gpu --disable-background-networking --no-first-run \
@@ -39,5 +41,8 @@ jobs:
           browser_pid=$!
           trap 'kill "$browser_pid" "$server_pid" 2>/dev/null || true' EXIT
           curl --silent --show-error --fail --retry 15 --retry-all-errors --retry-delay 1 "$ROOST_APP_URL" -o /dev/null
-          curl --silent --show-error --fail --retry 15 --retry-all-errors --retry-delay 1 "http://127.0.0.1:$ROOST_CDP_PORT/json/version"
+          if ! curl --silent --show-error --fail --retry 30 --retry-all-errors --retry-delay 1 "http://127.0.0.1:$ROOST_CDP_PORT/json/version"; then
+            cat "$RUNNER_TEMP/roost-chrome.log"
+            exit 1
+          fi
           node tests/run-roost-validation.mjs
