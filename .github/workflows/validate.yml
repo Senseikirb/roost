@@ -59,19 +59,6 @@ jobs:
           path: ${{ runner.temp }}/roost-desk-preview/
           if-no-files-found: error
           retention-days: 14
-      - name: Export synthetic screenshots for this design review
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 8
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import os, base64
-          from pathlib import Path
-          for width in (390, 1440):
-              file = Path(os.environ["RUNNER_TEMP"]) / "roost-desk-preview" / f"desk-{width}.jpg"
-              data = base64.b64encode(file.read_bytes()).decode("ascii")
-              for pos in range(0,len(data),2048):
-                  print("DESK_CAPTURE|%s|%s|%s" % (width,pos,data[pos:pos+2048]))
-          PY
       - name: Verify the public Pages release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'Senseikirb/roost'
         shell: bash

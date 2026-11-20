@@ -4,6 +4,10 @@ A personal start page with a searchable library of **785 hand-picked links acros
 
 **[Open The Roost](https://senseikirb.github.io/roost/)** · [User guide](docs/FEATURES.md) · [Setup and installation](SETUP.md)
 
+![The Roost Daily desk with its launcher, Today panel and feed controls](docs/screenshots/board-refresh/desk-1440.jpg)
+
+[View the phone layout](docs/screenshots/board-refresh/desk-390.jpg)
+
 ## Find your way around
 
 | If you want to… | Start here |
