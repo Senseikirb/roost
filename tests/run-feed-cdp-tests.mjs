@@ -4,14 +4,16 @@ import { connectApp } from "./cdp-client.mjs";
 const url = process.env.ROOST_FEED_APP_URL || "http://roost.localhost:8765/index.html";
 const profile = {
   version: 1, profile: "runtime-test", completed: true, layoutApplied: true,
-  data: { modules: { wire: true, today: true, workbench: true }, news: false, density: "comfort", visualMode: "default", starterSections: ["quick-access"] }
+  data: { modules: { wire: true, today: true, workbench: true }, news: true, density: "comfort", visualMode: "default", starterSections: ["quick-access"] }
 };
 const seed = `if (!sessionStorage.getItem('feed-suite-seeded')) {
   localStorage.clear();
   localStorage.setItem('roost_onboarding_v1', ${JSON.stringify(JSON.stringify(profile))});
-  localStorage.setItem('roost_settings_v1', JSON.stringify({headlines:false, newsMode:'all'}));
+  localStorage.setItem('roost_settings_v1', JSON.stringify({headlines:true, newsMode:'all'}));
   sessionStorage.setItem('feed-suite-seeded','1');
-}`;
+}
+window.__bootFeedRequests = [];
+window.fetch = async function(url) { window.__bootFeedRequests.push(String(url)); throw new Error('Unexpected request'); };`;
 const app = await connectApp({ url, seed });
 const results = {};
 try {
@@ -33,15 +35,20 @@ try {
       window.__feedRequests.push(String(url));
       return new Response('<rss><channel><item><title>Fixture headline</title><link>https://example.test/story</link><pubDate>' + new Date().toUTCString() + '</pubDate></item></channel></rss>');
     };
-    await roostTestHooks.fetchSection({label:'Off', feeds:['https://example.test/off.xml']}, {force:true});
+    const cfg = roostTestHooks.effectiveWireFeeds()[0];
+    await roostTestHooks.fetchSection(cfg, {force:true});
+    await roostTestHooks.loadWire({force:true});
+    roostTestHooks.applyHomeView('morning');
+    const consent = 'roost_headline_connection_v1';
+    const restore = roostTestHooks.safeRestoreData({ [consent]: JSON.stringify({enabled:true,custom:['https://example.test/feed']}) });
     document.getElementById('news').scrollIntoView();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    return window.__feedRequests.length === 0;
+    return !window.__bootFeedRequests.length && !window.__feedRequests.length && !(consent in restore) && document.querySelector('[data-feed-connection]').textContent === 'Connect live feeds';
   })()`);
-  assert.ok(results.disabled, "disabled headlines must not fetch through direct or lazy paths");
+  assert.ok(results.disabled, "previously visible headlines, views, restore and force-refresh cannot grant network access");
 
   results.sharedRequest = await app.evaluate(`(async () => {
-    document.querySelector('[data-action="toggle-heads"]').click();
+    document.querySelector('.roost-wire [data-feed-connection]').click();
     await new Promise(resolve => setTimeout(resolve, 80));
     window.__feedRequests = [];
     window.fetch = async function(url) {
@@ -49,11 +56,31 @@ try {
       await new Promise(resolve => setTimeout(resolve, 30));
       return new Response('<rss><channel><item><title>Shared fixture</title><link>https://example.test/shared</link></item></channel></rss>');
     };
-    const cfg = {label:'Shared', feeds:['https://example.test/shared.xml']};
+    const cfg = {label:'Shared', feeds:[roostTestHooks.effectiveWireFeeds()[0].feeds[0]]};
     const lists = await Promise.all([roostTestHooks.fetchSection(cfg, {force:true}), roostTestHooks.fetchSection(cfg, {force:true})]);
     return window.__feedRequests.filter(url => url.includes(encodeURIComponent(cfg.feeds[0]))).length === 1 && lists.every(list => list.length === 1 && list[0]._feedLive);
   })()`);
   assert.ok(results.sharedRequest, "concurrent surfaces must share one source request");
+
+  results.customPermission = await app.evaluate(`(async () => {
+    const url = 'https://example.test/shared.xml';
+    roostTestHooks.saveCustomFeeds([{id:'fixture',label:'Fixture',url,wire:true}]);
+    window.__feedRequests = [];
+    await roostTestHooks.fetchSection({label:'Fixture',feeds:[url]}, {force:true});
+    if (window.__feedRequests.length) return false;
+    document.querySelector('[data-action="customlinks"]').click();
+    document.querySelector('[data-custom-tab="feeds"]').click();
+    document.querySelector('[data-feed-allow="fixture"]').click();
+    await roostTestHooks.fetchSection({label:'Fixture',feeds:[url]}, {force:true});
+    const reachedDirectly = window.__feedRequests.includes(url) && !window.__feedRequests.some(request => request.includes(encodeURIComponent(url)));
+    const exported = roostTestHooks.backupPayload(true).data;
+    document.querySelector('[data-feed-allow="fixture"]').click();
+    window.__feedRequests = [];
+    await roostTestHooks.fetchSection({label:'Fixture',feeds:[url]}, {force:true});
+    document.getElementById('roost-modal-x').click();
+    return reachedDirectly && !window.__feedRequests.includes(url) && !('roost_headline_connection_v1' in exported);
+  })()`);
+  assert.ok(results.customPermission, "custom sources require a local, revocable choice and only receive direct requests");
 
   results.freshness = await app.evaluate(`(async () => {
     const urls = ['https://example.test/old-cache.xml','https://example.test/new-cache.xml'];
@@ -104,13 +131,13 @@ try {
     let calls = 0, aborted = false;
     window.fetch = (url, opts) => {
       calls++;
-      return Promise.resolve({ok:true, text:() => new Promise((resolve,reject) => {
-        opts.signal.addEventListener('abort', () => { aborted = true; reject(new DOMException('Aborted','AbortError')); });
-      })});
+      return Promise.resolve(new Response(new ReadableStream({ start(controller) {
+        opts.signal.addEventListener('abort', () => { aborted = true; controller.error(new DOMException('Aborted','AbortError')); });
+      } })));
     };
-    const pending = roostTestHooks.fetchSection({label:'Pending',feeds:['https://example.test/pending.xml']},{force:true});
+    const pending = roostTestHooks.fetchSection({label:'Pending',feeds:[roostTestHooks.effectiveWireFeeds()[0].feeds[0]]},{force:true});
     await new Promise(resolve => setTimeout(resolve,0));
-    document.querySelector('[data-action="toggle-heads"]').click();
+    document.querySelector('.roost-wire [data-feed-connection]').click();
     await pending;
     document.getElementById('security').scrollIntoView();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -119,7 +146,7 @@ try {
     return calls === 1 && aborted;
   })()`);
   assert.ok(results.cancel, "turning headlines off must abort inflight work and prevent fallbacks");
-  console.log("PASS feed fixtures: disabled, shared requests, freshness, Atom safety, corrupt cache, cancellation");
+  console.log("PASS feed fixtures: opt-in, source permissions, sharing boundaries, freshness, Atom safety, corrupt cache, cancellation");
 
   results.serviceWorker = await app.evaluate(`(async () => {
     const registration = await Promise.race([navigator.serviceWorker.ready, new Promise((_,reject) => setTimeout(() => reject(new Error('SW readiness timeout')),10000))]);

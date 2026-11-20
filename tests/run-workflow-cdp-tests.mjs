@@ -123,6 +123,46 @@ for (const width of [360,390,768,1440]) {
       return {failure,saved,conflict};
     })()`);
     assert.deepEqual(note,{failure:true,saved:true,conflict:true});
+    if (width === 390) {
+      const recovery = await app.evaluate(`(() => {
+        const originalSet = Storage.prototype.setItem, originalConfirm = window.confirm;
+        try {
+          document.getElementById('roost-add-link-primary').click();
+          const title = document.getElementById('custom-link-title');
+          title.value = 'Keep this resource';
+          document.getElementById('custom-link-url').value = 'https://example.org/resource';
+          window.confirm = () => false;
+          document.getElementById('custom-link-cancel').click();
+          const guarded = document.getElementById('custom-link-title') === title;
+          Storage.prototype.setItem = function(key, value) {
+            if (key === 'roost_custom_links_v1') throw new Error('Storage unavailable');
+            return originalSet.call(this, key, value);
+          };
+          document.getElementById('roost-custom-link-form').requestSubmit();
+          const kept = title.value === 'Keep this resource' && /Not saved/.test(document.getElementById('custom-link-status').textContent);
+          Storage.prototype.setItem = originalSet;
+          document.getElementById('roost-custom-link-form').requestSubmit();
+          const saved = JSON.parse(localStorage.getItem('roost_custom_links_v1')).some(link => link.title === title.value);
+          const rows = ['a','b'].map(id => ({title:id,link:'https://example.org/'+id,note:'',status:'new'}));
+          localStorage.setItem('roost_readlater_v1', JSON.stringify(rows));
+          document.querySelector('#roost-dock [data-action="readlater"]').click();
+          const field = document.querySelector('[data-readlater-note]');
+          localStorage.setItem('roost_readlater_v1', JSON.stringify([...rows].reverse()));
+          field.value = 'Article A only'; field.dispatchEvent(new Event('change'));
+          const readBack = JSON.parse(localStorage.getItem('roost_readlater_v1'));
+          const stable = readBack[0].note === '' && readBack[1].note === field.value;
+          document.getElementById('roost-modal-x').click();
+          const statement = document.getElementById('roost-mission-statement');
+          localStorage.setItem('roost_mission_v1', JSON.stringify({missionStatement:'Other tab'}));
+          statement.value = 'My writing'; statement.dispatchEvent(new Event('input'));
+          const unload = new Event('beforeunload',{cancelable:true}); window.dispatchEvent(unload);
+          const academy = !!document.querySelector('#academy-save-warning [data-download]') && unload.defaultPrevented &&
+            statement.value === 'My writing' && JSON.parse(localStorage.getItem('roost_mission_v1')).missionStatement === 'Other tab';
+          return {guarded,kept,saved,stable,academy};
+        } finally {Storage.prototype.setItem=originalSet; window.confirm=originalConfirm;}
+      })()`);
+      for (const [name, passed] of Object.entries(recovery)) assert.equal(passed,true,name);
+    }
     assert.deepEqual(app.errors,[]);
     results.push({width,desk,library,layout,writing,conflicts,session,note,runtimeErrors:app.errors});
   } finally {await app.close();}

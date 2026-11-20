@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-HNAUUWVznl5686raHTnsyYbZIiBoibS7teyoM9zTQ1c=' 'sha256-t80o4KmfpMWCGqtWpvzkV8PIGuzpfSTRKlAlAm+a71A='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https:; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="x-dns-prefetch-control" content="off" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Roost — Home Base</title>
-  <meta name="description" content="The Roost — a living home base: links, headlines, creative tools, and learning. Built to perch on, not to take itself too seriously." />
+  <meta name="description" content="The Roost is a local-first desk for your links, notes and plans, with a curated library, optional live headlines, and offline tools." />
   <!-- PWA / iOS home-screen -->
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0a1225" />
+  <meta name="theme-color" content="#101917" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="The Roost" />
   <link rel="apple-touch-icon" href="icon-180.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-deep: #060d1a;
@@ -463,8 +463,8 @@
                   color var(--transition-fast), background var(--transition-fast);
       z-index: 2;
     }
-    .link-card:hover .pin-btn,
-    .link-card:focus-within .pin-btn,
+    .roost-card-frame:hover .pin-btn,
+    .roost-card-frame:focus-within .pin-btn,
     .pin-btn.pinned {
       opacity: 1; transform: scale(1);
     }
@@ -1029,35 +1029,29 @@
   <a href="#main-content" class="skip-nav">Skip to main content</a>
   <div class="page-wrapper v3-header-wrap">
     <header class="site-header">
-      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 360'><g fill='%23dfe6f2'><path d='M320 92c11 0 20 7 22 17l4 17 23-7-15 17 11 8-17 5 7 52c3 27-7 54-35 73-28-19-38-46-35-73l7-52-17-5 11-8-15-17 23 7 4-17c2-10 11-17 22-17z'/><path d='M298 170C240 122 158 98 58 106l30 18-52 6 34 16-44 10 36 12-36 14 40 8-28 16 44 4-20 18 46-2-12 20c68-10 124-40 154-86z'/><path transform='translate(640 0) scale(-1 1)' d='M298 170C240 122 158 98 58 106l30 18-52 6 34 16-44 10 36 12-36 14 40 8-28 16 44 4-20 18 46-2-12 20c68-10 124-40 154-86z'/><path d='M320 266l-36 60 17-6 7 19 12-15 12 15 7-19 17 6z'/><path d='M268 58l4 11 12 1-9 8 3 12-10-7-10 7 3-12-9-8 12-1z'/><path d='M320 40l4 11 12 1-9 8 3 12-10-7-10 7 3-12-9-8 12-1z'/><path d='M372 58l4 11 12 1-9 8 3 12-10-7-10 7 3-12-9-8 12-1z'/></g></svg>" alt="" class="eagle-bg" aria-hidden="true" />
-      <h1>The Roost</h1>
-      <p class="subtitle">Home base — where the good links, fresh headlines &amp; half-formed ideas come to perch</p>
-      <div class="header-bar">
-        <span class="divider"></span>
-        <span class="stars" aria-hidden="true">★ ★ ★</span>
-        <span class="divider"></span>
+      <div class="greeting-bar">
+        <span id="greeting-icon" aria-hidden="true">☀️</span>
+        <span id="greeting-text">Welcome</span>
+        <span class="roost-header-date" id="greeting-date"></span>
+        <span id="greeting-clock"></span>
       </div>
-      <div class="header-stats" aria-label="Link statistics">
-        <span><span class="stat-num" id="total-links">786</span> links</span>
-        <span><span class="stat-num" id="total-sections">34</span> sections</span>
+      <h1>The Roost</h1>
+      <p class="subtitle">Your links, notes and plans in one place.</p>
+      <div class="header-stats" aria-label="Library size">
+        <span><span class="stat-num" id="total-links">785</span> links</span>
+        <span><span class="stat-num" id="total-sections">33</span> sections</span>
       </div>
     </header>
-  </div>
-  <div class="greeting-bar" role="status" aria-live="polite">
-    <span id="greeting-icon">☀️</span>
-    <span id="greeting-text">Good morning</span>
-    <span> · <span id="greeting-date"></span></span>
-    <span> · <span id="greeting-clock">--:--</span></span>
   </div>
   <nav class="top-bar" aria-label="Section navigation and search">
     <div class="top-bar-inner">
       <div class="search-wrap" role="search">
-        <span class="search-icon" aria-hidden="true">🔍</span>
-        <input type="search" id="search-input" placeholder="Search 786 links..."
+        <span class="search-icon" aria-hidden="true"></span>
+        <input type="search" id="search-input" placeholder="Search links, tools and notes…"
                autocomplete="off" aria-label="Search all links" />
         <span class="search-count" id="search-count" aria-live="polite"></span>
       </div>
-      <div class="nav-tabs" role="tablist" id="nav-tabs">
+      <div class="nav-tabs" aria-label="Jump to a section" id="nav-tabs">
         <a href="#pinned" class="nav-tab" id="nav-pinned" style="display:none;">★ Favorites</a>
 <a href="#recent" class="nav-tab" id="nav-recent" style="display:none;">⏱ Recent</a>
 <a href="#quick-access" class="nav-tab">Quick Access</a>
@@ -1103,9 +1097,8 @@
       <section class="v3-command-center" id="command-center" aria-labelledby="command-center-heading">
         <div class="v3-command-grid">
           <div>
-            <p class="v3-eyebrow">Section Launcher</p>
-            <h2 id="command-center-heading">Every section, right up front</h2>
-            <p>Jump straight to the area you want, then use filters only when you want to narrow the page.</p>
+            <h2 id="command-center-heading">Section directory</h2>
+            <p>Choose a section to browse its links.</p>
           </div>
           <div class="v3-controls">
             <div class="v3-actions" aria-label="Homepage controls">
@@ -7089,7 +7082,7 @@
   </div>
   <footer class="site-footer">
     <p>Last updated: June 2026 &middot; v3 &middot;
-      <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false">Back to top</a>
+      <a href="#">Back to top</a>
     </p>
   
     <details class="v3-maintenance">
@@ -7252,151 +7245,6 @@
       sections.forEach(s => obs.observe(s));
     })();
 
-    // ---- Favorites (pin) + Recently Visited via localStorage ----
-    (function () {
-      const PIN_KEY = 'kfl_pins_v1';
-      const RECENT_KEY = 'kfl_recent_v1';
-      const RECENT_MAX = 8;
-
-      function safeRead(k) {
-        try {
-          const value = JSON.parse(localStorage.getItem(k) || '[]');
-          return Array.isArray(value) ? value.filter(item => {
-            if (!item || typeof item !== 'object' || typeof item.href !== 'string') return false;
-            try { return /^https?:$/.test(new URL(item.href, location.href).protocol); } catch (e) { return false; }
-          }).map(item => ({ ...item, label: String(item.label || ''), desc: String(item.desc || '') })) : [];
-        }
-        catch (e) { return []; }
-      }
-      function safeWrite(k, v) {
-        try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
-      }
-
-      let pins = safeRead(PIN_KEY);
-      let recent = safeRead(RECENT_KEY);
-
-      const pinnedGrid = document.getElementById('pinned-grid');
-      const pinnedSection = document.getElementById('pinned');
-      const pinnedCount = document.getElementById('pinned-count');
-      const recentGrid = document.getElementById('recent-grid');
-      const recentSection = document.getElementById('recent');
-      const recentCount = document.getElementById('recent-count');
-      const navPinned = document.getElementById('nav-pinned');
-      const navRecent = document.getElementById('nav-recent');
-
-      function makeMiniCard(meta, opts) {
-        opts = opts || {};
-        const a = document.createElement('a');
-        a.className = 'link-card';
-        a.href = meta.href;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.setAttribute('data-name', (meta.label || '').toLowerCase());
-        a.setAttribute('data-desc-search', (meta.desc || '').toLowerCase());
-        const lab = document.createElement('span');
-        lab.className = 'card-label';
-        lab.textContent = meta.label;
-        a.appendChild(lab);
-        if (meta.desc) {
-          const d = document.createElement('span');
-          d.className = 'card-desc';
-          d.textContent = meta.desc;
-          a.appendChild(d);
-        }
-        if (opts.allowPinBtn !== false) attachPinBtn(a);
-        a.addEventListener('click', () => trackRecent(meta));
-        return a;
-      }
-
-      function getCardMeta(card) {
-        return {
-          href: card.getAttribute('href'),
-          label: (card.querySelector('.card-label') || {}).textContent || '',
-          desc:  (card.querySelector('.card-desc')  || {}).textContent || ''
-        };
-      }
-
-      function isPinned(href) { return pins.some(p => p.href === href); }
-
-      function renderPins() {
-        pinnedGrid.innerHTML = '';
-        pins.forEach(meta => pinnedGrid.appendChild(makeMiniCard(meta)));
-        pinnedCount.textContent = pins.length;
-        const empty = pins.length === 0;
-        pinnedSection.setAttribute('data-empty', empty ? 'true' : 'false');
-        if (navPinned) navPinned.style.display = empty ? 'none' : '';
-        // Sync star state across all matching pin buttons in main grid
-        document.querySelectorAll('main .link-card .pin-btn').forEach(btn => {
-          const card = btn.closest('.link-card');
-          const pinned = isPinned(card.getAttribute('href'));
-          btn.classList.toggle('pinned', pinned);
-          btn.textContent = pinned ? '\u2605' : '\u2606';
-          btn.setAttribute('aria-label', pinned ? 'Unpin from Favorites' : 'Pin to Favorites');
-        });
-      }
-
-      function togglePin(card) {
-        const meta = getCardMeta(card);
-        const idx = pins.findIndex(p => p.href === meta.href);
-        if (idx >= 0) pins.splice(idx, 1);
-        else pins.unshift(meta);
-        if (pins.length > 24) pins = pins.slice(0, 24);
-        safeWrite(PIN_KEY, pins);
-        renderPins();
-      }
-
-      function attachPinBtn(card) {
-        if (card.querySelector('.pin-btn')) return;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'pin-btn';
-        btn.tabIndex = -1;
-        btn.textContent = isPinned(card.getAttribute('href')) ? '\u2605' : '\u2606';
-        if (isPinned(card.getAttribute('href'))) btn.classList.add('pinned');
-        btn.addEventListener('click', e => {
-          e.preventDefault(); e.stopPropagation();
-          togglePin(card);
-        });
-        card.appendChild(btn);
-      }
-
-      function trackRecent(meta) {
-        recent = recent.filter(r => r.href !== meta.href);
-        recent.unshift(meta);
-        if (recent.length > RECENT_MAX) recent = recent.slice(0, RECENT_MAX);
-        safeWrite(RECENT_KEY, recent);
-        renderRecent();
-      }
-
-      function renderRecent() {
-        recentGrid.innerHTML = '';
-        recent.forEach(meta => recentGrid.appendChild(makeMiniCard(meta)));
-        recentCount.textContent = recent.length;
-        const empty = recent.length === 0;
-        recentSection.setAttribute('data-empty', empty ? 'true' : 'false');
-        if (navRecent) navRecent.style.display = empty ? 'none' : '';
-      }
-
-      // Wire up every primary card with a pin button + recent tracking
-      document.querySelectorAll('main .section:not(#pinned):not(#recent) .link-card')
-        .forEach(card => {
-          attachPinBtn(card);
-          card.addEventListener('click', e => {
-            // Ignore if user clicked the pin button
-            if (e.target.closest('.pin-btn')) return;
-            trackRecent(getCardMeta(card));
-          });
-        });
-
-      renderPins();
-      renderRecent();
-
-      // Expose for the keyboard shortcut
-      window.__kflTogglePin = function (card) {
-        if (card && card.classList.contains('link-card')) togglePin(card);
-      };
-    })();
-
     // ---- Help overlay + extra keyboard shortcuts ----
     (function () {
       const overlay = document.getElementById('help-overlay');
@@ -7429,7 +7277,7 @@
           const focused = document.activeElement;
           if (focused && focused.classList.contains('link-card')) {
             e.preventDefault();
-            window.__kflTogglePin(focused);
+            focused.parentElement.querySelector('.pin-btn')?.click();
           }
           return;
         }
@@ -7457,29 +7305,6 @@
     // search, truthful badges, aria-current on the nav.
     // ==========================================================
     (function () {
-      // ---- Favicons on every card (lazy; removed on failure) ----
-      function addFav(card) {
-        try {
-          if (!card || card.querySelector('.card-favicon')) return;
-          const host = new URL(card.href).hostname;
-          const img = document.createElement('img');
-          img.className = 'card-favicon';
-          img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
-          img.referrerPolicy = 'no-referrer';
-          img.src = 'https://www.google.com/s2/favicons?sz=64&domain=' + host;
-          img.addEventListener('error', () => img.remove());
-          card.prepend(img);
-        } catch (e) {}
-      }
-      document.querySelectorAll('.link-card').forEach(addFav);
-      new MutationObserver(muts => {
-        muts.forEach(m => m.addedNodes.forEach(n => {
-          if (n.nodeType !== 1) return;
-          if (n.classList && n.classList.contains('link-card')) addFav(n);
-          if (n.querySelectorAll) n.querySelectorAll('.link-card').forEach(addFav);
-        }));
-      }).observe(document.querySelector('main'), { childList: true, subtree: true });
-
       // ---- Section badges always tell the truth ----
       document.querySelectorAll('main .section[id]:not(#pinned):not(#recent)').forEach(s => {
         const c = s.querySelector('.section-count');
@@ -7617,7 +7442,9 @@
       const noResults = document.getElementById('no-results');
       const spotlight = document.getElementById('v3-spotlight');
       const viewbar = document.getElementById('v3-viewbar');
-      let activeView = localStorage.getItem('kfl_v3_view') || 'all';
+      function readPreference(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
+      function writePreference(key, value) { try { localStorage.setItem(key, value); } catch (_) {} }
+      let activeView = readPreference('kfl_v3_view') || 'all';
 
       function cleanHost(hostname) {
         return hostname.replace(/^www\./, '');
@@ -7648,6 +7475,13 @@
           const url = new URL(card.href);
           const domain = cleanHost(url.hostname);
           card.dataset.domain = domain;
+          if (card.closest('#quick-access')) {
+            const mark = document.createElement('span');
+            mark.className = 'roost-link-mark';
+            mark.setAttribute('aria-hidden', 'true');
+            mark.textContent = (card.querySelector('.card-label')?.textContent.trim() || domain).charAt(0);
+            card.prepend(mark);
+          }
           if (!card.querySelector('.card-domain')) {
             const domainEl = document.createElement('span');
             domainEl.className = 'card-domain';
@@ -7763,7 +7597,7 @@
           button.setAttribute('aria-pressed', button.dataset.v3View === activeView ? 'true' : 'false');
           button.addEventListener('click', () => {
             activeView = button.dataset.v3View;
-            localStorage.setItem('kfl_v3_view', activeView);
+            writePreference('kfl_v3_view', activeView);
             viewbar.querySelectorAll('button[data-v3-view]').forEach(b => {
               b.setAttribute('aria-pressed', b === button ? 'true' : 'false');
             });
@@ -7775,10 +7609,10 @@
       const compactToggle = document.getElementById('v3-compact-toggle');
       function setCompact(on) {
         document.body.classList.toggle('v3-compact', on);
-        localStorage.setItem('kfl_v3_compact', on ? '1' : '0');
+        writePreference('kfl_v3_compact', on ? '1' : '0');
         if (compactToggle) compactToggle.textContent = on ? 'Comfort' : 'Compact';
       }
-      setCompact(localStorage.getItem('kfl_v3_compact') === '1');
+      setCompact(readPreference('kfl_v3_compact') === '1');
       if (compactToggle) {
         compactToggle.addEventListener('click', () => setCompact(!document.body.classList.contains('v3-compact')));
       }
@@ -9734,8 +9568,10 @@
     pointer-events: none;
     transition: var(--transition-fast);
   }
-  .link-card:hover .roost-card-tools,
-  .link-card:focus-within .roost-card-tools {
+  .roost-card-frame { position: relative; display: grid; min-width: 0; }
+  .roost-card-frame:has(> .link-card[data-hidden="true"]) { display: none; }
+  .roost-card-frame:hover .roost-card-tools,
+  .roost-card-frame:focus-within .roost-card-tools {
     opacity: 1;
     pointer-events: auto;
   }
@@ -10587,6 +10423,7 @@
     .roost-dock-item small { display: none; }
   }
 </style>
+<link rel="stylesheet" href="roost-desk.css" media="screen" />
 
 <script>
 /* =================================================================
@@ -10612,6 +10449,34 @@
     }
   };
   var SETTINGS_KEY = "roost_settings_v1";
+  // Connection choices belong to this browser, separate from shareable settings.
+  var HEADLINE_CONNECTION_KEY = "roost_headline_connection_v1";
+  var headlineConnection = readHeadlineConnection();
+  function readHeadlineConnection() {
+    var stored = LS.read(HEADLINE_CONNECTION_KEY, {});
+    return {
+      enabled: stored.enabled === true,
+      custom: Array.isArray(stored.custom) ? stored.custom.filter(function (url) { return typeof url === "string"; }).slice(0, 80) : []
+    };
+  }
+  function canFetchHeadline(url) {
+    return settings.headlines && headlineConnection.enabled && (isBuiltInFeedUrl(url) || headlineConnection.custom.indexOf(url) !== -1);
+  }
+  function saveHeadlineConnection(enabled, custom) {
+    var next = { enabled: enabled, custom: custom };
+    var saved = LS.write(HEADLINE_CONNECTION_KEY, next);
+    headlineConnection = next;
+    if (!saved) toast("Feed choice applies to this tab only. Browser storage is unavailable.");
+    return saved;
+  }
+  window.addEventListener("storage", function (event) {
+    if (event.key !== HEADLINE_CONNECTION_KEY && event.key !== null) return;
+    headlineConnection = readHeadlineConnection();
+    pauseHeadlineRequests();
+    applyHeadlineVisibility();
+    var manager = document.getElementById("feed-list");
+    if (manager && manager._refreshFeedList) manager._refreshFeedList();
+  });
   var settings = LS.read(SETTINGS_KEY, { headlines: true });
   // Additive preference migration: preserve explicitly saved layouts / legacy groups.
   // New or unconfigured homes start at the desk. No layout or collapse data is rewritten.
@@ -10626,7 +10491,16 @@
   settings.ambient = !!settings.ambient;
   settings.wireCollapsed = !!settings.wireCollapsed;
   settings.todayCollapsed = !!settings.todayCollapsed;
-  function saveSettings() { LS.write(SETTINGS_KEY, settings); }
+  var settingsBaseline = Object.assign({}, settings);
+  function saveSettings() {
+    var latest = LS.read(SETTINGS_KEY, {});
+    Object.keys(settings).forEach(function (key) {
+      if (!Object.prototype.hasOwnProperty.call(latest, key) || settings[key] !== settingsBaseline[key]) latest[key] = settings[key];
+    });
+    if (!LS.write(SETTINGS_KEY, latest)) return false;
+    settingsBaseline = Object.assign({}, settings);
+    return true;
+  }
   var READ_LATER_KEY = "roost_readlater_v1";
   var BOARDS_KEY = "roost_boards_v1";
   var LINK_NOTES_KEY = "roost_link_notes_v1";
@@ -10676,6 +10550,7 @@
     { id: "kidZone", label: "Kid Zone", desc: "Show child-friendly learning section." }
   ];
   var roostOnboarding = readOnboardingState();
+  settings.headlines = roostOnboarding.data.news === true;
 
   var failedStorageKeys = new Set(), modalEditor = null;
   function reportStorageWrite(key, ok) {
@@ -10695,7 +10570,13 @@
     }
   }
   function watchEditor(body, selectors, label, statusId, extraValue) {
-    function value() { return JSON.stringify(selectors.map(function (selector) { var field = body.querySelector(selector); return field ? field.value : ""; }).concat(extraValue ? extraValue() : "")); }
+    function value() {
+      return JSON.stringify(selectors.map(function (selector) {
+        var field = body.querySelector(selector);
+        if (!field) return "";
+        return field.type === "checkbox" ? field.checked : field.value;
+      }).concat(extraValue ? extraValue() : ""));
+    }
     var baseline = value();
     var editor = {
       body: body, label: label,
@@ -10714,7 +10595,7 @@
     return !modalEditor || !modalEditor.dirty() || confirm("Discard unsaved " + modalEditor.label + " changes? Choose Cancel to keep writing, save, or export first.");
   }
   window.addEventListener("beforeunload", function (event) {
-    if (modalEditor && modalEditor.dirty()) { event.preventDefault(); event.returnValue = ""; }
+    if (missionUnsaved || (modalEditor && modalEditor.dirty())) { event.preventDefault(); event.returnValue = ""; }
   });
 
   /* ---------- toast ---------- */
@@ -10726,17 +10607,9 @@
   }
 
   function meaningfulStorageExists() {
-    try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        if (!k || k === ONBOARDING_KEY || k.indexOf("roost_feed_") === 0) continue;
-        if (k === "kfl_v3_compact" || k === "kfl_v3_view" || k === SETTINGS_KEY || k === "roost_launcher_minimized_v1" || k === LAYOUT_KEY || k === VIEWS_KEY || k === ACCESSIBILITY_KEY) continue;
-        if (k.indexOf("kfl_") !== 0 && k.indexOf("roost_") !== 0 && k !== "missionControlRPG_v3") continue;
-        var v = localStorage.getItem(k);
-        if (v && v !== "[]" && v !== "{}" && v !== "null") return true;
-      }
-    } catch (e) {}
-    return false;
+    var collections = ["kfl_pins_v1", "kfl_recent_v1", "roost_workbench_v1", CUSTOM_LINKS_KEY, CUSTOM_SECTIONS_KEY, READ_LATER_KEY, BOARDS_KEY];
+    if (collections.some(function (key) { return LS.read(key, []).some(function (item) { return item && typeof item === "object" && !Array.isArray(item) && Object.keys(item).length; }); })) return true;
+    return [LINK_NOTES_KEY, SESSION_KEY, "roost_mission_v1", "missionControlRPG_v3"].some(function (key) { return Object.keys(LS.read(key, {})).length > 0; });
   }
   function publicStarterData() {
     return {
@@ -10744,7 +10617,7 @@
       intendedUse: "personal",
       customUse: "",
       modules: { wire: true, today: true, missionExample: false, workbench: true, diagrams: true, kidZone: false },
-      news: true,
+      news: settings.headlines !== false,
       density: "comfort",
       visualMode: "default",
       starterSections: ["quick-access", "ai-apps", "ai-learn", "research", "news"]
@@ -10754,7 +10627,7 @@
     var compact = false;
     try { compact = localStorage.getItem("kfl_v3_compact") === "1"; } catch (e) {}
     return {
-      displayName: "Kirby",
+      displayName: "",
       intendedUse: "personal",
       customUse: "",
       modules: { wire: true, today: true, missionExample: true, workbench: true, diagrams: true, kidZone: true },
@@ -11023,8 +10896,7 @@
         if (/^[^\s/@]+\.[^\s]+/.test(raw)) raw = "https://" + raw;
         else return "";
       }
-      var parsed = new URL(raw);
-      if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
+      return safeHttpUrl(raw);
     } catch (e) {}
     return "";
   }
@@ -11059,7 +10931,7 @@
       section.updatedAt = new Date().toISOString();
       return section;
     });
-    LS.write(CUSTOM_SECTIONS_KEY, list);
+    return LS.write(CUSTOM_SECTIONS_KEY, list);
   }
   function customLinks() {
     var raw = LS.read(CUSTOM_LINKS_KEY, []);
@@ -11083,9 +10955,16 @@
       };
     }).filter(Boolean);
   }
-  function saveCustomLinks(list) {
-    LS.write(CUSTOM_LINKS_KEY, Array.isArray(list) ? list : []);
-    syncCustomFavoritesToPins();
+  function saveCustomLinks(list, sections, history, pins) {
+    if (customSectionsStorageIsMalformed()) { toast("Restore your custom sections before changing links."); return false; }
+    var values = {};
+    values[CUSTOM_LINKS_KEY] = JSON.stringify(list);
+    values.kfl_pins_v1 = JSON.stringify(pins || pinsForCustomLinks(list));
+    if (sections) values[CUSTOM_SECTIONS_KEY] = JSON.stringify(sections);
+    if (history) values[IMPORT_HISTORY_KEY] = JSON.stringify(history.slice(0, 20));
+    var result = writeStorageTransaction(values);
+    reportStorageWrite(CUSTOM_LINKS_KEY, result.ok);
+    return result.ok;
   }
   function normalizeTags(value) {
     if (Array.isArray(value)) return value.map(function (tag) { return String(tag || "").trim().slice(0, 32); }).filter(Boolean).slice(0, 12);
@@ -11177,8 +11056,6 @@
         launcher.appendChild(jump);
       }
     });
-    installCustomCardBehavior();
-    installCardTools();
     refreshKflUtilitySections();
     if (settings.headlines) setupHeadlines();
     syncMissionSurfaceStats();
@@ -11210,52 +11087,25 @@
       }
     });
   }
-  function installCustomCardBehavior() {
-    document.querySelectorAll(".roost-custom-link-card").forEach(function (card) {
-      if (!card.querySelector(".pin-btn")) attachCustomPinButton(card);
-      if (!card._roostCustomRecent) {
-        card._roostCustomRecent = true;
-        card.addEventListener("click", function (event) {
-          if (event.target.closest(".pin-btn") || event.target.closest(".roost-card-tools")) return;
-          trackRoostRecent(linkCardData(card));
-        });
-      }
-    });
-  }
-  function attachCustomPinButton(card) {
-    var btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "pin-btn";
-    btn.tabIndex = -1;
-    btn.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      toggleRoostPin(card);
-    });
-    card.appendChild(btn);
-    syncPinButton(card, btn);
-  }
   function readPins() { return LS.read("kfl_pins_v1", []).filter(function (item) { return item && safeCustomUrl(item.href); }); }
-  function writePins(pins) { LS.write("kfl_pins_v1", pins.slice(0, 24)); }
+  function writePins(pins) { return LS.write("kfl_pins_v1", pins); }
   function readRecent() { return LS.read("kfl_recent_v1", []).filter(function (item) { return item && safeCustomUrl(item.href); }); }
-  function writeRecent(recent) { LS.write("kfl_recent_v1", recent.slice(0, 8)); }
-  function syncCustomFavoritesToPins() {
-    var pins = readPins();
-    customLinks().forEach(function (link) {
-      var idx = pins.findIndex(function (pin) { return safeCustomUrl(pin.href) === link.url; });
-      if (link.favorite && idx === -1) pins.unshift({ href: link.url, label: link.title, desc: link.description });
-      if (!link.favorite && idx !== -1) pins.splice(idx, 1);
-    });
-    writePins(pins);
+  function writeRecent(recent) { return LS.write("kfl_recent_v1", recent.slice(0, 10)); }
+  function pinsForCustomLinks(links) {
+    var old = new Set(customLinks().filter(function (link) { return link.favorite; }).map(function (link) { return link.url; }));
+    var favorites = new Map(links.filter(function (link) { return link.favorite; }).map(function (link) { return [link.url, link]; }));
+    var pins = readPins().filter(function (pin) { var url = safeCustomUrl(pin.href); return !old.has(url) || favorites.has(url); });
+    var present = new Set(pins.map(function (pin) { return safeCustomUrl(pin.href); }));
+    favorites.forEach(function (link, url) { if (!present.has(url)) pins.unshift({ href: url, label: link.title, desc: link.description }); });
+    return pins;
   }
-  function syncPinButton(card, btn) {
-    var href = safeCustomUrl(card.href);
-    var pinned = readPins().some(function (pin) { return safeCustomUrl(pin.href) === href; });
-    btn = btn || card.querySelector(".pin-btn");
-    if (!btn) return;
+  function syncPinButton(card, btn, saved) {
+    var pinned = saved.has(safeCustomUrl(card.href));
     btn.classList.toggle("pinned", pinned);
-    btn.textContent = pinned ? "\u2605" : "\u2606";
-    btn.setAttribute("aria-label", pinned ? "Unpin from Favorites" : "Pin to Favorites");
+    btn.textContent = pinned ? "★" : "☆";
+    btn.setAttribute("aria-pressed", String(pinned));
+    btn.setAttribute("aria-label", "Favorite " + (card.querySelector(".card-label")?.textContent || card.href));
+    btn.title = pinned ? "Remove from Favorites" : "Add to Favorites";
   }
   function toggleRoostPin(card) {
     var data = linkCardData(card);
@@ -11263,23 +11113,31 @@
     var pins = readPins();
     var idx = pins.findIndex(function (pin) { return safeCustomUrl(pin.href) === data.href; });
     var pinned = idx === -1;
+    if (pinned && pins.length >= 24) { toast("Favorites is full. Remove a favorite to add another."); return; }
     if (pinned) pins.unshift({ href: data.href, label: data.title, desc: data.desc });
     else pins.splice(idx, 1);
-    writePins(pins);
-    var id = card.getAttribute("data-custom-link-id");
-    if (id) {
-      var links = customLinks();
-      links.forEach(function (link) { if (link.id === id) link.favorite = pinned; });
-      LS.write(CUSTOM_LINKS_KEY, links);
+    var changes = { kfl_pins_v1: JSON.stringify(pins) };
+    var links = customLinks();
+    var matching = links.filter(function (link) { return link.url === data.href && link.favorite !== pinned; });
+    if (matching.length) {
+      matching.forEach(function (link) { link.favorite = pinned; });
+      changes[CUSTOM_LINKS_KEY] = JSON.stringify(links);
     }
+    var result = writeStorageTransaction(changes);
+    if (!result.ok) { reportStorageWrite("kfl_pins_v1", false); toast("Could not save Favorites."); return; }
+    reportStorageWrite("kfl_pins_v1", true);
+    var section = card.closest(".section");
+    var returnId = ["pinned","recent"].includes(section.id) && section.id;
     refreshKflUtilitySections();
+    if (returnId) (document.querySelector("#" + returnId + " .pin-btn") || document.getElementById("search-input")).focus({ preventScroll: true });
   }
   function trackRoostRecent(data) {
     if (!data || !data.href) return;
     var recent = readRecent().filter(function (item) { return safeCustomUrl(item.href) !== data.href; });
     recent.unshift({ href: data.href, label: data.title, desc: data.desc });
-    writeRecent(recent);
+    if (!writeRecent(recent)) return;
     refreshKflUtilitySections();
+    if (recent.length >= 10) checkRoostAchievements("recent");
   }
   function miniLinkCardHtml(meta) {
     var href = safeCustomUrl(meta.href);
@@ -11301,7 +11159,8 @@
     if (recentSection) recentSection.setAttribute("data-empty", recent.length ? "false" : "true");
     if (navPinned) navPinned.style.display = pins.length ? "" : "none";
     if (navRecent) navRecent.style.display = recent.length ? "" : "none";
-    document.querySelectorAll("main .link-card .pin-btn").forEach(function (btn) { syncPinButton(btn.closest(".link-card"), btn); });
+    var saved = new Set(pins.map(function (pin) { return safeCustomUrl(pin.href); }));
+    document.querySelectorAll("main .roost-card-frame").forEach(function (frame) { syncPinButton(frame.querySelector(".link-card"), frame.querySelector(".pin-btn"), saved); });
     installCardTools();
   }
   function installCustomPrimaryAction() {
@@ -11334,16 +11193,26 @@
   }
   function buildCustomLinkForm(body, linkId) {
     var link = linkId ? customLinks().filter(function (item) { return item.id === linkId; })[0] : null;
-    var fallbackSection = ensureDefaultCustomSection();
+    if (customSectionsStorageIsMalformed()) {
+      body.innerHTML = '<p role="alert">Your saved sections could not be read. Back up your local data and restore the sections before editing links.</p><button class="wb-btn" type="button">Open Backup</button>';
+      body.querySelector("button").addEventListener("click", function () { openModal("backup"); });
+      return;
+    }
+    var fallbackSection = customSections()[0] || { id: customId("csec"), title: "Custom Links", order: 0, hidden: false };
     link = link || { id: "", title: "", url: "", description: "", sectionId: fallbackSection.id, tags: [], icon: "", favorite: false };
     body.innerHTML =
       '<form class="roost-custom-form" id="roost-custom-link-form">' +
         '<div class="roost-field-row"><label class="roost-field">Title<input id="custom-link-title" maxlength="120" required value="' + esc(link.title) + '"></label><label class="roost-field">URL<input id="custom-link-url" type="url" required placeholder="https://example.com" value="' + esc(link.url) + '"></label></div>' +
         '<label class="roost-field">Description<textarea id="custom-link-desc" maxlength="500">' + esc(link.description) + '</textarea></label>' +
-        '<div class="roost-field-row"><label class="roost-field">Section<select id="custom-link-section">' + customSectionOptions(link.sectionId) + '</select></label><label class="roost-field">Tags<input id="custom-link-tags" maxlength="220" placeholder="comma, separated" value="' + esc((link.tags || []).join(", ")) + '"></label></div>' +
+        '<div class="roost-field-row"><label class="roost-field">Section<select id="custom-link-section">' + (customSections().length ? customSectionOptions(link.sectionId) : '<option value="' + esc(fallbackSection.id) + '">Custom Links</option>') + '</select></label><label class="roost-field">Tags<input id="custom-link-tags" maxlength="220" placeholder="comma, separated" value="' + esc((link.tags || []).join(", ")) + '"></label></div>' +
         '<div class="roost-field-row"><label class="roost-field">Custom icon<input id="custom-link-icon" maxlength="12" placeholder="emoji or short text" value="' + esc(link.icon) + '"></label><label class="roost-backup-check"><input id="custom-link-favorite" type="checkbox"' + (link.favorite ? " checked" : "") + '> Add to Favorites</label></div>' +
         '<div class="roost-backup-actions"><button class="wb-btn primary" type="submit">' + (link.id ? "Save Link" : "Add Link") + '</button><button class="wb-btn" type="button" id="custom-link-cancel">Cancel</button><span class="roost-backup-status" id="custom-link-status"></span></div>' +
       '</form>';
+    var editor = watchEditor(body, ["#custom-link-title", "#custom-link-url", "#custom-link-desc", "#custom-link-section", "#custom-link-tags", "#custom-link-icon", "#custom-link-favorite"], "custom link", "#custom-link-status");
+    function linkRevision(item) {
+      return item && JSON.stringify([item.title, item.url, item.description, item.sectionId, item.tags, item.icon, item.favorite, item.hidden]);
+    }
+    var originalRevision = linkRevision(link);
     body.querySelector("#custom-link-cancel").addEventListener("click", function () { closeModal(); });
     body.querySelector("#roost-custom-link-form").addEventListener("submit", function (event) {
       event.preventDefault();
@@ -11351,6 +11220,15 @@
       var url = safeCustomUrl(body.querySelector("#custom-link-url").value);
       if (!url) { status.textContent = "Use a safe http or https URL."; status.className = "roost-backup-status bad"; return; }
       var links = customLinks();
+      if (link.id && linkRevision(links.find(function (item) { return item.id === link.id; })) !== originalRevision) {
+        editor.status("This link changed or was removed in another tab. Your edits are still here. Copy them before reopening the link.");
+        return;
+      }
+      var sections = customSections(), sectionId = body.querySelector("#custom-link-section").value;
+      if (customSectionsStorageIsMalformed() || (sections.length && !sections.some(function (section) { return section.id === sectionId; }))) {
+        editor.status("Your sections changed in another tab. Copy these edits before reopening the form.");
+        return;
+      }
       var duplicate = links.filter(function (item) { return item.id !== link.id && item.url.toLowerCase() === url.toLowerCase(); })[0];
       if (duplicate && !confirm("A custom link with this URL already exists. Save another copy anyway?")) return;
       var next = {
@@ -11358,17 +11236,22 @@
         title: body.querySelector("#custom-link-title").value.trim().slice(0, 120) || url,
         url: url,
         description: body.querySelector("#custom-link-desc").value.trim().slice(0, 500),
-        sectionId: body.querySelector("#custom-link-section").value || ensureDefaultCustomSection().id,
+        sectionId: sectionId,
         tags: normalizeTags(body.querySelector("#custom-link-tags").value),
         icon: body.querySelector("#custom-link-icon").value.trim().slice(0, 12),
         favorite: body.querySelector("#custom-link-favorite").checked,
-        hidden: false,
+        hidden: !!link.hidden,
+        importBatchId: link.importBatchId || "",
         createdAt: link.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
       links = links.filter(function (item) { return item.id !== next.id; });
       links.unshift(next);
-      saveCustomLinks(links);
+      if (!saveCustomLinks(links, sections.length ? null : [fallbackSection])) {
+        editor.status("Not saved. Your link edits are still here.");
+        return;
+      }
+      editor.saved();
       renderCustomLinks();
       toast(link.id ? "Custom link saved" : "Custom link added");
       closeModal();
@@ -11478,8 +11361,7 @@
         var id = btn.getAttribute("data-sec-del");
         var count = customLinks().filter(function (link) { return link.sectionId === id; }).length;
         if (!confirm("Delete this custom section and " + count + " custom links? Built-in links are not affected.")) return;
-        saveCustomSections(customSections().filter(function (section) { return section.id !== id; }));
-        saveCustomLinks(customLinks().filter(function (link) { return link.sectionId !== id; }));
+        if (!saveCustomLinks(customLinks().filter(function (link) { return link.sectionId !== id; }), customSections().filter(function (section) { return section.id !== id; }))) return;
         renderCustomLinks();
         renderCustomSectionsManager(box);
       });
@@ -11499,6 +11381,16 @@
     var text = box.querySelector("#custom-import-text");
     var status = box.querySelector("#custom-import-status");
     var undo = box.querySelector("#custom-undo-import");
+    var sourceRevision = 0;
+    function invalidatePreview() {
+      sourceRevision++;
+      customImportPreview = null;
+      box.querySelector("#custom-apply-import").disabled = true;
+      box.querySelector("#custom-import-preview").textContent = "";
+      status.textContent = "";
+    }
+    text.addEventListener("input", invalidatePreview);
+    box.querySelector("#custom-import-type").addEventListener("change", invalidatePreview);
     function latestUndoableImport() {
       return importHistory().filter(function (batch) { return !batch.undoneAt && (batch.linkIds || []).length; })[0] || null;
     }
@@ -11508,11 +11400,19 @@
       undo.title = batch && batch.importedAt ? "Undo import from " + new Date(batch.importedAt).toLocaleString() : "";
     }
     file.addEventListener("change", function () {
+      invalidatePreview();
       var f = file.files && file.files[0];
       if (!f) return;
+      text.value = "";
+      if (f.size > LINK_IMPORT_BYTES) {
+        status.textContent = "Choose a bookmark file of 4 MiB or less.";
+        status.className = "roost-backup-status bad";
+        return;
+      }
+      var revision = sourceRevision;
       var reader = new FileReader();
-      reader.onload = function () { text.value = String(reader.result || ""); };
-      reader.onerror = function () { status.textContent = "Could not read that file."; status.className = "roost-backup-status bad"; };
+      reader.onload = function () { if (revision === sourceRevision) text.value = String(reader.result || ""); };
+      reader.onerror = function () { if (revision === sourceRevision) { status.textContent = "Could not read that file."; status.className = "roost-backup-status bad"; } };
       reader.readAsText(f);
     });
     box.querySelector("#custom-preview-import").addEventListener("click", function () {
@@ -11550,12 +11450,17 @@
       if (!confirm("Undo the last custom import? This removes only links created by that import batch.")) return;
       var result = undoLastImport();
       renderCustomLinks();
-      status.textContent = result.ok ? "Removed " + result.removedLinks + " imported links and " + result.removedSections + " empty section(s)." : "No undoable import was found.";
+      status.textContent = result.ok ? "Removed " + result.removedLinks + " imported links and " + result.removedSections + " empty section(s)." : result.error || "No undoable import was found.";
       status.className = "roost-backup-status " + (result.ok ? "good" : "bad");
       renderImportUndoControl();
     });
     box.querySelector("#custom-export").addEventListener("click", exportCustomData);
     renderImportUndoControl();
+  }
+  var LINK_IMPORT_BYTES = 4 * 1024 * 1024;
+  var LINK_IMPORT_ITEMS = 2000;
+  function checkImportCount(count) {
+    if (count > LINK_IMPORT_ITEMS) throw new Error("Split the import into batches of 2,000 links or fewer.");
   }
   function detectImportType(text, selected) {
     if (selected && selected !== "auto") return selected;
@@ -11567,6 +11472,7 @@
     return "csv";
   }
   function buildCustomImportPreview(text, selectedType) {
+    checkImportSize(text, LINK_IMPORT_BYTES);
     var type = detectImportType(text, selectedType);
     var parsed = [];
     if (type === "bookmarks") parsed = parseBookmarkHtml(text);
@@ -11603,14 +11509,22 @@
     };
   }
   function parseBookmarkHtml(text) {
-    var doc = new DOMParser().parseFromString(String(text || ""), "text/html");
+    // Detached template contents cannot activate imported images or subframes.
+    var template = document.createElement("template");
+    template.innerHTML = text;
+    var doc = template.content;
+    var anchors = doc.querySelectorAll("a[href]");
+    checkImportCount(anchors.length);
+    var folders = new Map();
+    doc.querySelectorAll("h3").forEach(function (heading) {
+      if (heading.parentElement) folders.set(heading.parentElement, heading.textContent.trim().slice(0, 80));
+    });
     var out = [];
-    doc.querySelectorAll("a[href]").forEach(function (a) {
+    anchors.forEach(function (a) {
       var folder = "Bookmarks";
       var parent = a.parentElement;
-      while (parent && parent !== doc.body) {
-        var h3 = parent.querySelector && parent.querySelector(":scope > h3");
-        if (h3 && h3.textContent.trim()) { folder = h3.textContent.trim(); break; }
+      while (parent) {
+        if (folders.get(parent)) { folder = folders.get(parent); break; }
         parent = parent.parentElement;
       }
       var clone = a.cloneNode(true);
@@ -11620,17 +11534,20 @@
     return out;
   }
   function parseRoostCustomJson(text) {
-    var parsed = JSON.parse(String(text || "{}"));
+    var parsed = parseImportJson(text);
     var data = parsed;
     if (parsed && parsed.schema === BACKUP_SCHEMA && parsed.data) {
       data = {
-        links: JSON.parse(parsed.data[CUSTOM_LINKS_KEY] || "[]"),
-        sections: JSON.parse(parsed.data[CUSTOM_SECTIONS_KEY] || "[]")
+        links: parseImportJson(parsed.data[CUSTOM_LINKS_KEY] || "[]"),
+        sections: parseImportJson(parsed.data[CUSTOM_SECTIONS_KEY] || "[]")
       };
     }
-    var sections = {};
+    var links = Array.isArray(data) ? data : data && (data.links || data.items);
+    if (!Array.isArray(links) || !links.every(storageRecord) || (data.sections && (!Array.isArray(data.sections) || !data.sections.every(storageRecord)))) throw new Error("Expected a list of link records.");
+    checkImportCount(links.length);
+    var sections = Object.create(null);
     (data.sections || []).forEach(function (section) { sections[section.id] = section.title; });
-    return (data.links || data.items || []).map(function (link) {
+    return links.map(function (link) {
       return Object.assign({}, link, { section: link.sectionTitle || sections[link.sectionId] || link.section || "Imported" });
     });
   }
@@ -11639,7 +11556,7 @@
     if (rows.length < 2) throw new Error("CSV needs a header row and at least one link.");
     var headers = rows.shift().map(function (h) { return String(h || "").trim().toLowerCase(); });
     return rows.map(function (row) {
-      var obj = {};
+      var obj = Object.create(null);
       headers.forEach(function (h, i) { obj[h] = row[i] || ""; });
       return { title: obj.title || obj.name, url: obj.url || obj.href, description: obj.description || obj.desc, section: obj.section, tags: obj.tags, icon: obj.icon, favorite: obj.favorite };
     });
@@ -11653,22 +11570,26 @@
         else if (ch === '"') quoted = false;
         else value += ch;
       } else if (ch === '"') quoted = true;
-      else if (ch === ",") { row.push(value); value = ""; }
-      else if (ch === "\n") { row.push(value); rows.push(row); row = []; value = ""; }
+      else if (ch === ",") { if (row.length >= 128) throw new Error("A CSV row has too many columns."); row.push(value); value = ""; }
+      else if (ch === "\n") { row.push(value); rows.push(row); checkImportCount(rows.length - 1); row = []; value = ""; }
       else if (ch !== "\r") value += ch;
     }
     if (quoted) throw new Error("Malformed CSV quote.");
     row.push(value);
     rows.push(row);
-    return rows.filter(function (r) { return r.some(function (c) { return String(c || "").trim(); }); });
+    rows = rows.filter(function (r) { return r.some(function (c) { return String(c || "").trim(); }); });
+    checkImportCount(rows.length - 1);
+    return rows;
   }
   function parseOpmlFeeds(text) {
+    if (/<!DOCTYPE\b/i.test(text)) throw new Error("Use an OPML file without a document type declaration.");
     var doc = new DOMParser().parseFromString(String(text || ""), "text/xml");
     if (doc.querySelector("parsererror")) throw new Error("OPML/XML is malformed.");
     var out = [];
     doc.querySelectorAll("outline").forEach(function (node) {
       var url = node.getAttribute("htmlUrl") || node.getAttribute("xmlUrl") || node.getAttribute("url");
       if (!url) return;
+      checkImportCount(out.length + 1);
       out.push({ title: node.getAttribute("title") || node.getAttribute("text") || url, url: url, description: node.getAttribute("description") || "Feed subscription", section: "Feeds", tags: "feed,opml", icon: "RSS" });
     });
     return out;
@@ -11691,22 +11612,14 @@
         mode: String(batch.mode || "skip").slice(0, 20),
         imported: Math.max(0, Number(batch.imported || 0)),
         skipped: Math.max(0, Number(batch.skipped || 0)),
-        linkIds: Array.isArray(batch.linkIds) ? batch.linkIds.map(String).filter(Boolean).slice(0, 1000) : [],
-        sectionIds: Array.isArray(batch.sectionIds) ? batch.sectionIds.map(String).filter(Boolean).slice(0, 200) : [],
+        linkIds: Array.isArray(batch.linkIds) ? batch.linkIds.map(String).filter(Boolean) : [],
+        sectionIds: Array.isArray(batch.sectionIds) ? batch.sectionIds.map(String).filter(Boolean) : [],
+        addedPinUrls: Array.isArray(batch.addedPinUrls) ? batch.addedPinUrls.filter(function (url) { return typeof url === "string"; }) : [],
         undoneAt: String(batch.undoneAt || ""),
         removedLinks: Math.max(0, Number(batch.removedLinks || 0)),
         removedSections: Math.max(0, Number(batch.removedSections || 0))
       };
     }).filter(function (batch) { return !!batch.id; }).slice(0, 20);
-  }
-  function saveImportHistory(history) {
-    LS.write(IMPORT_HISTORY_KEY, (history || []).slice(0, 20));
-  }
-  function recordImportBatch(batch) {
-    var history = importHistory().filter(function (item) { return item.id !== batch.id; });
-    history.unshift(batch);
-    saveImportHistory(history);
-    return batch;
   }
   function sectionForImport(title, sections, batchId, createdSectionIds) {
     var normalized = String(title || "Imported").trim().toLowerCase();
@@ -11735,13 +11648,13 @@
       return !(sectionIds[section.id] && section.importBatchId === batch.id && !sectionUse[section.id]);
     });
     var removedSections = sections.length - keptSections.length;
-    saveCustomLinks(keptLinks);
-    saveCustomSections(keptSections);
-    syncCustomFavoritesToPins();
     batch.undoneAt = new Date().toISOString();
     batch.removedLinks = removedLinks;
     batch.removedSections = removedSections;
-    saveImportHistory(history);
+    var addedPins = new Set(batch.addedPinUrls);
+    var keptFavorites = new Set(keptLinks.filter(function (link) { return link.favorite; }).map(function (link) { return link.url; }));
+    var pins = readPins().filter(function (pin) { var url = safeCustomUrl(pin.href); return !addedPins.has(url) || keptFavorites.has(url); });
+    if (!saveCustomLinks(keptLinks, keptSections, history, pins)) return { ok: false, error: "Undo could not be saved. Free browser storage and retry." };
     return { ok: true, batchId: batch.id, removedLinks: removedLinks, removedSections: removedSections };
   }
   function applyCustomImport(preview, mode) {
@@ -11794,19 +11707,15 @@
       existingByUrl[key] = link;
       imported++;
     });
-    var oldLinksRaw = localStorage.getItem(CUSTOM_LINKS_KEY);
-    var oldSectionsRaw = localStorage.getItem(CUSTOM_SECTIONS_KEY);
-    try {
-      localStorage.setItem(CUSTOM_SECTIONS_KEY, JSON.stringify(sections));
-      localStorage.setItem(CUSTOM_LINKS_KEY, JSON.stringify(links));
-      syncCustomFavoritesToPins();
-      if (batchLinkIds.length || batchSectionIds.length) {
-        recordImportBatch({ id: batchId, importedAt: new Date().toISOString(), type: preview.type || "unknown", mode: mode, imported: imported, skipped: skipped, linkIds: batchLinkIds, sectionIds: batchSectionIds });
+    if (imported) {
+      var pins = pinsForCustomLinks(links), history = null;
+      if (batchLinkIds.length) {
+        var existingPins = new Set(readPins().map(function (pin) { return safeCustomUrl(pin.href); }));
+        history = importHistory();
+        history.unshift({ id: batchId, importedAt: new Date().toISOString(), type: preview.type || "unknown", mode: mode, imported: imported, skipped: skipped, linkIds: batchLinkIds, sectionIds: batchSectionIds,
+          addedPinUrls: pins.map(function (pin) { return safeCustomUrl(pin.href); }).filter(function (url) { return !existingPins.has(url); }) });
       }
-    } catch (e) {
-      if (oldSectionsRaw == null) localStorage.removeItem(CUSTOM_SECTIONS_KEY); else localStorage.setItem(CUSTOM_SECTIONS_KEY, oldSectionsRaw);
-      if (oldLinksRaw == null) localStorage.removeItem(CUSTOM_LINKS_KEY); else localStorage.setItem(CUSTOM_LINKS_KEY, oldLinksRaw);
-      throw new Error("Import could not be saved. No custom data was changed.");
+      if (!saveCustomLinks(links, sections, history, pins)) throw new Error("Import could not be saved. Check your browser storage and retry.");
     }
     return { imported: imported, skipped: skipped, batchId: batchId, undoable: batchLinkIds.length, createdSections: batchSectionIds.length };
   }
@@ -11822,7 +11731,7 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
 
-  var setupEl, setupBody, setupLastFocus;
+  var setupEl, setupBody, setupLastFocus, setupDraft, setupSavedAtOpen;
   function ensureOnboardingDialog() {
     if (setupEl) return;
     setupEl = document.createElement("div");
@@ -11833,25 +11742,24 @@
     setupEl.setAttribute("aria-labelledby", "roost-setup-title");
     setupEl.innerHTML =
       '<div class="roost-setup-panel">' +
-        '<div class="roost-setup-head"><h2 id="roost-setup-title">Set Up The Roost</h2><p id="roost-setup-copy"></p><div class="roost-setup-progress" aria-hidden="true"><span id="roost-setup-progress"></span></div></div>' +
+        '<div class="roost-setup-head"><h2 id="roost-setup-title" tabindex="-1">Set Up The Roost</h2><p id="roost-setup-copy" role="status"></p><div class="roost-setup-progress" aria-hidden="true"><span id="roost-setup-progress"></span></div></div>' +
         '<div class="roost-setup-body" id="roost-setup-body"></div>' +
         '<div class="roost-setup-foot"><div class="roost-setup-actions"><button class="roost-setup-btn subtle" type="button" data-setup-skip>Skip</button><button class="roost-setup-btn subtle" type="button" data-setup-reset>Reset</button></div><div class="roost-setup-actions"><button class="roost-setup-btn" type="button" data-setup-back>Back</button><button class="roost-setup-btn primary" type="button" data-setup-next>Continue</button></div></div>' +
       '</div>';
     document.body.appendChild(setupEl);
     setupBody = setupEl.querySelector("#roost-setup-body");
-    setupEl.querySelector("[data-setup-skip]").addEventListener("click", skipOnboarding);
+    setupEl.querySelector("[data-setup-skip]").addEventListener("click", closeOnboarding);
     setupEl.querySelector("[data-setup-reset]").addEventListener("click", resetOnboardingChoices);
     setupEl.querySelector("[data-setup-back]").addEventListener("click", function () {
-      roostOnboarding.step = Math.max(0, roostOnboarding.step - 1);
-      saveOnboardingState();
+      collectOnboardingInputs();
+      setupDraft.step = Math.max(0, setupDraft.step - 1);
       renderOnboardingStep();
     });
     setupEl.querySelector("[data-setup-next]").addEventListener("click", function () {
       collectOnboardingInputs();
-      if (roostOnboarding.step >= ONBOARDING_STEPS - 1) finishOnboarding();
+      if (setupDraft.step >= ONBOARDING_STEPS - 1) finishOnboarding();
       else {
-        roostOnboarding.step += 1;
-        saveOnboardingState();
+        setupDraft.step += 1;
         renderOnboardingStep();
       }
     });
@@ -11860,14 +11768,9 @@
   function openOnboarding(force) {
     ensureOnboardingDialog();
     setupLastFocus = document.activeElement;
-    setupEl._wasCompleted = !!roostOnboarding.completed;
-    if (force) {
-      roostOnboarding.completed = false;
-      roostOnboarding.skipped = false;
-      roostOnboarding.step = 0;
-      saveOnboardingState();
-    }
-    if (!roostOnboarding.completed) saveOnboardingState();
+    setupSavedAtOpen = JSON.stringify(LS.read(ONBOARDING_KEY, null));
+    setupDraft = normalizeOnboardingState(JSON.parse(setupSavedAtOpen) || JSON.parse(JSON.stringify(roostOnboarding)));
+    if (force || setupDraft.completed) setupDraft.step = 0;
     setupEl.classList.add("open");
     setRoostLayer(setupEl, true);
     renderOnboardingStep();
@@ -11880,15 +11783,12 @@
       try { setupLastFocus.focus({ preventScroll: true }); } catch (e) {}
     }
     setupLastFocus = null;
+    setupDraft = null;
   }
   function trapSetupKeyboard(e) {
     if (e.key === "Escape") {
       e.preventDefault();
-      if (setupEl && setupEl._wasCompleted) closeOnboarding();
-      else {
-        var skip = setupEl && setupEl.querySelector("[data-setup-skip]");
-        if (skip && skip.focus) skip.focus();
-      }
+      closeOnboarding();
       return;
     }
     if (e.key !== "Tab") return;
@@ -11907,30 +11807,30 @@
   }
   function renderOnboardingStep() {
     ensureOnboardingDialog();
-    roostOnboarding = normalizeOnboardingState(roostOnboarding);
-    var step = roostOnboarding.step;
+    var step = setupDraft.step;
     var title = setupEl.querySelector("#roost-setup-title");
     var copy = setupEl.querySelector("#roost-setup-copy");
     var progress = setupEl.querySelector("#roost-setup-progress");
     var back = setupEl.querySelector("[data-setup-back]");
     var next = setupEl.querySelector("[data-setup-next]");
-    var labels = ["Privacy and name", "Use", "Modules", "Display", "Starter sections"];
+    var labels = ["Your desk settings", "What brings you here?", "Choose your tools", "Choose your display", "Pick your starter sections"];
     title.textContent = labels[step] || "Set Up The Roost";
-    copy.textContent = "Step " + (step + 1) + " of " + ONBOARDING_STEPS + ". Stored only in this browser.";
+    copy.textContent = "Setup · Step " + (step + 1) + " of " + ONBOARDING_STEPS;
+    setupEl.querySelector("[data-setup-skip]").textContent = "Cancel";
+    setupEl.querySelector("[data-setup-reset]").hidden = step === 0;
+    back.hidden = step === 0;
     progress.style.width = Math.round(((step + 1) / ONBOARDING_STEPS) * 100) + "%";
     back.disabled = step === 0;
-    next.textContent = step >= ONBOARDING_STEPS - 1 ? "Finish" : "Continue";
+    next.textContent = step >= ONBOARDING_STEPS - 1 ? "Save settings" : "Continue";
     setupBody.innerHTML = onboardingStepHtml(step);
-    bindOnboardingInputs();
-    var first = setupBody.querySelector("input, button");
-    (first || next).focus({ preventScroll: true });
+    title.focus({ preventScroll: true });
   }
   function onboardingStepHtml(step) {
-    var data = onboardingData();
+    var data = setupDraft.data;
     if (step === 0) {
-      return '<div class="roost-setup-step"><p>Choose a local display name, or leave it blank for a neutral greeting.</p>' +
-        '<label class="roost-setup-field">Display name, optional<input type="text" maxlength="40" data-setup-field="displayName" value="' + esc(data.displayName) + '" placeholder="Friend, Captain, Mom, Dad..."></label>' +
-        '<div class="roost-setup-note">Privacy: setup choices, notes, boards, Mission Control progress, and preferences are saved only in this browser localStorage. There are no accounts, telemetry, analytics, cloud sync, or setup APIs.</div></div>';
+      return '<div class="roost-setup-step"><p>Choose a name for your greeting and tailor the tools on your desk.</p>' +
+        '<label class="roost-setup-field">Display name (optional)<input type="text" maxlength="40" data-setup-field="displayName" value="' + esc(data.displayName) + '" placeholder="Your name"></label>' +
+        '<div class="roost-setup-note">Your notes, boards and preferences stay in this browser. You can export a backup from Tools.</div></div>';
     }
     if (step === 1) {
       var uses = [
@@ -11947,7 +11847,7 @@
     if (step === 2) {
       return '<div class="roost-setup-step"><p>Choose optional modules. The Mission Control curriculum is available as an example profile, not a universal default.</p><div class="roost-setup-grid">' +
         MODULES.map(function (m) { return choiceHtml("checkbox", "module", m.id, m.label, m.desc, data.modules[m.id] !== false); }).join("") +
-        choiceHtml("checkbox", "news", "on", "Live headlines", "Use RSS through public CORS proxies. Links still work if feeds fail.", data.news !== false) +
+        choiceHtml("checkbox", "news", "on", "Show headlines", "Show the Wire and headlines alongside links. Connect live feeds separately in the Wire.", data.news !== false) +
         '</div></div>';
     }
     if (step === 3) {
@@ -11960,21 +11860,15 @@
     }
     return '<div class="roost-setup-step"><p>Select several sections to start expanded. Other sections are still present and can be expanded any time.</p><div class="roost-setup-grid">' +
       STARTER_SECTIONS.map(function (s) { return choiceHtml("checkbox", "starter", s.id, s.label, "Start this section open.", data.starterSections.indexOf(s.id) !== -1); }).join("") +
-      '</div><div class="roost-setup-review"><strong>Ready?</strong><span>Finish saves this setup locally and applies the selected layout. Reset only resets setup choices; it does not delete your links, notes, boards, or Mission Control progress.</span></div></div>';
+      '</div><div class="roost-setup-review"><strong>Ready to save?</strong><span>Your choices apply to this browser. You can change them later from Customize desk.</span></div></div>';
   }
   function choiceHtml(type, group, value, title, desc, checked) {
     var name = group === "module" || group === "starter" ? group + "-" + value : group;
     return '<label class="roost-setup-choice"><input type="' + type + '" name="' + esc(name) + '" data-setup-group="' + esc(group) + '" value="' + esc(value) + '"' + (checked ? " checked" : "") + '><strong>' + esc(title) + '</strong><span>' + esc(desc) + '</span></label>';
   }
-  function bindOnboardingInputs() {
-    setupBody.querySelectorAll("input").forEach(function (input) {
-      input.addEventListener("change", function () { collectOnboardingInputs(); saveOnboardingState(); });
-      input.addEventListener("input", function () { collectOnboardingInputs(); saveOnboardingState(); });
-    });
-  }
   function collectOnboardingInputs() {
     if (!setupBody) return;
-    var data = onboardingData();
+    var data = setupDraft.data;
     setupBody.querySelectorAll("[data-setup-field]").forEach(function (input) {
       var field = input.getAttribute("data-setup-field");
       data[field] = String(input.value || "").slice(0, field === "displayName" ? 40 : 80);
@@ -11994,48 +11888,31 @@
         data.starterSections = Object.keys(set);
       }
     });
-    roostOnboarding.data = data;
   }
   function resetOnboardingChoices() {
-    roostOnboarding.profile = "public-starter";
-    roostOnboarding.step = 0;
-    roostOnboarding.data = publicStarterData();
-    roostOnboarding.layoutApplied = false;
-    saveOnboardingState();
+    setupDraft = defaultOnboardingState();
     renderOnboardingStep();
-  }
-  function skipOnboarding() {
-    if (setupEl && setupEl._wasCompleted) {
-      roostOnboarding.completed = true;
-      saveOnboardingState();
-      closeOnboarding();
-      applyProfileConfig({ applyStarter: false });
-      return;
-    }
-    roostOnboarding = normalizeOnboardingState({
-      version: ONBOARDING_VERSION,
-      profile: "public-starter",
-      completed: true,
-      skipped: true,
-      step: ONBOARDING_STEPS - 1,
-      data: publicStarterData(),
-      layoutApplied: false,
-      createdAt: roostOnboarding.createdAt,
-      completedAt: new Date().toISOString()
-    });
-    saveOnboardingState();
-    closeOnboarding();
-    applyProfileConfig({ applyStarter: true });
   }
   function finishOnboarding() {
     collectOnboardingInputs();
-    roostOnboarding.completed = true;
-    roostOnboarding.skipped = false;
-    roostOnboarding.step = ONBOARDING_STEPS - 1;
-    roostOnboarding.profile = roostOnboarding.profile === "legacy-personal" ? "legacy-personal" : "custom";
-    roostOnboarding.completedAt = new Date().toISOString();
-    roostOnboarding.layoutApplied = false;
-    saveOnboardingState();
+    var message = setupEl.querySelector("#roost-setup-copy");
+    if (JSON.stringify(LS.read(ONBOARDING_KEY, null)) !== setupSavedAtOpen) {
+      message.textContent = "These settings changed in another tab. Cancel and reopen setup to load them.";
+      return;
+    }
+    var now = new Date().toISOString();
+    setupDraft.completed = true;
+    setupDraft.skipped = false;
+    setupDraft.step = ONBOARDING_STEPS - 1;
+    setupDraft.profile = setupDraft.profile === "legacy-personal" ? "legacy-personal" : "custom";
+    setupDraft.completedAt = now;
+    setupDraft.updatedAt = now;
+    setupDraft.layoutApplied = false;
+    if (!LS.write(ONBOARDING_KEY, setupDraft)) {
+      message.textContent = "Could not save these settings in this browser. Your choices are still open.";
+      return;
+    }
+    roostOnboarding = setupDraft;
     closeOnboarding();
     applyProfileConfig({ applyStarter: true });
     toast("Setup saved locally");
@@ -12085,6 +11962,7 @@
   var CACHE_TTL = 30 * 60 * 1000; // 30 min
   var SECTION_HEADLINE_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
   var feedRequests = Object.create(null);
+  var headlineRequestGeneration = 0;
   var feedControllers = [];
   var headlineObserver = null;
   var PROXIES = [
@@ -12092,6 +11970,30 @@
     function (u) { return { url: "https://corsproxy.io/?url=" + encodeURIComponent(u), json: false }; },
     function (u) { return { url: "https://api.allorigins.win/get?url=" + encodeURIComponent(u), json: true }; }
   ];
+  // Only exact source URLs shipped with Roost may be disclosed to a relay.
+  var builtInFeedUrls = new Set();
+  WIRE_FEEDS.concat(Object.values(SECTION_FEEDS)).forEach(function (bucket) {
+    bucket.feeds.forEach(function (url) { builtInFeedUrls.add(url); });
+  });
+  function isBuiltInFeedUrl(url) { return builtInFeedUrls.has(url); }
+  function safeDirectFeedUrl(raw) {
+    var safe = safeCustomUrl(raw);
+    if (!safe) return "";
+    var url = new URL(safe);
+    var host = url.hostname.replace(/\.$/, "");
+    // Browsers enforce DNS, CORS, and local-network permissions.
+    if (url.protocol !== "https:" || url.port || !host.includes(".") ||
+        /^[\d.]+$/.test(host) || /\.(?:local|localhost|internal|lan|home|arpa)$/i.test(host)) return "";
+    return url.href;
+  }
+  function feedRequestTargets(url) {
+    if (isBuiltInFeedUrl(url)) {
+      var publisher = url.replace(/^http:/i, "https:");
+      return PROXIES.map(function (proxy) { return proxy(publisher); });
+    }
+    var direct = safeDirectFeedUrl(url);
+    return direct ? [{ url: direct, json: false, direct: true }] : [];
+  }
   function cacheKey(u) { return "roost_feed_" + u.replace(/[^a-z0-9]/gi, "").slice(0, 60) + "_" + u.length; }
   function normalizedFeedItems(items) {
     if (!Array.isArray(items)) return [];
@@ -12114,6 +12016,8 @@
   }
   function pauseHeadlineRequests() {
     if (headlineObserver) { headlineObserver.disconnect(); headlineObserver = null; }
+    headlineRequestGeneration++;
+    feedRequests = Object.create(null);
     feedControllers.forEach(function (controller) { controller.abort(); });
   }
   function feedCacheMeta(urls) {
@@ -12148,6 +12052,7 @@
 
   function parseFeed(xmlText, sourceLabel) {
     var out = [];
+    if (typeof xmlText !== "string" || xmlText.length > 2000000 || /<!DOCTYPE\b/i.test(xmlText)) return out;
     try {
       var doc = new DOMParser().parseFromString(xmlText, "text/xml");
       if (doc.querySelector("parsererror")) return out;
@@ -12199,7 +12104,7 @@
     var ck = cacheKey(url);
     var cached = readFeedCache(url);
     var saved = cached ? feedItemsWithFreshness(cached.items, cached.t, false) : [];
-    if (!settings.headlines || navigator.onLine === false) return Promise.resolve(saved);
+    if (!canFetchHeadline(url) || navigator.onLine === false) return Promise.resolve(saved);
     if (!opts.force && cached && (Date.now() - cached.t) < CACHE_TTL && cached.items && cached.items.length) {
       return Promise.resolve(saved);
     }
@@ -12209,14 +12114,40 @@
     }
     return refreshFeed(url, label, ck, cached, opts.limit || 12);
   }
-  function fetchWithTimeout(url, asJson) {
+  async function readFeedResponse(response) {
+    var maxBytes = 2000000;
+    if (!response.body || Number(response.headers.get("content-length")) > maxBytes) {
+      if (response.body) await response.body.cancel();
+      throw new Error("Missing or oversized feed");
+    }
+    var reader = response.body.getReader(), decoder = new TextDecoder(), bytes = 0, chunks = [];
+    try {
+      while (true) {
+        var chunk = await reader.read();
+        if (chunk.done) break;
+        bytes += chunk.value.byteLength;
+        if (bytes > maxBytes) {
+          await reader.cancel();
+          throw new Error("Oversized feed");
+        }
+        chunks.push(decoder.decode(chunk.value, { stream: true }));
+      }
+      chunks.push(decoder.decode());
+      return chunks.join("");
+    } finally {
+      reader.releaseLock();
+    }
+  }
+  function fetchWithTimeout(spec) {
     var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
     if (controller) feedControllers.push(controller);
     var timer = controller ? setTimeout(function () { controller.abort(); }, 6500) : null;
-    return fetch(url, { cache: "no-store", signal: controller ? controller.signal : undefined })
-      .then(function (response) {
+    return fetch(spec.url, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer",
+      redirect: spec.direct ? "error" : "follow", signal: controller ? controller.signal : undefined })
+      .then(async function (response) {
         if (!response.ok) throw new Error("status " + response.status);
-        return asJson ? response.json() : response.text();
+        var body = await readFeedResponse(response);
+        return spec.json ? JSON.parse(body) : body;
       })
       .finally(function () {
         if (timer) clearTimeout(timer);
@@ -12226,13 +12157,15 @@
   function refreshFeed(url, label, ck, cached, limit) {
     // Wire and section strips share sources, including during repeated setup.
     if (feedRequests[url]) return feedRequests[url];
-    var i = 0;
+    var targets = feedRequestTargets(url);
+    var generation = headlineRequestGeneration, i = 0;
     var fallback = cached ? feedItemsWithFreshness(cached.items, cached.t, false) : [];
     function attempt() {
-      if (!settings.headlines || navigator.onLine === false || i >= PROXIES.length) return Promise.resolve(fallback);
-      var spec = PROXIES[i++](url);
-      return fetchWithTimeout(spec.url, spec.json)
+      if (generation !== headlineRequestGeneration || !canFetchHeadline(url) || navigator.onLine === false || i >= targets.length) return Promise.resolve(fallback);
+      var spec = targets[i++];
+      return fetchWithTimeout(spec)
         .then(function (body) {
+          if (generation !== headlineRequestGeneration || !canFetchHeadline(url)) return fallback;
           var xml = spec.json ? (body && body.contents) : body;
           if (typeof xml !== "string" || !xml || xml.length > 2000000) throw new Error("empty or oversized feed");
           var items = parseFeed(xml, label);
@@ -12296,6 +12229,11 @@
     var btn = strip ? strip.querySelector("[data-roost-refresh-section]") : null;
     if (!btn || btn._roostBound) return;
     btn._roostBound = true;
+    if (strip._cfg && !strip._cfg.feeds.some(canFetchHeadline)) {
+      btn.textContent = "Next saved";
+      btn.title = "Show another cached headline";
+      btn.setAttribute("aria-label", btn.title);
+    }
     btn.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -12334,9 +12272,10 @@
     return LS.read(READ_LATER_KEY, []).map(normalizeReadLaterItem).filter(Boolean);
   }
   function saveReadLaterItems(items) {
-    LS.write(READ_LATER_KEY, (items || []).map(normalizeReadLaterItem).filter(Boolean).slice(0, 200));
+    if (!LS.write(READ_LATER_KEY, (items || []).map(normalizeReadLaterItem).filter(Boolean))) return false;
     renderTodayDashboard();
     syncArticleSaveButtons();
+    return true;
   }
   function readLaterActiveItems() {
     return readLaterItems().filter(function (item) {
@@ -12387,8 +12326,10 @@
   function saveReadLater(item) {
     var href = safeHttpUrl(item && item.link);
     if (!href) return false;
-    var existing = readLaterItems().filter(function (current) { return current.link === href; })[0] || {};
-    var items = readLaterItems().filter(function (current) { return current.link !== href; });
+    var savedItems = readLaterItems();
+    var existing = savedItems.find(function (current) { return current.link === href; }) || {};
+    var items = savedItems.filter(function (current) { return current.link !== href; });
+    if (!existing.link && items.length >= 200) return false;
     items.unshift({
       title: String(item.title || "Untitled").slice(0, 220),
       link: href,
@@ -12401,7 +12342,7 @@
       archived: existing.status === "archived",
       updatedAt: new Date().toISOString()
     });
-    saveReadLaterItems(items);
+    if (!saveReadLaterItems(items)) return false;
     checkRoostAchievements("readlater");
     return true;
   }
@@ -12411,8 +12352,7 @@
     var items = readLaterItems();
     var next = items.filter(function (current) { return current.link !== href; });
     if (next.length === items.length) return false;
-    saveReadLaterItems(next);
-    return true;
+    return saveReadLaterItems(next);
   }
   function bindArticleSaveButtons(root) {
     (root || document).querySelectorAll("[data-save-article]").forEach(function (btn) {
@@ -12435,7 +12375,7 @@
           date: btn.getAttribute("data-date")
         });
         syncArticleSaveButtons(link);
-        toast(ok ? "Saved for later" : "Could not save article");
+        toast(ok ? "Saved for later" : readLaterItems().length >= 200 ? "Read Later is full. Remove an article before adding another." : "Could not save article");
       });
     });
     syncArticleSaveButtons();
@@ -12449,7 +12389,7 @@
     if (s < 86400) return Math.round(s / 3600) + "h ago";
     var dd = Math.round(s / 86400); return dd + "d ago";
   }
-  function esc(s) { return (s || "").replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   function positionPrimaryLauncher() {
     var headerWrap = document.querySelector(".v3-header-wrap");
@@ -12461,14 +12401,14 @@
     }
     top.classList.add("roost-command-surface");
     top.setAttribute("aria-label", "Roost launcher and section navigation");
-    input.placeholder = "Launch links, sections, commands...";
+    input.placeholder = "Search links, tools and notes…";
     input.setAttribute("aria-label", "Launcher: search links, sections, Mission Control, saved items, and commands");
     input.setAttribute("aria-keyshortcuts", "/ Control+K Meta+K");
     var wrap = input.closest(".search-wrap");
     if (wrap && !wrap.querySelector(".roost-launcher-label")) {
       var label = document.createElement("span");
       label.className = "roost-launcher-label";
-      label.textContent = "Launcher";
+      label.textContent = "/";
       label.setAttribute("aria-hidden", "true");
       wrap.appendChild(label);
     }
@@ -12573,6 +12513,7 @@
       else settings.todayCollapsed = !settings.todayCollapsed;
       saveSettings();
       applySurfaceCollapsed(kind);
+      if (kind === "wire" && !settings.wireCollapsed) loadWire({ preferCache: true });
     });
   }
 
@@ -12582,25 +12523,54 @@
 
   function buildWire() {
     if (document.querySelector(".roost-wire")) return;
-    var anchor = document.querySelector(".greeting-bar");
+    var anchor = document.querySelector(".v3-header-wrap");
     if (!anchor) return;
     var wrap = document.createElement("div");
     wrap.className = "roost-wire";
     wrap.innerHTML =
       '<div class="roost-wire-inner board">' +
         '<div class="roost-wire-title"><div class="roost-wire-title-main"><span class="dot"></span><span>Roost Wire</span></div><div class="roost-wire-modes" id="roost-wire-modes">' + wireModeButtonsHtml() + '</div><div class="roost-wire-actions">' + surfaceToggleHtml("wire", "Wire", "roost-wire-grid") + '<button class="roost-news-refresh roost-wire-refresh" id="roost-wire-refresh" type="button" title="Refresh Roost Wire" aria-label="Refresh Roost Wire">Refresh</button></div></div>' +
+        '<div class="roost-wire-connection"><span data-feed-connection-status></span><button type="button" class="roost-news-refresh" data-feed-connection></button></div>' +
         '<div class="roost-wire-grid" id="roost-wire-grid"></div>' +
       '</div>';
     anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
     var refresh = wrap.querySelector("#roost-wire-refresh");
     if (refresh) refresh.addEventListener("click", function () { refreshWire(refresh); });
+    bindFeedConnection(wrap);
     bindWireModes(wrap);
     bindSurfaceToggle(wrap, "wire");
     applySurfaceCollapsed("wire");
     if (!settings.headlines) { wrap.classList.add("roost-hidden"); return; }
-    var grid = wrap.querySelector("#roost-wire-grid");
-    renderWireLoading(grid);
     loadWire({ preferCache: true });
+  }
+  function bindFeedConnection(root) {
+    var button = root.querySelector("[data-feed-connection]");
+    if (!button) return;
+    button.addEventListener("click", function () {
+      if (!headlineConnection.enabled && !settings.headlines) {
+        settings.headlines = true;
+        saveSettings();
+        roostOnboarding.data.news = true;
+        saveOnboardingState();
+        syncHeadlineToggleLabel(document);
+      }
+      saveHeadlineConnection(!headlineConnection.enabled, headlineConnection.custom);
+      pauseHeadlineRequests();
+      applyHeadlineVisibility();
+      syncFeedConnection(root);
+    });
+    syncFeedConnection(root);
+  }
+  function syncFeedConnection(root) {
+    var enabled = headlineConnection.enabled;
+    root.querySelector("[data-feed-connection]").textContent = enabled ? "Pause live feeds" : "Connect live feeds";
+    root.querySelector("[data-feed-connection-status]").textContent = enabled
+      ? "Live updates are on. Built-in sources use AllOrigins or corsproxy.io."
+      : "Live updates are paused. Connecting shares your IP and built-in feed addresses with AllOrigins or corsproxy.io.";
+    var refresh = root.querySelector("#roost-wire-refresh");
+    if (refresh) refresh.hidden = !enabled;
+    var modes = root.querySelector("#roost-wire-modes");
+    if (modes) modes.hidden = !enabled && !effectiveWireFeeds().some(function (group) { return !!feedCacheMeta(group.feeds); });
   }
   function wireModeButtonsHtml() {
     return wireModes().map(function (mode) {
@@ -12653,7 +12623,7 @@
     var selected = selectedWireBucketByIdx(idx);
     if (!grid || !selected) return Promise.resolve(0);
     if (btn) btn.disabled = true;
-    return loadWireTopic(grid, selected.idx, selected.bucket, { preferCache: true, advance: true }).then(function (items) {
+    return loadWireTopic(grid, selected.idx, selected.bucket, { preferCache: true, advance: true, sequence: wireLoadSequence }).then(function (items) {
       var count = items && items.length ? items.length : 0;
       toast(count > 1 ? "More " + selected.bucket.label + " headlines" : "No more " + selected.bucket.label + " headlines yet");
       return count;
@@ -12681,13 +12651,21 @@
     if (!wrap || !grid) return Promise.resolve(0);
     var sequence = ++wireLoadSequence;
     wrap.classList.remove("roost-hidden");
+    grid.dataset.receivedLive = "false";
+    syncFeedConnection(wrap);
+    if (settings.wireCollapsed && !opts.force) return Promise.resolve(0);
     renderWireLoading(grid);
     var selected = selectedWireBuckets();
     if (!selected.length) return Promise.resolve(0);
+    if (!headlineConnection.enabled && !selected.some(function (item) { return !!feedCacheMeta(item.bucket.feeds); })) {
+      grid.replaceChildren();
+      return Promise.resolve(0);
+    }
     return Promise.all(selected.map(function (item) {
-      return loadWireTopic(grid, item.idx, item.bucket, opts);
+      return loadWireTopic(grid, item.idx, item.bucket, Object.assign({}, opts, { sequence: sequence }));
     })).then(function (lists) {
       var ready = lists.filter(function (items) { return items && items.length; }).length;
+      if (sequence === wireLoadSequence) grid.dataset.receivedLive = String(lists.some(function (items) { return items.some(function (item) { return item._feedLive; }); }));
       if (!ready && settings.headlines && moduleEnabled("wire") && sequence === wireLoadSequence) {
         grid.innerHTML = '<div class="roost-wire-cell"><div class="topic">Unavailable</div><div class="headline">No recent headlines right now. Your library and local tools are ready.</div></div>';
       }
@@ -12701,12 +12679,12 @@
       return fetchOne(u, bucket.label, { force: !!opts.force, preferCache: !!opts.preferCache, limit: 10 });
     })).then(function (lists) {
       var items = recentSectionHeadlines(mergeFeedItems(lists, 70));
-      if (!settings.headlines || !moduleEnabled("wire")) return items;
+      if (!settings.headlines || !moduleEnabled("wire") || (opts.sequence && opts.sequence !== wireLoadSequence)) return items;
       var rotated = rotateFeedItems(items, wireHeadlineOffsets, String(idx), !!opts.advance);
       renderWireTopic(grid, idx, bucket, rotated[0]);
       return items;
     }).catch(function () {
-      renderWireTopic(grid, idx, bucket, null);
+      if (!opts.sequence || opts.sequence === wireLoadSequence) renderWireTopic(grid, idx, bucket, null);
       return [];
     });
   }
@@ -12714,7 +12692,8 @@
     if (!settings.headlines) return;
     setRefreshBusy(btn, true);
     loadWire({ force: true, advance: true }).then(function (ready) {
-      toast(ready ? "Roost Wire refreshed" : "Roost Wire unavailable");
+      var grid = document.getElementById("roost-wire-grid");
+      toast(!ready ? "Roost Wire unavailable" : grid && grid.dataset.receivedLive === "true" ? "Roost Wire refreshed" : "Showing cached headlines. Live update unavailable.");
     }).finally(function () {
       setRefreshBusy(btn, false);
     });
@@ -12773,7 +12752,11 @@
   function setupHeadlines() {
     if (headlineObserver) { headlineObserver.disconnect(); headlineObserver = null; }
     if (!settings.headlines) return;
-    var ids = sectionFeedIds();
+    var configs = effectiveSectionFeeds();
+    document.querySelectorAll("main .section .roost-heads").forEach(function (strip) {
+      var section = strip.closest(".section");
+      if (!configs[section.id]) strip.remove();
+    });
     var io = headlineObserver = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver(function (entries, obs) {
       entries.forEach(function (en) {
         if (!settings.headlines || !en.isIntersecting) return;
@@ -12782,20 +12765,24 @@
       });
     }, { rootMargin: "300px 0px" }) : null;
 
-    ids.forEach(function (id) {
+    Object.keys(configs).forEach(function (id) {
       var sec = document.getElementById(id);
       if (!sec) return;
       var header = sec.querySelector(".section-header");
       if (!header) return;
       var strip = sec.querySelector(".roost-heads");
+      var config = configs[id];
+      if (!config.feeds.some(canFetchHeadline) && !feedCacheMeta(config.feeds)) {
+        if (strip) strip.remove();
+        return;
+      }
       if (!strip) {
         strip = document.createElement("div");
         strip.className = "roost-heads"; strip.setAttribute("data-state", "loading");
         strip.innerHTML = sectionRefreshButtonHtml() + '<div class="roost-heads-skel"></div>';
         header.parentNode.insertBefore(strip, header.nextSibling);
       }
-      strip._cfg = sectionFeedConfig(id);
-      if (!strip._cfg) return;
+      strip._cfg = config;
       strip.classList.remove("roost-hidden");
       bindSectionRefresh(strip, sec);
       if (io) io.observe(sec);
@@ -12807,9 +12794,10 @@
     if (!settings.headlines) return Promise.resolve([]);
     var strip = sec.querySelector(".roost-heads");
     if (!strip || !strip._cfg) return Promise.resolve([]);
+    var request = strip._request = (strip._request || 0) + 1;
     if (opts.button) setRefreshBusy(opts.button, true);
     return fetchSection(strip._cfg, { force: !!opts.force, preferCache: !opts.force, limit: 10 }).then(function (items) {
-      if (!settings.headlines) return [];
+      if (request !== strip._request || !settings.headlines || !strip.isConnected) return [];
       if (!items.length) {
         strip.setAttribute("data-state", "empty");
         strip.innerHTML = sectionRefreshButtonHtml() + '<div class="roost-heads-msg">Headlines unavailable right now - links below are unaffected.</div>';
@@ -12847,11 +12835,13 @@
       bindArticleSaveButtons(strip);
       return freshItems;
     }).catch(function () {
+      if (request !== strip._request || !strip.isConnected) return [];
       strip.setAttribute("data-state", "empty");
       strip.innerHTML = sectionRefreshButtonHtml() + '<div class="roost-heads-msg">Headlines unavailable right now - links below are unaffected.</div>';
       bindSectionRefresh(strip, sec);
       return [];
     }).finally(function () {
+      if (request !== strip._request) return;
       var btn = strip.querySelector("[data-roost-refresh-section]");
       setRefreshBusy(btn, false);
     });
@@ -12866,11 +12856,13 @@
   var LEGACY_MISSION_KEY = "missionControlRPG_v3";
   var MISSION_TAB_KEY = "roost_mission_tab_v1";
   var MISSION_TABS = ["deck", "board", "library", "quests", "projects", "portfolio"];
-  var missionState;
+  var missionState, missionRevision, missionUnsaved = false;
 
   function safeHttpUrl(u) {
     try {
+      if (typeof u !== "string" || u.length > 8192) return "";
       var parsed = new URL(clean(u));
+      if (parsed.username || parsed.password) return "";
       if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
     } catch (e) {}
     return "";
@@ -12880,7 +12872,10 @@
   }
   function readMissionState() {
     if (missionState) return missionState;
-    missionState = LS.read(MISSION_STATE_KEY, null);
+    try {
+      missionRevision = localStorage.getItem(MISSION_STATE_KEY);
+      missionState = JSON.parse(missionRevision);
+    } catch (e) { missionState = null; }
     if (!missionState || typeof missionState !== "object" || Array.isArray(missionState)) {
       var hasSavedMission = true;
       try { hasSavedMission = localStorage.getItem(MISSION_STATE_KEY) !== null; } catch (e) {}
@@ -12904,7 +12899,42 @@
     missionState.projects = missionState.projects || missionState.projectData || {};
     return missionState;
   }
-  function saveMissionState() { LS.write(MISSION_STATE_KEY, readMissionState()); }
+  function saveMissionState() {
+    var draft = readMissionState();
+    var notice = document.getElementById("academy-save-warning");
+    try {
+      if (localStorage.getItem(MISSION_STATE_KEY) !== missionRevision) throw new Error("conflict");
+      var raw = JSON.stringify(draft);
+      localStorage.setItem(MISSION_STATE_KEY, raw);
+      missionRevision = raw;
+      missionUnsaved = false;
+      if (notice) notice.remove();
+      return true;
+    } catch (e) {
+      missionUnsaved = true;
+      if (!notice) {
+        notice = document.createElement("div");
+        notice.id = "academy-save-warning";
+        notice.className = "roost-backup-card";
+        notice.innerHTML = '<p role="alert"></p><div class="roost-backup-actions"><button type="button" class="wb-btn" data-retry>Retry save</button><button type="button" class="wb-btn" data-download>Download Academy draft</button></div>';
+        (document.getElementById("mission-control") || document.body).prepend(notice);
+        notice.querySelector("[data-retry]").addEventListener("click", saveMissionState);
+        notice.querySelector("[data-download]").addEventListener("click", function () {
+          var data = {}; data[MISSION_STATE_KEY] = JSON.stringify(missionState);
+          var snapshot = { app: "The Roost", schema: BACKUP_SCHEMA, exportedAt: new Date().toISOString(), data: data };
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(new Blob([JSON.stringify(snapshot)], { type: "application/json" }));
+          a.download = "roost-academy-draft.json"; document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+        });
+      }
+      notice.querySelector("p").textContent = e.message === "conflict"
+        ? "Academy progress changed in another tab. Download this draft before reloading to see the saved version."
+        : "Academy changes are only in this tab. Download this draft or free browser storage and retry.";
+      toast("Academy changes are unsaved");
+      return false;
+    }
+  }
   function migrateMissionControlState() {
     try {
       var raw = localStorage.getItem(LEGACY_MISSION_KEY);
@@ -12932,7 +12962,7 @@
         if (item.completed) next.leadership[id] = { t: item.dateCompleted || item.t || new Date().toISOString() };
       });
       next.migratedFromMissionControl = true;
-      LS.write(MISSION_STATE_KEY, next);
+      if (LS.write(MISSION_STATE_KEY, next)) missionRevision = JSON.stringify(next);
       return next;
     } catch (e) { return null; }
   }
@@ -13206,7 +13236,7 @@
     var st = readMissionState();
     if (st.completed[key]) delete st.completed[key];
     else st.completed[key] = { t: new Date().toISOString() };
-    saveMissionState();
+    if (!saveMissionState()) return;
     renderMissionAcademy();
     renderTodayDashboard();
     checkRoostAchievements("mission");
@@ -13254,7 +13284,7 @@
     scope.querySelectorAll("[data-resource-status]").forEach(function (select) { select.addEventListener("change", function () { st.resourceStatus[select.getAttribute("data-resource-status")] = select.value; saveMissionState(); renderMissionPortfolio(); }); });
     scope.querySelectorAll("[data-leadership-toggle]").forEach(function (btn) { btn.addEventListener("click", function () { toggleLeadershipLesson(btn.getAttribute("data-leadership-toggle")); }); });
   }
-  function toggleLeadershipLesson(id) { var st = readMissionState(); if (st.leadership[id]) delete st.leadership[id]; else st.leadership[id] = { t: new Date().toISOString() }; saveMissionState(); renderMissionAcademy(); toast(st.leadership[id] ? "Leadership lesson complete" : "Leadership lesson reopened"); }
+  function toggleLeadershipLesson(id) { var st = readMissionState(); if (st.leadership[id]) delete st.leadership[id]; else st.leadership[id] = { t: new Date().toISOString() }; if (!saveMissionState()) return; renderMissionAcademy(); toast(st.leadership[id] ? "Leadership lesson complete" : "Leadership lesson reopened"); }
   function renderMissionQuests() {
     var panel = document.getElementById("roost-mission-quests");
     if (!panel) return;
@@ -13273,7 +13303,7 @@
     if (track) track.addEventListener("change", function () { st.questTrack = track.value || "all"; saveMissionState(); renderMissionQuests(); });
     scope.querySelectorAll("[data-sidequest-toggle]").forEach(function (btn) { btn.addEventListener("click", function () { toggleSideQuest(btn.getAttribute("data-sidequest-toggle")); }); });
   }
-  function toggleSideQuest(id) { var st = readMissionState(); if (st.sideQuests[id]) delete st.sideQuests[id]; else st.sideQuests[id] = { t: new Date().toISOString() }; saveMissionState(); renderMissionAcademy(); toast(st.sideQuests[id] ? "Side quest complete" : "Side quest reopened"); }
+  function toggleSideQuest(id) { var st = readMissionState(); if (st.sideQuests[id]) delete st.sideQuests[id]; else st.sideQuests[id] = { t: new Date().toISOString() }; if (!saveMissionState()) return; renderMissionAcademy(); toast(st.sideQuests[id] ? "Side quest complete" : "Side quest reopened"); }
   function renderMissionProjects() {
     var panel = document.getElementById("roost-mission-projects");
     if (!panel) return;
@@ -13289,7 +13319,7 @@
     var tasks = (data.subtasks || []).map(function (task, idx) { return '<label class="roost-project-task"><input type="checkbox" data-project-task="' + esc(project.id) + '" data-project-task-index="' + idx + '"' + (task.done ? " checked" : "") + '> <span>' + esc(task.text) + '</span></label>'; }).join("");
     return '<article class="roost-project-card"><div class="roost-project-head"><div><h4>' + esc(project.title) + '</h4><p>' + esc(project.desc || "") + '</p></div><select data-project-status="' + esc(project.id) + '">' + statuses + '</select></div><div class="roost-mission-meta">' + tech + '</div><div class="roost-project-metrics">' + esc(project.metrics || "") + '</div><div class="roost-academy-progress" aria-label="Project task progress"><i style="width:' + pct + '%"></i></div><div class="roost-project-fields">' + projectField(project.id, "github", "GitHub", data.github) + projectField(project.id, "demo", "Demo", data.demo) + projectField(project.id, "video", "Video", data.video) + projectField(project.id, "actualMetrics", "Actual metrics", data.actualMetrics) + '</div><label class="roost-academy-field">Project notes<textarea data-project-field="' + esc(project.id) + '" data-project-field-name="notes" maxlength="1200" placeholder="Next step, blocker, polish note...">' + esc(data.notes || "") + '</textarea></label><div class="roost-project-tasks">' + tasks + '</div><details class="roost-project-crossover"><summary>Crossover map</summary><div class="roost-mission-meta">' + crossover + '</div></details></article>';
   }
-  function projectField(projectId, field, label, value) { return '<label class="roost-academy-field">' + esc(label) + '<input data-project-field="' + esc(projectId) + '" data-project-field-name="' + esc(field) + '" value="' + esc(value || "") + '" placeholder="https://..."></label>'; }
+  function projectField(projectId, field, label, value) { return '<label class="roost-academy-field">' + esc(label) + '<input maxlength="300" data-project-field="' + esc(projectId) + '" data-project-field-name="' + esc(field) + '" value="' + esc(value || "") + '" placeholder="https://..."></label>'; }
   function bindMissionProjectControls(scope) {
     var st = readMissionState();
     scope.querySelectorAll("[data-project-status]").forEach(function (select) { select.addEventListener("change", function () { var id = select.getAttribute("data-project-status"); st.projects[id] = st.projects[id] || {}; st.projects[id].status = select.value; saveMissionState(); renderMissionAcademy(); }); });
@@ -13314,19 +13344,17 @@
     return Number(values[match[1]] || 0) >= Number(match[2]);
   }
   function exportMissionPortfolio() {
-    var html = buildMissionPortfolioHtml();
-    var win = window.open("", "_blank", "noopener,noreferrer");
-    if (win && win.document) { win.document.open(); win.document.write(html); win.document.close(); return; }
     try {
-      var blob = new Blob([html], { type: "text/html" }), a = document.createElement("a");
+      var blob = new Blob([buildMissionPortfolioHtml()], { type: "text/html" }), a = document.createElement("a");
       a.href = URL.createObjectURL(blob); a.download = "roost-mission-control-portfolio.html"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
     } catch (e) { toast("Portfolio export blocked"); }
   }
   function buildMissionPortfolioHtml() {
     var st = readMissionState(), summary = missionSummary();
+    var policy = "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'";
     var projects = (ROOST_MISSION_CONFIG.projects || []).map(function (project) { var data = missionProjectState(project); return '<li><strong>' + esc(project.title) + '</strong> - ' + esc(data.status) + (data.github ? ' - GitHub: ' + esc(data.github) : '') + (data.demo ? ' - Demo: ' + esc(data.demo) : '') + '</li>'; }).join("");
     var achievements = (ROOST_MISSION_CONFIG.rpg.achievements || []).filter(function (achievement) { return achievementUnlocked(achievement, summary); }).map(function (achievement) { return '<li>' + esc(achievement.name || achievement.id) + '</li>'; }).join("");
-    return '<!doctype html><html><head><meta charset="utf-8"><title>The Roost Mission Portfolio</title><style>body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:860px;margin:40px auto;padding:0 20px;line-height:1.5;color:#172033}h1,h2{color:#8d1b2a}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{border:1px solid #ccd3df;border-radius:8px;padding:12px}.kpi strong{display:block;font-size:1.5rem}@media print{body{margin:20px}.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><h1>The Roost Mission Portfolio</h1><p>' + esc(st.missionStatement || "Mission statement not set yet.") + '</p><div class="grid"><div class="kpi"><strong>' + summary.done + '/' + summary.total + '</strong>Core missions</div><div class="kpi"><strong>' + summary.questDone + '</strong>Side quests</div><div class="kpi"><strong>' + summary.xp + '</strong>Total XP</div><div class="kpi"><strong>' + esc(summary.rank.name) + '</strong>Rank</div></div><h2>Projects</h2><ul>' + projects + '</ul><h2>Achievements</h2><ul>' + (achievements || '<li>No achievements unlocked yet.</li>') + '</ul></body></html>';
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="' + policy + '"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Roost Mission Portfolio</title><style>body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:860px;margin:40px auto;padding:0 20px;line-height:1.5;color:#172033}h1,h2{color:#8d1b2a}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{border:1px solid #ccd3df;border-radius:8px;padding:12px}.kpi strong{display:block;font-size:1.5rem}@media print{body{margin:20px}.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><h1>The Roost Mission Portfolio</h1><p>' + esc(st.missionStatement || "Mission statement not set yet.") + '</p><div class="grid"><div class="kpi"><strong>' + summary.done + '/' + summary.total + '</strong>Core missions</div><div class="kpi"><strong>' + summary.questDone + '</strong>Side quests</div><div class="kpi"><strong>' + summary.xp + '</strong>Total XP</div><div class="kpi"><strong>' + esc(summary.rank.name) + '</strong>Rank</div></div><h2>Projects</h2><ul>' + projects + '</ul><h2>Achievements</h2><ul>' + (achievements || '<li>No achievements unlocked yet.</li>') + '</ul></body></html>';
   }
   function protectAcademySearchVisibility() {
     var search = document.getElementById("search-input"), academy = document.getElementById("mission-control");
@@ -13516,7 +13544,7 @@
     }
     if (top.parentNode !== widget) widget.appendChild(top);
     var scope = document.getElementById("roost-scope-bar");
-    if (scope && scope.parentNode !== widget) widget.appendChild(scope);
+    if (scope && scope.previousElementSibling !== top) top.after(scope);
     return widget;
   }
   function layoutWidgetDefinitions() {
@@ -13701,6 +13729,8 @@
         var def = byId[id];
         if (def && def.group === "main") main.appendChild(def.el);
       });
+      var intro = document.getElementById("roost-mission-intro"), quick = document.getElementById("quick-access");
+      if (intro && quick) quick.after(intro);
     }
     defs.forEach(function (def) { applyLayoutWidgetState(def, state); });
     reorderJumpSurface(document.getElementById("nav-tabs"), state.sectionOrder);
@@ -14349,7 +14379,7 @@
     return customFeedsState().feeds;
   }
   function saveCustomFeeds(list) {
-    LS.write(CUSTOM_FEEDS_KEY, { version: CUSTOM_FEEDS_VERSION, feeds: Array.isArray(list) ? list : [], updatedAt: new Date().toISOString() });
+    return LS.write(CUSTOM_FEEDS_KEY, { version: CUSTOM_FEEDS_VERSION, feeds: Array.isArray(list) ? list : [], updatedAt: new Date().toISOString() });
   }
   function customWireFeeds() {
     return customFeeds().filter(function (feed) { return feed.wire; });
@@ -14367,7 +14397,7 @@
     return modes;
   }
   function effectiveSectionFeeds() {
-    var map = {};
+    var map = Object.create(null);
     Object.keys(SECTION_FEEDS || {}).forEach(function (id) {
       map[id] = { label: SECTION_FEEDS[id].label, feeds: SECTION_FEEDS[id].feeds.slice() };
     });
@@ -14400,21 +14430,49 @@
     }).join("");
   }
   function renderCustomFeedsManager(box) {
-    var feeds = customFeeds();
     box.innerHTML =
+      '<div class="roost-wire-connection"><span data-feed-connection-status></span><button class="wb-btn" type="button" data-feed-connection></button></div>' +
+      '<p>Allow each custom source to receive your IP and feed address directly. Use a public HTTPS RSS or Atom feed that supports cross-origin requests (CORS).</p>' +
       '<div class="roost-custom-form"><div class="roost-import-controls"><label class="roost-field">Feed label<input id="feed-label" maxlength="40" placeholder="Space, Local news, Python..."></label><label class="roost-field">RSS / Atom URL<input id="feed-url" type="url" placeholder="https://example.com/feed.xml"></label></div>' +
       '<div class="roost-import-controls"><label class="roost-field">Attach section<select id="feed-section">' + allSectionOptionsHtml("") + '</select></label><label class="roost-backup-check"><input type="checkbox" id="feed-wire" checked> Show in Roost Wire</label></div>' +
-      '<div class="roost-backup-actions"><button class="wb-btn primary" type="button" id="feed-add">Add Feed</button><span class="roost-backup-status" id="feed-status"></span></div></div>' +
+      '<div class="roost-backup-actions"><button class="wb-btn primary" type="button" id="feed-add">Add Feed</button><span class="roost-backup-status" id="feed-status" role="status"></span></div></div>' +
       '<div class="roost-list" id="feed-list"></div>';
+    bindFeedConnection(box);
     function renderList() {
       var list = customFeeds();
       var target = box.querySelector("#feed-list");
+      syncFeedConnection(box);
+      target._refreshFeedList = renderList;
       target.innerHTML = list.length ? list.map(function (feed) {
-        return '<div class="roost-feed-row"><div><strong>' + esc(feed.label) + '</strong><span>' + esc(feed.url) + '</span><span>' + (feed.wire ? '<span class="roost-feed-chip">Wire</span> ' : '') + (feed.sectionId ? '<span class="roost-feed-chip">Section: ' + esc(feed.sectionId) + '</span>' : '') + '</span></div><div class="roost-custom-actions"><button class="wb-btn" type="button" data-feed-test="' + esc(feed.id) + '">Test</button><button class="wb-btn" type="button" data-feed-delete="' + esc(feed.id) + '">Delete</button></div></div>';
+        var id = esc(feed.id), approved = headlineConnection.custom.indexOf(feed.url) !== -1;
+        var access = isBuiltInFeedUrl(feed.url) ? '<span>Built-in source</span>' : safeDirectFeedUrl(feed.url)
+          ? '<button class="wb-btn" type="button" data-feed-allow="' + id + '" aria-pressed="' + approved + '">' + (approved ? 'Pause source' : 'Allow source') + '</button>'
+          : '<span>Saved only. Add a public HTTPS address to connect this feed.</span>';
+        return '<div class="roost-feed-row"><div><strong>' + esc(feed.label) + '</strong><span>' + esc(feed.url) + '</span><span>' + (feed.wire ? '<span class="roost-feed-chip">Wire</span> ' : '') + (feed.sectionId ? '<span class="roost-feed-chip">Section: ' + esc(feed.sectionId) + '</span>' : '') + '</span></div><div class="roost-custom-actions">' + access + '<button class="wb-btn" type="button" data-feed-test="' + id + '">Test</button><button class="wb-btn" type="button" data-feed-delete="' + id + '">Delete</button></div></div>';
       }).join("") : '<p class="roost-custom-empty">No custom feeds yet. Add RSS or Atom feeds to personalize Roost Wire.</p>';
+      target.querySelectorAll("[data-feed-allow]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var feed = list.find(function (item) { return item.id === btn.getAttribute("data-feed-allow"); });
+          if (!feed || !safeDirectFeedUrl(feed.url)) return;
+          var approved = headlineConnection.custom.filter(function (url) { return url !== feed.url && list.some(function (item) { return item.url === url; }); });
+          if (headlineConnection.custom.indexOf(feed.url) === -1) approved.push(feed.url);
+          saveHeadlineConnection(headlineConnection.enabled, approved);
+          pauseHeadlineRequests();
+          applyHeadlineVisibility();
+          renderList();
+          var next = target.querySelector('[data-feed-allow="' + feed.id + '"]');
+          if (next) next.focus();
+        });
+      });
       target.querySelectorAll("[data-feed-delete]").forEach(function (btn) {
         btn.addEventListener("click", function () {
-          saveCustomFeeds(customFeeds().filter(function (feed) { return feed.id !== btn.getAttribute("data-feed-delete"); }));
+          var remaining = customFeeds().filter(function (feed) { return feed.id !== btn.getAttribute("data-feed-delete"); });
+          if (!saveCustomFeeds(remaining)) { box.querySelector("#feed-status").textContent = "Could not save this change. Your feed is still listed."; return; }
+          var approved = headlineConnection.custom.filter(function (url) { return remaining.some(function (feed) { return feed.url === url; }); });
+          if (approved.length !== headlineConnection.custom.length) {
+            saveHeadlineConnection(headlineConnection.enabled, approved);
+            pauseHeadlineRequests();
+          }
           syncWireModeButtons();
           applyHeadlineVisibility();
           renderList();
@@ -14425,26 +14483,32 @@
           var feed = customFeeds().filter(function (item) { return item.id === btn.getAttribute("data-feed-test"); })[0];
           var status = box.querySelector("#feed-status");
           if (!feed) return;
+          if (!canFetchHeadline(feed.url)) {
+            status.textContent = "Connect live feeds and allow this source before testing.";
+            return;
+          }
           status.textContent = "Testing feed...";
           status.className = "roost-backup-status";
           fetchSection({ label: feed.label, feeds: [feed.url] }, { force: true, limit: 5 }).then(function (items) {
-            status.textContent = items.length ? "Feed parsed: " + items.length + " headline(s)." : "Feed unavailable right now.";
-            status.className = "roost-backup-status " + (items.length ? "good" : "bad");
+            var live = items.some(function (item) { return item._feedLive; });
+            status.textContent = live ? "Received " + items.length + " headlines." : items.length ? "Live test failed. Cached headlines are still available." : "Feed unavailable. Check its address and cross-origin support.";
+            status.className = "roost-backup-status " + (live ? "good" : "bad");
           });
         });
       });
     }
     box.querySelector("#feed-add").addEventListener("click", function () {
       var status = box.querySelector("#feed-status");
-      var url = safeCustomUrl(box.querySelector("#feed-url").value);
-      if (!url) { status.textContent = "Use a safe http or https feed URL."; status.className = "roost-backup-status bad"; return; }
+      var url = safeDirectFeedUrl(box.querySelector("#feed-url").value);
+      if (!url) { status.textContent = "Enter a public HTTPS feed address without credentials."; status.className = "roost-backup-status bad"; return; }
       var list = customFeeds();
+      if (list.length >= 80) { status.textContent = "You have 80 feeds. Remove a feed before adding another."; return; }
       if (list.some(function (feed) { return feed.url.toLowerCase() === url.toLowerCase(); }) && !confirm("This feed URL already exists. Add another copy anyway?")) return;
       list.unshift({ id: customId("feed"), label: box.querySelector("#feed-label").value.trim().slice(0, 40) || src(url), url: url, wire: box.querySelector("#feed-wire").checked, sectionId: box.querySelector("#feed-section").value, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-      saveCustomFeeds(list);
+      if (!saveCustomFeeds(list)) { status.textContent = "Feed could not be saved. Your entry is still here."; status.className = "roost-backup-status bad"; return; }
       box.querySelector("#feed-label").value = "";
       box.querySelector("#feed-url").value = "";
-      status.textContent = "Feed saved locally.";
+      status.textContent = "Feed saved locally. Choose Allow source to permit live updates.";
       status.className = "roost-backup-status good";
       syncWireModeButtons();
       applyHeadlineVisibility();
@@ -14462,71 +14526,70 @@
     state = state && typeof state === "object" ? state : linkHealthState();
     state.version = LINK_HEALTH_VERSION;
     state.updatedAt = new Date().toISOString();
-    LS.write(LINK_HEALTH_KEY, state);
-    return state;
+    return LS.write(LINK_HEALTH_KEY, state);
   }
   function linkHealthCandidates(scope, limit) {
-    scope = scope || "visible";
     limit = Math.max(1, Math.min(Number(limit) || 25, 100));
-    var cards = Array.from(document.querySelectorAll("main .link-card[href]")).filter(function (card) {
-      if (!safeHttpUrl(card.href) || card.closest(".roost-hidden")) return false;
-      if (scope === "custom" && !card.classList.contains("roost-custom-link-card")) return false;
-      if (scope === "favorites" && !readPins().some(function (pin) { return safeCustomUrl(pin.href) === safeHttpUrl(card.href); })) return false;
-      if (scope === "recent" && !readRecent().some(function (item) { return safeCustomUrl(item.href) === safeHttpUrl(card.href); })) return false;
-      return true;
-    });
-    var seen = {};
-    return cards.map(linkCardData).filter(function (item) {
-      if (!item || !item.href || seen[item.href]) return false;
-      seen[item.href] = true;
-      return true;
-    }).slice(0, limit);
+    return linkHealthAllCandidates(scope).slice(0, limit);
   }
   function linkHealthAllCandidates(scope) {
     scope = scope || "visible";
+    var saved = scope === "favorites" ? readPins() : scope === "recent" ? readRecent() : null;
+    var savedUrls = saved && new Set(saved.map(function (item) { return safeCustomUrl(item.href); }));
     var cards = Array.from(document.querySelectorAll("main .link-card[href]")).filter(function (card) {
       if (!safeHttpUrl(card.href) || card.closest(".roost-hidden")) return false;
+      if (scope === "visible" && !card.getClientRects().length) return false;
       if (scope === "custom" && !card.classList.contains("roost-custom-link-card")) return false;
-      if (scope === "favorites" && !readPins().some(function (pin) { return safeCustomUrl(pin.href) === safeHttpUrl(card.href); })) return false;
-      if (scope === "recent" && !readRecent().some(function (item) { return safeCustomUrl(item.href) === safeHttpUrl(card.href); })) return false;
-      return true;
+      return !savedUrls || savedUrls.has(card.href);
     });
-    var seen = {};
+    var seen = new Set();
     return cards.map(linkCardData).filter(function (item) {
-      if (!item || !item.href || seen[item.href]) return false;
-      seen[item.href] = true;
+      if (!item || !item.href || seen.has(item.href)) return false;
+      seen.add(item.href);
       return true;
     });
   }
-  function fetchHealthWithTimeout(url, init, ms) {
-    var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-    var timer = controller ? setTimeout(function () { controller.abort(); }, ms || 6500) : null;
-    init = Object.assign({}, init || {}, { signal: controller ? controller.signal : undefined, cache: "no-store" });
-    return fetch(url, init).finally(function () { if (timer) clearTimeout(timer); });
+  var healthRun = null;
+  function stopLinkHealth() {
+    if (healthRun) healthRun.abort();
+    healthRun = null;
   }
-  function checkLinkHealthUrl(item) {
-    var href = safeHttpUrl(item && item.href);
-    if (!href) return Promise.resolve({ href: "", title: item && item.title || "", status: "invalid", detail: "Invalid URL", checkedAt: new Date().toISOString() });
-    return fetchHealthWithTimeout(href, { method: "HEAD", mode: "cors" }, 6500).then(function (res) {
-      return { href: href, title: item.title || href, status: res.ok ? "ok" : "warn", detail: "HTTP " + res.status, checkedAt: new Date().toISOString() };
-    }).catch(function () {
-      return fetchHealthWithTimeout(href, { method: "GET", mode: "no-cors" }, 6500).then(function () {
-        return { href: href, title: item.title || href, status: "opaque", detail: "Reached by browser; status hidden by site", checkedAt: new Date().toISOString() };
-      }).catch(function (err) {
-        return { href: href, title: item.title || href, status: "blocked", detail: err && err.name === "AbortError" ? "Timed out" : "Blocked or unavailable", checkedAt: new Date().toISOString() };
+  async function checkLinkHealthUrl(item, signal) {
+    var href = safeDirectFeedUrl(item.href);
+    function result(status, detail) {
+      return { href: item.href, title: item.title || item.href, status: status, detail: detail, checkedAt: new Date().toISOString() };
+    }
+    if (!href) return result("skipped", "Only public HTTPS site names on the standard port can be checked.");
+    var controller = new AbortController();
+    function abort() { controller.abort(); }
+    if (signal.aborted) return null;
+    signal.addEventListener("abort", abort, { once: true });
+    var timer = setTimeout(abort, 6500);
+    try {
+      var response = await fetch(href, {
+        method: "HEAD", mode: "cors", redirect: "manual", signal: controller.signal,
+        cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer"
       });
-    });
+      if (response.type === "opaqueredirect") return result("unverified", "The site redirects to another address.");
+      return result(response.ok ? "ok" : "warn", "HTTP " + response.status);
+    } catch (e) {
+      if (signal.aborted) return null;
+      return result("unverified", controller.signal.aborted ? "Request timed out." : "Browser could not verify this site. It may limit cross-site checks.");
+    } finally {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", abort);
+    }
   }
   function healthClass(status) {
-    if (status === "ok" || status === "opaque") return "good";
-    if (status === "warn") return "warn";
+    if (status === "ok") return "good";
+    if (["warn", "unverified", "skipped", "opaque"].indexOf(status) >= 0) return "warn";
     return "bad";
   }
   function linkHealthCoverageSummary() {
     var state = linkHealthState();
     var results = state.results || {};
     var visible = linkHealthAllCandidates("visible");
-    var sections = {};
+    var sections = Object.create(null);
     var checked = 0;
     var oldest = "";
     visible.forEach(function (item) {
@@ -14565,12 +14628,12 @@
       "- Saved result rows: " + summary.totalResults,
       "- Oldest visible check: " + (summary.oldestCheckedAt || "none"),
       "",
-      "Browser checks may report opaque/reached when a site hides exact status with CORS.",
+      "A browser can verify status only for sites that permit cross-site checks.",
       "",
       "## Section Coverage"
     ];
     summary.sections.slice(0, 40).forEach(function (section) {
-      lines.push("- " + section.section + ": " + section.checked + "/" + section.total + " checked, " + section.good + " good/reached, " + section.warn + " warn, " + section.bad + " blocked/bad");
+      lines.push("- " + section.section + ": " + section.checked + "/" + section.total + " checked, " + section.good + " verified, " + section.warn + " warn, " + section.bad + " blocked/bad");
     });
     return lines.join("\n");
   }
@@ -14578,7 +14641,7 @@
     var summary = linkHealthCoverageSummary();
     var oldest = summary.oldestCheckedAt ? shortDateTime(summary.oldestCheckedAt) : "None yet";
     return '<div class="roost-health-summary-grid"><span><strong>' + summary.checkedVisible + '</strong>checked visible</span><span><strong>' + summary.uncheckedVisible + '</strong>unchecked visible</span><span><strong>' + summary.totalResults + '</strong>saved results</span><span><strong>' + esc(oldest) + '</strong>oldest check</span></div>' +
-      '<p class="roost-backup-status">Manual browser checks can be opaque because many sites hide exact status with CORS.</p>' +
+      '<p class="roost-backup-status">Unverified means the browser could not confirm a status. You can still open the link yourself.</p>' +
       '<div class="roost-backup-actions"><button class="wb-btn" type="button" id="health-copy-report">Copy Report</button></div>' +
       '<div class="roost-coverage-list">' + (summary.sections.length ? summary.sections.slice(0, 40).map(function (section) {
         return '<div class="roost-health-row"><div><strong>' + esc(section.section) + '</strong><span>' + section.checked + '/' + section.total + ' visible links checked</span></div><span class="roost-health-pill ' + (section.checked === section.total ? 'good' : section.checked ? 'warn' : 'bad') + '">' + Math.round(section.checked / Math.max(1, section.total) * 100) + '%</span></div>';
@@ -14586,10 +14649,10 @@
   }
   function buildLinkHealth(body) {
     body.innerHTML =
-      '<div class="roost-panel-grid"><section class="roost-tool-card"><h4>Manual Link Health</h4><p>Run a small, explicit local check when you want to audit links. Many sites hide exact status from browsers, so "reached" is useful but not a guarantee.</p><div class="roost-health-grid"><label class="roost-field">Scope<select id="health-scope"><option value="visible">Visible links</option><option value="favorites">Favorites</option><option value="recent">Recent</option><option value="custom">Custom links</option></select></label><label class="roost-field">Limit<input id="health-limit" type="number" min="1" max="100" value="25"></label></div><div class="roost-backup-actions"><button class="wb-btn primary" id="health-run" type="button">Check Links</button><button class="wb-btn" id="health-clear" type="button">Clear Results</button></div><div class="roost-backup-status" id="health-status"></div></section><section class="roost-tool-card"><h4>Coverage Summary</h4><div id="health-coverage"></div></section><section class="roost-tool-card"><h4>Latest Results</h4><div id="health-results"></div></section></div>';
+      '<div class="roost-panel-grid"><section class="roost-tool-card"><h4>Manual Link Health</h4><p>Check Links contacts each selected HTTPS site directly. It can see your IP address and the requested link. Roost asks for headers only and skips IP addresses, local hostnames and redirects. Close this panel to stop the check.</p><div class="roost-health-grid"><label class="roost-field">Scope<select id="health-scope"><option value="visible">Visible links</option><option value="favorites">Favorites</option><option value="recent">Recent</option><option value="custom">Custom links</option></select></label><label class="roost-field">Limit<input id="health-limit" type="number" min="1" max="100" value="25"></label></div><div class="roost-backup-actions"><button class="wb-btn primary" id="health-run" type="button">Check Links</button><button class="wb-btn" id="health-clear" type="button">Clear Results</button></div><div class="roost-backup-status" id="health-status"></div></section><section class="roost-tool-card"><h4>Coverage Summary</h4><div id="health-coverage"></div></section><section class="roost-tool-card"><h4>Latest Results</h4><div id="health-results"></div></section></div>';
     function renderResults() {
       var state = linkHealthState();
-      var results = Object.keys(state.results || {}).map(function (href) { return state.results[href]; }).sort(function (a, b) { return String(b.checkedAt || "").localeCompare(String(a.checkedAt || "")); }).slice(0, 80);
+      var results = Object.values(state.results).filter(storageRecord).sort(function (a, b) { return String(b.checkedAt || "").localeCompare(String(a.checkedAt || "")); }).slice(0, 80);
       var target = body.querySelector("#health-results");
       var coverage = body.querySelector("#health-coverage");
       if (coverage) {
@@ -14601,12 +14664,12 @@
             body.querySelector("#health-status").textContent = report;
             return;
           }
-          navigator.clipboard.writeText(report).then(function () { toast("Health report copied"); });
+          navigator.clipboard.writeText(report).then(function () { toast("Health report copied"); }).catch(function () { body.querySelector("#health-status").textContent = report; });
         });
       }
       target.innerHTML = results.length ? results.map(function (item) {
         return '<div class="roost-health-row"><div><strong>' + esc(item.title || item.href) + '</strong><span>' + esc(item.href) + '</span><span>' + esc(item.detail || "") + (item.checkedAt ? " - " + esc(shortDateTime(item.checkedAt)) : "") + '</span></div><span class="roost-health-pill ' + healthClass(item.status) + '">' + esc(item.status || "unknown") + '</span></div>';
-      }).join("") : roostEmptyCardHtml("No link checks yet", "Run a small manual batch when you want fresh maintenance context. Results stay local and browser status may be opaque.", [{ label: "Check Visible Links", action: "health-visible", primary: true }, { label: "Custom Links", action: "health-custom" }]);
+      }).join("") : roostEmptyCardHtml("No link checks yet", "Check a batch of links to see which sites share their status with your browser. Results are saved here.", [{ label: "Check Visible Links", action: "health-visible", primary: true }, { label: "Custom Links", action: "health-custom" }]);
       target.querySelectorAll("[data-empty-action]").forEach(function (btn) {
         btn.addEventListener("click", function () {
           var scope = body.querySelector("#health-scope");
@@ -14622,34 +14685,48 @@
       var status = body.querySelector("#health-status");
       var candidates = linkHealthCandidates(body.querySelector("#health-scope").value, body.querySelector("#health-limit").value);
       if (!candidates.length) { status.textContent = "No links found for that scope."; status.className = "roost-backup-status bad"; return; }
+      stopLinkHealth();
+      var run = healthRun = new AbortController();
       btn.disabled = true;
+      var clear = body.querySelector("#health-clear");
+      clear.disabled = true;
       status.className = "roost-backup-status";
       status.textContent = "Checking " + candidates.length + " link(s)...";
-      var state = linkHealthState();
+      var completed = [];
       var index = 0, done = 0;
       function next() {
-        if (index >= candidates.length) return Promise.resolve();
+        if (run.signal.aborted || index >= candidates.length) return Promise.resolve();
         var item = candidates[index++];
-        return checkLinkHealthUrl(item).then(function (result) {
-          state.results[result.href] = result;
+        return checkLinkHealthUrl(item, run.signal).then(function (result) {
+          if (!result || run.signal.aborted) return;
+          completed.push(result);
           done++;
           status.textContent = "Checked " + done + "/" + candidates.length + ".";
-          renderResults();
         }).then(next);
       }
       Promise.all([next(), next(), next()]).then(function () {
-        saveLinkHealthState(state);
-        status.className = "roost-backup-status good";
-        status.textContent = "Link health check complete.";
+        if (run.signal.aborted) return;
+        var state = linkHealthState();
+        completed.forEach(function (result) { state.results[result.href] = result; });
+        var saved = saveLinkHealthState(state);
+        status.className = "roost-backup-status " + (saved ? "good" : "bad");
+        status.textContent = saved ? "Link health check complete." : "Checks finished, but the results could not be saved.";
       }).catch(function () {
-        saveLinkHealthState(state);
+        if (run.signal.aborted) return;
         status.className = "roost-backup-status bad";
-        status.textContent = "Check stopped early; saved completed results.";
-      }).finally(function () { btn.disabled = false; renderResults(); });
+        status.textContent = "Check stopped early. Try again.";
+      }).finally(function () {
+        if (healthRun !== run) return;
+        healthRun = null;
+        btn.disabled = clear.disabled = false;
+        renderResults();
+      });
     });
     body.querySelector("#health-clear").addEventListener("click", function () {
-      try { localStorage.removeItem(LINK_HEALTH_KEY); } catch (e) {}
-      body.querySelector("#health-status").textContent = "Results cleared.";
+      try {
+        localStorage.removeItem(LINK_HEALTH_KEY);
+        body.querySelector("#health-status").textContent = "Results cleared.";
+      } catch (e) { body.querySelector("#health-status").textContent = "Browser storage would not clear the results."; }
       renderResults();
     });
     renderResults();
@@ -14779,7 +14856,7 @@
       else menu += '<button class="roost-dock-item" type="button" data-action="' + t.action + '" data-i="' + i + '">' + inner + '</button>';
     });
     menu += '</div>';
-    dock.innerHTML = menu + '<button class="roost-dock-toggle" id="roost-dock-toggle" aria-label="Open tools" title="Tools">✦</button>';
+    dock.innerHTML = menu + '<button class="roost-dock-toggle" id="roost-dock-toggle" aria-label="Open tools" title="Tools"><span class="roost-dock-symbol" aria-hidden="true">✦</span> Tools</button>';
     document.body.appendChild(dock);
 
     var toggle = dock.querySelector("#roost-dock-toggle");
@@ -14866,7 +14943,6 @@
     }
     if (settings.headlines) {
       setupHeadlines();
-      document.querySelectorAll(".roost-heads").forEach(function (strip) { strip.classList.remove("roost-hidden"); });
     } else {
       document.querySelectorAll(".roost-heads").forEach(function (strip) { strip.classList.add("roost-hidden"); });
     }
@@ -14927,7 +15003,7 @@
         t: String(note.t || note.createdAt || new Date().toISOString()),
         pinned: !!note.pinned
       };
-    }).filter(function (note) { return !!note.body || !!note.title; }).slice(0, 100);
+    }).filter(function (note) { return !!note.body || !!note.title; });
   }
   function saveWorkbenchNotes(notes) {
     return LS.write(WB_KEY, (Array.isArray(notes) ? notes : []).map(function (note) {
@@ -14940,7 +15016,7 @@
         t: String(note.t || new Date().toISOString()),
         pinned: !!note.pinned
       };
-    }).slice(0, 100));
+    }));
   }
   function buildWorkbench(body) {
     var keys = Object.keys(WB_METHODS);
@@ -14990,6 +15066,10 @@
       var notes = workbenchNotes();
       var title = (body.querySelector("#wb-title").value || WB_METHODS[cur].name).trim();
       var existing = notes.filter(function (note) { return note.id === loadedNoteId; })[0];
+      if (!loadedNoteId && notes.length >= 100) {
+        editor.status("Your 100 note slots are full. Download this draft or delete a saved note to make room.");
+        return;
+      }
       var saved = { id: existing ? existing.id : customId("note"), title: title, method: loadedMethod || WB_METHODS[cur].name, body: textEl.value, t: new Date().toISOString(), pinned: existing ? existing.pinned : false };
       if (existing) notes = notes.map(function (note) { return note.id === saved.id ? saved : note; });
       else notes.unshift(saved);
@@ -15060,11 +15140,11 @@
       if (!notes.length) { list.innerHTML = '<p style="font-size:.76rem;color:var(--text-muted)">Nothing saved yet — your notes live in this browser only.</p>'; return; }
       list.innerHTML = shown.map(function (n) {
         var when = new Date(n.t).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-        return '<div class="wb-note" data-id="' + n.id + '"><div class="nbody"><div class="ntitle">' + esc(n.title) +
+        return '<div class="wb-note" data-id="' + esc(n.id) + '"><div class="nbody"><div class="ntitle">' + esc(n.title) +
           '</div><div class="nmeta">' + esc(n.method) + ' · ' + when + '</div><div class="npreview">' + esc(n.body.slice(0, 160)) +
-          '</div></div><button data-load="' + n.id + '" title="Load">↥</button><button data-del="' + n.id + '" title="Delete">✕</button></div>';
+          '</div></div><button data-load="' + esc(n.id) + '" title="Load">↥</button><button data-del="' + esc(n.id) + '" title="Delete">✕</button></div>';
       }).join("");
-      var noteById = {};
+      var noteById = Object.create(null);
       shown.forEach(function (n) { noteById[n.id] = n; });
       list.querySelectorAll(".wb-note").forEach(function (row) {
         var id = row.getAttribute("data-id");
@@ -15261,33 +15341,75 @@
       section: card.closest(".section") ? card.closest(".section").id : ""
     };
   }
-  function installCardTools() {
-    document.querySelectorAll("main .link-card").forEach(function (card) {
-      if (card.querySelector(".roost-card-tools")) return;
-      var tools = document.createElement("span");
-      tools.className = "roost-card-tools";
-      tools.innerHTML = '<button class="roost-link-tool" type="button" title="Link note" aria-label="Link note">Note</button><button class="roost-board-tool" type="button" title="Add to board" aria-label="Add to board">Board</button>';
-      card.appendChild(tools);
-      tools.querySelector(".roost-link-tool").addEventListener("click", function (event) {
-        event.preventDefault(); event.stopPropagation();
-        activeLinkCardData = linkCardData(card);
-        openModal("linknote");
-      });
-      tools.querySelector(".roost-board-tool").addEventListener("click", function (event) {
-        event.preventDefault(); event.stopPropagation();
-        addCardToBoard(card);
-      });
+  var cardSectionObserver;
+  function enhanceSectionCards(section) {
+    if (!section || !section.querySelector(".link-grid > .link-card")) return;
+    var pins = new Set(readPins().map(function (pin) { return safeCustomUrl(pin.href); }));
+    var notes = linkNotes();
+    section.querySelectorAll(".link-grid > .link-card").forEach(function (card) {
+      var frame = document.createElement("div");
+      frame.className = "roost-card-frame";
+      var actions = document.createElement("span");
+      actions.className = "roost-card-tools";
+      actions.innerHTML = '<button class="roost-link-tool" type="button">Note</button><button class="roost-board-tool" type="button">Board</button>';
+      var title = card.querySelector(".card-label")?.textContent || card.href;
+      actions.firstElementChild.setAttribute("aria-label", "Link note for " + title);
+      actions.lastElementChild.setAttribute("aria-label", "Add " + title + " to a board");
+      var pin = document.createElement("button");
+      pin.type = "button"; pin.className = "pin-btn";
+      syncPinButton(card, pin, pins);
+      var keepFocus = card === document.activeElement;
+      card.before(frame);
+      frame.append(card, pin, actions);
+      markCardNote(card, notes);
+      if (keepFocus) card.focus({ preventScroll: true });
     });
-    markAnnotatedCards();
+  }
+  function installCardTools() {
+    var main = document.getElementById("main-content");
+    if (!main._roostCardControls) {
+      main._roostCardControls = true;
+      if ("IntersectionObserver" in window) cardSectionObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) { enhanceSectionCards(entry.target); cardSectionObserver.unobserve(entry.target); }
+        });
+      }, { rootMargin: "300px" });
+      main.addEventListener("focusin", function (event) {
+        if (event.target.matches(".link-card")) enhanceSectionCards(event.target.closest(".section"));
+      });
+      main.addEventListener("click", function (event) {
+        var button = event.target.closest(".roost-card-frame button");
+        if (button) {
+          var card = button.closest(".roost-card-frame").querySelector(".link-card");
+          if (button.classList.contains("pin-btn")) toggleRoostPin(card);
+          if (button.classList.contains("roost-link-tool")) { activeLinkCardData = linkCardData(card); openModal("linknote"); }
+          if (button.classList.contains("roost-board-tool")) addCardToBoard(card);
+        } else {
+          var link = event.target.closest("a.link-card");
+          if (link && !event.defaultPrevented) {
+            var data = linkCardData(link);
+            setTimeout(function () { trackRoostRecent(data); }, 0);
+          }
+        }
+      });
+      window.addEventListener("storage", function (event) {
+        if (!event.key || event.key === "kfl_pins_v1" || event.key === "kfl_recent_v1") refreshKflUtilitySections();
+      });
+    }
+    main.querySelectorAll(".section").forEach(function (section) {
+      if (!section.querySelector(".link-grid > .link-card")) return;
+      if (!cardSectionObserver || ["pinned","recent","quick-access"].includes(section.id)) enhanceSectionCards(section);
+      else cardSectionObserver.observe(section);
+    });
+  }
+  function markCardNote(card, notes) {
+    var note = notes[safeHttpUrl(card.href)];
+    card.classList.toggle("roost-has-note", !!(note && (note.note || note.status || note.rating)));
+    card.classList.toggle("roost-has-tags", !!(note && linkNoteTags(note).length));
   }
   function markAnnotatedCards() {
     var notes = linkNotes();
-    document.querySelectorAll("main .link-card").forEach(function (card) {
-      var href = safeHttpUrl(card.href);
-      var note = href && notes[href];
-      card.classList.toggle("roost-has-note", !!(note && (note.note || note.status || note.rating)));
-      card.classList.toggle("roost-has-tags", !!(note && linkNoteTags(note).length));
-    });
+    document.querySelectorAll("main .roost-card-frame .link-card").forEach(function (card) { markCardNote(card, notes); });
   }
   function buildLinkNote(body) {
     var data = activeLinkCardData;
@@ -15441,9 +15563,11 @@
     });
   }
   function saveBoards(list) {
-    LS.write(BOARDS_KEY, list.slice(0, 40));
+    if (list.length > 40 && list.length > boards().length) { toast("Your 40 boards are full. Delete a board to make room."); return false; }
+    if (!LS.write(BOARDS_KEY, list)) return false;
     checkRoostAchievements("boards");
     renderTodayDashboard();
+    return true;
   }
   function boardLinkIndex() {
     var index = {};
@@ -15498,9 +15622,9 @@
     });
     board.templateId = template.id;
     board.name = board.name || template.name;
-    board.links = templateLinks.concat(existing).slice(0, 80);
+    board.links = templateLinks.concat(existing);
     board.updatedAt = now;
-    saveBoards(list);
+    if (!saveBoards(list)) return { ok: false, count: 0, error: "Board could not be saved. Check board capacity and browser storage." };
     return { ok: true, created: created, name: board.name, count: links.length, missing: Math.max(0, (template.urls || []).length - links.length) };
   }
   function boardTemplatesHtml() {
@@ -15523,8 +15647,7 @@
     if (!board) { board = { id: "b" + Date.now(), name: name, links: [] }; list.unshift(board); }
     board.links = (board.links || []).filter(function (l) { return l.href !== data.href; });
     board.links.unshift({ href: data.href, title: data.title, desc: data.desc, section: data.section, addedAt: new Date().toISOString() });
-    saveBoards(list);
-    toast("Added to " + board.name);
+    if (saveBoards(list)) toast("Added to " + board.name);
   }
   function buildBoards(body) {
     var list = boards();
@@ -15583,7 +15706,7 @@
       btn.addEventListener("click", function () {
         var result = applyBoardTemplate(btn.getAttribute("data-board-template"));
         if (result.ok) toast((result.created ? "Created " : "Updated ") + result.name + " with " + result.count + " link(s)");
-        else toast("Template links were not found");
+        else toast(result.error || "Template links were not found");
         render();
       });
     });
@@ -15600,6 +15723,11 @@
   function buildReadLater(body) {
     function render() {
       var items = readLaterItems();
+      var editor = {
+        label: "article note",
+        dirty: function () { return Array.from(body.querySelectorAll("[data-readlater-note]")).some(function (field) { return field.value !== field.defaultValue; }); }
+      };
+      modalEditor = editor;
       var counts = readLaterCounts(items);
       var entries = items.map(function (item, idx) { return { item: item, idx: idx }; }).filter(function (entry) { return readLaterMatchesFilter(entry.item, readLaterFilter); });
       var filters = [
@@ -15622,56 +15750,58 @@
         }).join("") || roostEmptyCardHtml("No saved articles here", "Save headlines from Roost Wire or section headline strips. If this filter is empty, All may still have archived or completed items.", [{ label: "Open Roost Wire", action: "wire", primary: true }, { label: "Show News", action: "news" }])) + '</div>';
       body.querySelectorAll("[data-readlater-filter]").forEach(function (btn) {
         btn.addEventListener("click", function () {
+          if (!allowEditorLeave()) return;
           readLaterFilter = btn.getAttribute("data-readlater-filter") || "active";
           render();
         });
       });
       body.querySelectorAll("[data-readlater-status]").forEach(function (select) {
         select.addEventListener("change", function () {
-          var items = readLaterItems();
-          var idx = Number(select.getAttribute("data-readlater-status"));
-          if (!items[idx]) return;
-          items[idx].status = readLaterStatus(select.value);
-          items[idx].archived = items[idx].status === "archived";
-          items[idx].updatedAt = new Date().toISOString();
-          saveReadLaterItems(items);
-          render();
+          if (!allowEditorLeave()) return;
+          var original = items[Number(select.dataset.readlaterStatus)];
+          var current = readLaterItems(), target = current.find(function (item) { return item.link === original.link; });
+          if (!target || target.status !== original.status) { toast("Article status changed in another tab"); render(); return; }
+          target.status = readLaterStatus(select.value);
+          target.archived = target.status === "archived";
+          target.updatedAt = new Date().toISOString();
+          if (saveReadLaterItems(current)) render(); else select.value = original.status;
         });
       });
       body.querySelectorAll("[data-readlater-priority]").forEach(function (btn) {
         btn.addEventListener("click", function () {
-          var items = readLaterItems();
-          var idx = Number(btn.getAttribute("data-readlater-priority"));
-          if (!items[idx]) return;
-          items[idx].priority = items[idx].priority === "high" ? "normal" : "high";
-          items[idx].updatedAt = new Date().toISOString();
-          saveReadLaterItems(items);
-          render();
+          if (!allowEditorLeave()) return;
+          var original = items[Number(btn.dataset.readlaterPriority)];
+          var current = readLaterItems(), target = current.find(function (item) { return item.link === original.link; });
+          if (!target || target.priority !== original.priority) { toast("Article priority changed in another tab"); render(); return; }
+          target.priority = target.priority === "high" ? "normal" : "high";
+          target.updatedAt = new Date().toISOString();
+          if (saveReadLaterItems(current)) render();
         });
       });
       body.querySelectorAll("[data-readlater-note]").forEach(function (field) {
         field.addEventListener("change", function () {
-          var items = readLaterItems();
-          var idx = Number(field.getAttribute("data-readlater-note"));
-          if (!items[idx]) return;
-          items[idx].note = field.value.slice(0, 800);
-          items[idx].updatedAt = new Date().toISOString();
-          saveReadLaterItems(items);
+          var original = items[Number(field.dataset.readlaterNote)];
+          var current = readLaterItems(), target = current.find(function (item) { return item.link === original.link; });
+          if (!target || target.note !== field.defaultValue) {
+            toast("This article changed in another tab. Copy your draft before reopening it.");
+            return;
+          }
+          target.note = field.value.slice(0, 800);
+          target.updatedAt = new Date().toISOString();
+          if (saveReadLaterItems(current)) field.defaultValue = target.note;
         });
       });
       body.querySelectorAll("[data-readlater-remove]").forEach(function (btn) {
         btn.addEventListener("click", function () {
-          var items = readLaterItems();
-          items.splice(Number(btn.getAttribute("data-readlater-remove")), 1);
-          saveReadLaterItems(items);
-          render();
+          if (!allowEditorLeave()) return;
+          var target = items[Number(btn.dataset.readlaterRemove)];
+          if (removeReadLater(target.link)) render();
         });
       });
       var clear = body.querySelector("#readlater-clear");
       if (clear) clear.addEventListener("click", function () {
         if (!confirm("Clear saved articles?")) return;
-        saveReadLaterItems([]);
-        render();
+        if (saveReadLaterItems([])) render();
       });
       bindRoostEmptyActions(body);
     }
@@ -16202,7 +16332,7 @@
       else { center.querySelector(".v3-controls").append(options, groups); }
       options.open = mode !== "library"; options.dataset.surface = mode;
     }
-    center.querySelector("#command-center-heading").textContent = mode === "library" ? "Explore the library" : "Every section, right up front";
+    center.querySelector("#command-center-heading").textContent = mode === "library" ? "Explore the library" : "Section directory";
     center.classList.toggle("roost-surface-away", mode === "desk" || (mode === "library" && !!librarySelectedId));
     center.classList.toggle("roost-library-directory", mode === "library" && !librarySelectedId);
     sections.forEach(function (section) {
@@ -16260,6 +16390,12 @@
     var nav = document.createElement("nav");
     nav.id = "roost-home-nav"; nav.setAttribute("aria-label", "Roost browsing mode");
     nav.innerHTML = '<button type="button" data-home-surface="desk">Daily desk</button><button type="button" data-home-surface="library">Library</button><button type="button" data-home-surface="full">Full page</button>';
+    var customize = document.createElement("button");
+    customize.type = "button";
+    customize.className = "roost-customize-desk";
+    customize.textContent = "Customize desk";
+    customize.addEventListener("click", function () { openOnboarding(!!roostOnboarding.completed); });
+    nav.appendChild(customize);
     launcher.prepend(nav);
     nav.addEventListener("click", function (event) { var button = event.target.closest("[data-home-surface]"); if (button) setHomeSurface(button.dataset.homeSurface); });
     var controls = document.createElement("div"); controls.id = "roost-library-controls";
@@ -16337,7 +16473,7 @@
       if (wrap) wrap.classList.add("roost-hidden");
       return;
     }
-    var anchor = document.querySelector(".roost-wire") || document.querySelector(".greeting-bar");
+    var anchor = document.querySelector(".roost-wire") || document.querySelector(".v3-header-wrap");
     if (!anchor) return;
     if (!wrap) {
       wrap = document.createElement("div");
@@ -16353,8 +16489,8 @@
     var achievements = checkRoostAchievements("dashboard");
     var resume = points.length ? '<div class="roost-resume-grid">' + points.map(function (point, index) {
       return '<button class="roost-resume-point" type="button" data-resume-point="' + index + '"><span>' + esc(point.reason) + '</span><strong>' + esc(point.title) + '</strong><span class="roost-resume-open">' + (point.kind === "session" ? "Resume session" : "Open") + ' →</span></button>';
-    }).join("") + '</div>' : '<p class="roost-today-empty">A clear desk. Find a destination, or plan one thing to work on. Your saved work will appear here.</p>';
-    wrap.innerHTML = '<div class="roost-surface-header"><div><h2>Today</h2><span>Pick up where you left off</span></div>' + surfaceToggleHtml("today", "Today", "roost-today-body") + '</div><div class="roost-today-inner" id="roost-today-body">' +
+    }).join("") + '</div>' : '<p class="roost-today-empty">Plan a session or explore the library. Your saved work will appear here.</p>';
+    wrap.innerHTML = '<div class="roost-surface-header"><div><h2>Today</h2><span>Continue your work</span></div>' + surfaceToggleHtml("today", "Today", "roost-today-body") + '</div><div class="roost-today-inner" id="roost-today-body">' +
       '<section class="roost-today-card roost-daily-desk" aria-label="Continue your work">' + resume +
       '<div class="roost-mini-actions"><button class="roost-mini-action" type="button" data-browse-library>Browse library</button><button class="roost-mini-action" type="button" data-open-tool="session">Plan a session</button><button class="roost-mini-action" type="button" data-open-tool="views">Home Views</button></div>' +
       '<details class="roost-today-details"' + (expanded ? ' open' : '') + '><summary>' + (missionOn ? 'Learning, quests & local tools' : 'Quests & local tools') + '</summary><div class="roost-today-extra">' +
@@ -16394,8 +16530,10 @@
     var bar = document.createElement("div");
     bar.className = "roost-scope-bar";
     bar.id = "roost-scope-bar";
+    bar.setAttribute("role", "group");
+    bar.setAttribute("aria-label", "Search scope");
     var scopes = [{ id: "all", label: "All" }, { id: "links", label: "Links" }, { id: "mission", label: "Mission" }, { id: "news", label: "News" }, { id: "saved", label: "Saved" }];
-    bar.innerHTML = scopes.map(function (scope) {
+    bar.innerHTML = '<span class="roost-scope-caption" aria-hidden="true">Search in</span>' + scopes.map(function (scope) {
       return '<button type="button" data-search-scope="' + scope.id + '" aria-pressed="' + (settings.searchScope === scope.id ? "true" : "false") + '">' + scope.label + '</button>';
     }).join("");
     var top = input.closest(".top-bar");
@@ -16827,7 +16965,7 @@
       '<div class="roost-help-grid">' +
         '<section class="roost-help-group"><h4>Open or find</h4><ul><li>Use the launcher for links, sections, saved items, and commands.</li><li>Arrow keys move through grouped results; Enter activates the selected item.</li></ul><div class="roost-help-actions"><button class="roost-help-action" type="button" data-help-action="launcher">Focus launcher</button><button class="roost-help-action" type="button" data-help-action="surprise">Surprise me</button></div></section>' +
         '<section class="roost-help-group"><h4>Make it yours</h4><ul><li>Add one link or import bookmark HTML, CSV, JSON, or OPML.</li><li>Edit Layout can hide, move, compact, or restore homepage widgets.</li></ul><div class="roost-help-actions"><button class="roost-help-action" type="button" data-help-action="addlink">Add Link</button><button class="roost-help-action" type="button" data-help-action="import">Import Bookmarks</button><button class="roost-help-action" type="button" data-help-action="feeds">News Feeds</button><button class="roost-help-action" type="button" data-help-action="views">Home Views</button><button class="roost-help-action" type="button" data-help-action="layout">Edit Layout</button><button class="roost-help-action" type="button" data-help-action="calm">Calm Start</button><button class="roost-help-action" type="button" data-help-action="setup">Run Setup Again</button></div></section>' +
-        '<section class="roost-help-group"><h4>Save and trust</h4><ul><li>Configuration stays in this browser. There are no accounts, analytics, ads, or cloud sync.</li><li>Live headlines use public RSS proxies and fail gracefully.</li></ul><div class="roost-help-actions"><button class="roost-help-action" type="button" data-help-action="backup">Backup / Restore</button><button class="roost-help-action" type="button" data-help-action="readlater">Read Later</button><button class="roost-help-action" type="button" data-help-action="headlines">Toggle Headlines</button><button class="roost-help-action" type="button" data-help-action="accessibility">Accessibility</button><button class="roost-help-action" type="button" data-help-action="linkhealth">Link Health</button></div></section>' +
+        '<section class="roost-help-group"><h4>Save and trust</h4><ul><li>Configuration stays in this browser. There are no accounts, analytics, ads, or cloud sync.</li><li>Connect live feeds to receive built-in headlines through public relays. Each custom source requires separate permission.</li></ul><div class="roost-help-actions"><button class="roost-help-action" type="button" data-help-action="backup">Backup / Restore</button><button class="roost-help-action" type="button" data-help-action="readlater">Read Later</button><button class="roost-help-action" type="button" data-help-action="headlines">Toggle Headlines</button><button class="roost-help-action" type="button" data-help-action="accessibility">Accessibility</button><button class="roost-help-action" type="button" data-help-action="linkhealth">Link Health</button></div></section>' +
         '<section class="roost-help-group"><h4>Learn and build</h4><p>' + esc(missionCopy) + '</p><div class="roost-help-actions"><button class="roost-help-action" type="button" data-help-action="mission">' + esc(missionTitle) + '</button><button class="roost-help-action" type="button" data-help-action="workbench">Open Workbench</button></div></section>' +
       '</div>' +
       '<div class="roost-help-shortcuts"><span><kbd>/</kbd> launcher</span><span><kbd>Ctrl</kbd> + <kbd>K</kbd> command launcher</span><span><kbd>?</kbd> this panel</span><span><kbd>Esc</kbd> close</span><span><kbd>c</kbd> collapse sections</span><span><kbd>p</kbd> pin focused card</span></div>' +
@@ -17134,35 +17272,54 @@
      5A) BACKUP / RESTORE (local Roost memory, no cloud, no deletion)
      ================================================================= */
   var BACKUP_SCHEMA = "the-roost.localStorage.v1";
+  var BACKUP_IMPORT_BYTES = 32 * 1024 * 1024;
+  function checkImportSize(text, limit) {
+    if (typeof text !== "string" || text.length > limit || new Blob([text]).size > limit) {
+      throw new Error("Import exceeds " + (limit / 1024 / 1024) + " MiB. Split the file before importing.");
+    }
+  }
+  function parseImportJson(text) {
+    var result = JSON.parse(text);
+    // Check after parsing so deep nesting cannot overflow a recursive reviver.
+    function inspect(value, depth) {
+      if (!value || typeof value !== "object") return;
+      if (depth > 40) throw new Error("Imported records are nested too deeply.");
+      Object.keys(value).forEach(function (field) {
+        if (field === "prototype" || Object.prototype.hasOwnProperty.call(Object.prototype, field)) throw new Error("Imported records contain a reserved property name.");
+        inspect(value[field], depth + 1);
+      });
+    }
+    inspect(result, 0);
+    return result;
+  }
   var CONFIG_PACK_SCHEMA = "the-roost.config-pack.v1";
   var BACKUP_META_KEY = "roost_backup_meta_v1";
   var CONFIG_PACK_KEYS = [CUSTOM_SECTIONS_KEY, CUSTOM_LINKS_KEY, CUSTOM_FEEDS_KEY, VIEWS_KEY, BOARDS_KEY, ACCESSIBILITY_KEY, LAYOUT_KEY];
   function isRoostStorageKey(k, includeFeeds) {
     if (typeof k !== "string" || !k) return false;
-    if (k === RESTORE_UNDO_KEY) return false;
+    if (k === RESTORE_UNDO_KEY || k === HEADLINE_CONNECTION_KEY) return false;
     if (k.indexOf("roost_feed_") === 0) return !!includeFeeds;
     return k.indexOf("roost_") === 0 || k.indexOf("kfl_") === 0 || k === LEGACY_MISSION_KEY;
   }
   function storageKeysForBackup(includeFeeds) {
     var keys = [];
-    try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        if (isRoostStorageKey(k, includeFeeds)) keys.push(k);
-      }
-    } catch (e) {}
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (isRoostStorageKey(k, includeFeeds)) keys.push(k);
+    }
     return keys.sort();
   }
   function backupPayload(includeFeeds) {
     var data = {};
     storageKeysForBackup(includeFeeds).forEach(function (k) {
-      try { data[k] = localStorage.getItem(k); } catch (e) {}
+      var raw = localStorage.getItem(k);
+      if (raw === null) throw new Error("Saved data changed during export. Try exporting again.");
+      data[k] = raw;
     });
     return {
       app: "The Roost",
       schema: BACKUP_SCHEMA,
       exportedAt: new Date().toISOString(),
-      href: location.href,
       includesFeedCache: !!includeFeeds,
       metadata: storageExportMetadata(data, includeFeeds),
       data: data
@@ -17171,22 +17328,20 @@
   function configPackPayload() {
     var data = {};
     CONFIG_PACK_KEYS.forEach(function (k) {
-      try {
-        var v = localStorage.getItem(k);
-        if (typeof v === "string") data[k] = v;
-      } catch (e) {}
+      var v = localStorage.getItem(k);
+      if (typeof v === "string") data[k] = v;
     });
     return {
       app: "The Roost",
       schema: CONFIG_PACK_SCHEMA,
       exportedAt: new Date().toISOString(),
-      href: location.href,
       includesPersonalProgress: false,
       data: data
     };
   }
   function parseConfigPackText(text) {
-    var parsed = JSON.parse(text || "{}");
+    checkImportSize(text, BACKUP_IMPORT_BYTES);
+    var parsed = parseImportJson(text);
     if (!parsed || parsed.schema !== CONFIG_PACK_SCHEMA || !storageRecord(parsed.data)) {
       throw new Error("This does not look like a The Roost configuration pack.");
     }
@@ -17235,7 +17390,7 @@
     // Future/local extension keys remain opaque for backward-compatible recovery.
     if (!known) return;
     var value;
-    try { value = JSON.parse(raw); } catch (e) { throw new Error(key + ": invalid JSON. Nothing was changed."); }
+    try { value = parseImportJson(raw); } catch (e) { throw new Error(key + ": invalid or unsupported JSON. Nothing was changed."); }
     function requireShape(ok, expected) { if (!ok) throw new Error(key + ": expected " + expected + ". Nothing was changed."); }
     function recordList(list, label) { requireShape(Array.isArray(list) && list.every(storageRecord), label + " records"); }
     function optionalMap(object, field) { if (object[field] != null) requireShape(storageRecord(object[field]), field + " object"); }
@@ -17267,7 +17422,10 @@
       Object.keys(value[field] || {}).forEach(function (id) { var project = value[field][id]; requireShape(storageRecord(project), "project records"); if (project.subtasks != null) recordList(project.subtasks, "project subtask"); });
     });
     if (key === LAYOUT_KEY) { optionalMap(value, "hidden"); optionalMap(value, "sizes"); }
-    if (key === LINK_HEALTH_KEY) optionalMap(value, "results");
+    if (key === LINK_HEALTH_KEY) {
+      optionalMap(value, "results");
+      requireShape(Object.values(value.results || {}).every(storageRecord), "link health records");
+    }
     if (key === QUEST_KEY && value.quests != null) recordList(value.quests, "quest");
     if (feedCache) recordList(value.items, "cached headline");
   }
@@ -17328,7 +17486,8 @@
     }).join("") + '</ul>';
   }
   function parseBackupText(text) {
-    var parsed = JSON.parse(text || "{}");
+    checkImportSize(text, BACKUP_IMPORT_BYTES);
+    var parsed = parseImportJson(text);
     if (!parsed || parsed.schema !== BACKUP_SCHEMA || !storageRecord(parsed.data)) {
       throw new Error("This does not look like a The Roost backup.");
     }
@@ -17396,16 +17555,22 @@
     }
   }
   function applyStorageRestore(data) {
-    var safe, changed;
+    var safe, changed, priorUndo;
     try {
       safe = safeRestoreData(data);
       changed = Object.keys(safe).filter(function (key) { return localStorage.getItem(key) !== safe[key]; });
       if (!changed.length) return { ok: true, keys: Object.keys(safe), written: 0 };
+      priorUndo = localStorage.getItem(RESTORE_UNDO_KEY);
       captureRestoreUndo(changed);
     } catch (e) {
       return { ok: false, keys: [], written: 0, error: "Nothing changed. " + (e.message || "A recovery snapshot could not be saved; browser storage may be full.") };
     }
-    return writeStorageTransaction(safe);
+    var result = writeStorageTransaction(safe);
+    if (!result.ok && !result.rollbackFailed && priorUndo !== null) {
+      try { localStorage.setItem(RESTORE_UNDO_KEY, priorUndo); }
+      catch (e) { result.error += " The earlier Undo snapshot could not be recovered."; }
+    }
+    return result;
   }
   function applyRestoreUndo() {
     var undo = restoreUndoState();
@@ -17415,8 +17580,8 @@
       var prior = undo.previous[k];
       values[k] = prior.existed ? prior.value : null;
     });
+    values[RESTORE_UNDO_KEY] = null;
     var result = writeStorageTransaction(values);
-    if (result.ok) try { localStorage.removeItem(RESTORE_UNDO_KEY); } catch (e) {}
     result.restored = result.ok ? undo.keys.length : 0;
     return result;
   }
@@ -17434,7 +17599,7 @@
           '<textarea class="roost-backup-text" id="backup-text" spellcheck="false" aria-label="Backup JSON" placeholder="Paste The Roost backup JSON here..."></textarea>' +
           '<div class="roost-backup-actions"><button class="wb-btn" id="backup-preview">Preview</button><button class="wb-btn primary" id="backup-restore">Restore Backup</button><button class="wb-btn" id="backup-undo-restore" disabled>Undo Last Restore</button><button class="wb-btn" id="backup-reload" disabled>Reload Page</button></div>' +
           '<div id="backup-preview-box"></div><div class="roost-backup-status" id="backup-restore-status"></div></section>' +
-        '<section class="roost-backup-card"><h4>Configuration Pack</h4><p>Export or import shareable local setup pieces: custom links, custom feeds, saved views, boards, accessibility preferences, and layout. Packs exclude Mission progress, recents, Read Later, notes, and other personal memory.</p>' +
+        '<section class="roost-backup-card"><h4>Configuration Pack</h4><p>Packs contain your custom links, sections, feed addresses, views, boards, accessibility preferences and layout. Review URLs, titles and descriptions for private details before sharing. Workbench notes and learning progress stay out of the pack.</p>' +
           '<textarea class="roost-backup-text" id="pack-text" spellcheck="false" aria-label="Configuration pack JSON" placeholder="Paste The Roost configuration pack JSON here..."></textarea>' +
           '<div class="roost-backup-actions"><button class="wb-btn primary" id="pack-download" type="button">Download Pack</button><button class="wb-btn" id="pack-copy" type="button">Copy Pack JSON</button><button class="wb-btn" id="pack-preview" type="button">Preview Pack</button><button class="wb-btn" id="pack-apply" type="button">Apply Pack</button></div>' +
           '<div id="pack-preview-box"></div><div class="roost-backup-status" id="pack-status"></div></section>' +
@@ -17453,22 +17618,32 @@
     var packPreviewBox = body.querySelector("#pack-preview-box");
 
     function renderCurrent() {
-      var payload = backupPayload(includeFeeds.checked);
+      var payload;
+      try {
+        payload = backupPayload(includeFeeds.checked);
+        if (health) health.innerHTML = backupMemoryHealthHtml(payload);
+      } catch (e) {
+        health.replaceChildren(); current.replaceChildren();
+        setStatus(exportStatus, "Browser storage could not be read. Try again when it is available.", "bad");
+        renderUndoControl();
+        return;
+      }
       var keys = Object.keys(payload.data);
-      if (health) health.innerHTML = backupMemoryHealthHtml(backupPayload(false));
       current.innerHTML = '<p class="roost-backup-status">Schema 1 · ' + keys.length + ' keys · ' + Math.ceil(payload.metadata.approximateBytes / 1024) + ' KB approx. · ' + esc(new Date(payload.exportedAt).toLocaleString()) + '</p><p class="roost-backup-status">Includes: ' + esc(payload.metadata.categories.join(", ")) + '. Excludes: ' + esc(payload.metadata.excluded.join(", ")) + '.</p><details><summary>Included storage keys</summary>' + backupKeyListHtml(keys, payload.data) + '</details>';
       renderUndoControl();
       bindRoostEmptyActions(body);
     }
     function backupJson() {
-      return JSON.stringify(backupPayload(includeFeeds.checked), null, 2);
+      try { return JSON.stringify(backupPayload(includeFeeds.checked), null, 2); }
+      catch (e) { setStatus(exportStatus, "Backup stopped because browser storage could not be read. Try again.", "bad"); return null; }
     }
     function setStatus(el, msg, kind) {
       el.className = "roost-backup-status" + (kind ? " " + kind : "");
       el.textContent = msg || "";
     }
     function packJson() {
-      return JSON.stringify(configPackPayload(), null, 2);
+      try { return JSON.stringify(configPackPayload(), null, 2); }
+      catch (e) { setStatus(packStatus, "Export stopped because browser storage could not be read. Try again.", "bad"); return null; }
     }
     function previewPack() {
       try {
@@ -17509,6 +17684,7 @@
     includeFeeds.addEventListener("change", renderCurrent);
     body.querySelector("#backup-download").addEventListener("click", function () {
       var json = backupJson();
+      if (!json) return;
       var stamp = new Date().toISOString().replace(/[:.]/g, "-");
       var blob = new Blob([json], { type: "application/json" });
       var a = document.createElement("a");
@@ -17517,12 +17693,14 @@
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
       writeBackupMeta("download");
-      setStatus(exportStatus, "Backup downloaded.", "good");
+      setStatus(exportStatus, "Backup download started. Keep the JSON file somewhere private.", "good");
       renderCurrent();
     });
     body.querySelector("#backup-copy").addEventListener("click", function () {
       if (!navigator.clipboard) { setStatus(exportStatus, "Clipboard is unavailable in this browser.", "bad"); return; }
-      navigator.clipboard.writeText(backupJson()).then(function () {
+      var json = backupJson();
+      if (!json) return;
+      navigator.clipboard.writeText(json).then(function () {
         writeBackupMeta("clipboard");
         setStatus(exportStatus, "Backup JSON copied.", "good");
         renderCurrent();
@@ -17537,6 +17715,7 @@
     });
     body.querySelector("#pack-download").addEventListener("click", function () {
       var json = packJson();
+      if (!json) return;
       var stamp = new Date().toISOString().replace(/[:.]/g, "-");
       var blob = new Blob([json], { type: "application/json" });
       var a = document.createElement("a");
@@ -17544,11 +17723,13 @@
       a.download = "the-roost-config-pack-" + stamp + ".json";
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-      setStatus(packStatus, "Configuration pack downloaded.", "good");
+      setStatus(packStatus, "Configuration pack download started.", "good");
     });
     body.querySelector("#pack-copy").addEventListener("click", function () {
       if (!navigator.clipboard) { setStatus(packStatus, "Clipboard is unavailable in this browser.", "bad"); return; }
-      navigator.clipboard.writeText(packJson()).then(function () {
+      var json = packJson();
+      if (!json) return;
+      navigator.clipboard.writeText(json).then(function () {
         setStatus(packStatus, "Configuration pack JSON copied.", "good");
       }).catch(function () {
         setStatus(packStatus, "Copy failed. Use Download Pack instead.", "bad");
@@ -17565,12 +17746,18 @@
       renderCurrent();
       toast(applied.ok ? "Configuration pack applied" : "Pack apply failed");
     });
+    var backupRevision = 0;
+    text.addEventListener("input", function () { backupRevision++; previewBox.textContent = ""; });
     body.querySelector("#backup-file").addEventListener("change", function (e) {
+      var revision = ++backupRevision;
       var file = e.target.files && e.target.files[0];
       if (!file) return;
+      text.value = "";
+      previewBox.textContent = "";
+      if (file.size > BACKUP_IMPORT_BYTES) { setStatus(restoreStatus, "Choose a backup of 32 MiB or less.", "bad"); return; }
       var reader = new FileReader();
-      reader.onload = function () { text.value = String(reader.result || ""); previewBackup(); };
-      reader.onerror = function () { setStatus(restoreStatus, "Could not read that file.", "bad"); };
+      reader.onload = function () { if (revision === backupRevision) { text.value = String(reader.result || ""); previewBackup(); } };
+      reader.onerror = function () { if (revision === backupRevision) setStatus(restoreStatus, "Could not read that file.", "bad"); };
       reader.readAsText(file);
     });
     body.querySelector("#backup-preview").addEventListener("click", previewBackup);
@@ -17591,7 +17778,7 @@
         renderUndoControl();
         return;
       }
-      if (!confirm("Undo the last restore for " + undo.keys.length + " key(s)?")) return;
+      if (!confirm("Restore the previous values of " + undo.keys.length + " key(s)? This will also replace any edits to those keys since the restore.")) return;
       var result = applyRestoreUndo();
       setStatus(restoreStatus, result.ok ? "Undo restored " + result.restored + " previous key value(s). Reload when ready." : result.error || "Undo failed. The recovery snapshot is still available.", result.ok ? "good" : "bad");
       reload.disabled = !result.ok;
@@ -17620,6 +17807,7 @@
   }
   function openModal(which) {
     if (!allowEditorLeave()) return false;
+    stopLinkHealth();
     modalEditor = null;
     if (which === "setup") {
       if (modalEl && modalEl.classList.contains("open")) closeModal();
@@ -17713,6 +17901,7 @@
   }
   function closeModal() {
     if (!modalEl || !allowEditorLeave()) return false;
+    stopLinkHealth();
     modalEditor = null;
     modalEl.classList.remove("open");
     setRoostLayer(modalEl, false);
@@ -17779,14 +17968,14 @@
     try { installSearchScopes(); } catch (e) {}
     try { installCommandLauncher(); } catch (e) {}
     try { installQuickStartHelp(); } catch (e) {}
-    try { installCardTools(); } catch (e) {}
     try { if (moduleEnabled("today")) renderTodayDashboard(); } catch (e) {}
     try { checkRoostAchievements("boot"); } catch (e) {}
     try { buildDock(); } catch (e) {}
     try { applyProfileConfig({ applyStarter: false }); } catch (e) {}
     try { applyLayoutState({ silent: true }); } catch (e) {}
     try { installHomeSurface(); } catch (e) {}
-    try { if (shouldShowOnboarding()) openOnboarding(false); } catch (e) {}
+    // Remember the neutral starter before other local activity can resemble a legacy profile.
+    if (shouldShowOnboarding() && !LS.read(ONBOARDING_KEY, null)) saveOnboardingState();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();

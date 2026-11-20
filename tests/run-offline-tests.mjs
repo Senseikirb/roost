@@ -13,9 +13,12 @@ let body = "shell version one";
 let claimed = false;
 let skipped = false;
 let networkCalls = 0;
+const requests = [];
+let denyCache = false;
 const cacheKey = (request) => typeof request === "string" ? request : request.url;
 const caches = {
   async open(name) {
+    if (denyCache) throw new Error('Cache storage disabled');
     if (!stores.has(name)) stores.set(name, new Map());
     const store = stores.get(name);
     return {
@@ -39,6 +42,7 @@ vm.runInNewContext(source, {
   fetch: async (request) => {
     networkCalls++;
     const url = cacheKey(request);
+    requests.push(url);
     if (!online || (failTool && url.endsWith("iq-rfsoc-explorer.html"))) throw new Error("offline");
     return new Response(body, { status: 200 });
   }
@@ -85,6 +89,13 @@ online = false;
 const home = dispatch(`${scope}index.html?source=installed`);
 assert.equal(await (await home.response).text(), "shell version one", "query-string navigation must find offline shell");
 await home.settled();
+const css = dispatch(scope + "roost-desk.css", { mode: "cors" });
+assert.equal((await css.response).status, 200, "the desk stylesheet is available offline");
+await css.settled();
+const artwork = dispatch(scope + "roost-ridgeline.jpg", { mode: "cors" });
+assert.equal((await artwork.response).status, 200, "masthead is cached for offline use");
+await artwork.settled();
+assert.ok(requests.every(url => !url.includes("?")), "static revalidation strips query parameters");
 const tool = dispatch(`${scope}iq-rfsoc-explorer.html`);
 assert.equal((await tool.response).status, 503);
 assert.match(await (await tool.response).text(), /Back to The Roost/);
@@ -103,6 +114,13 @@ online = false;
 const updatedHome = dispatch(`${scope}index.html`);
 assert.equal(await (await updatedHome.response).text(), "shell version two", "next open uses refreshed shell");
 await updatedHome.settled();
+const rootHome = dispatch(scope);
+assert.equal(await (await rootHome.response).text(), "shell version two", "root and index share updates");
+await rootHome.settled();
+online = true; denyCache = true;
+const noCache = dispatch(scope);
+assert.equal(await (await noCache.response).text(), "shell version two", "storage failure still serves the network");
+await noCache.settled(); denyCache = false;
 assert.ok(networkCalls > 0);
 
 // A root installation must not claim an old cache from a sibling path.
@@ -110,6 +128,6 @@ self.registration.scope = "https://example.test/";
 vm.runInNewContext(source, { self, caches, URL, Set, Promise, Response, fetch: async () => new Response("root shell") });
 await lifecycle("activate");
 assert.ok(stores.has("roost-shell-v3"), "root scope must preserve the sibling Roost's legacy cache");
-assert.ok(stores.has(`roost-shell:${scope}:v5`), "root scope must preserve the sibling Roost's scoped cache");
+assert.ok(stores.has(`roost-shell:${scope}:v6`), "root scope must preserve the sibling Roost's scoped cache");
 
 console.log("PASS production service worker: scoped lifecycle, optional failure, request boundaries, offline shell/tools, revalidation lifetime");

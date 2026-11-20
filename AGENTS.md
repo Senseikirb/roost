@@ -11,13 +11,14 @@ The Roost is a local-first, static personal homepage and command center. It is a
 - `index.html` is the primary app. Most newer behavior lives in the bottom `ROOST UPGRADE LAYER`; inspect that area first for feature work.
 - `manifest.json`, `sw.js`, and icon files provide PWA install and offline shell behavior.
 - Browser `localStorage` is the data layer. Existing `kfl_*` and `roost_*` keys are user data and must be preserved.
-- Public RSS/Atom feeds are fetched from the browser through public CORS proxies and cached locally. Feed data is untrusted.
+- Built-in RSS/Atom feeds use public relays only after explicit browser-specific approval. Custom feeds need separate approval and use direct public HTTPS requests. Treat all feed data as untrusted.
 
 ## Important Files
 
 - `index.html`: main app, curated links, UI, upgrade layer, local tools, feed handling, test hooks.
 - `README.md`: product overview and feature documentation.
 - `SETUP.md`: user setup, validation, GitHub Pages, iPhone install, and local-memory notes.
+- `roost-desk.css`: responsive desk styling. `roost-ridgeline.jpg` is local masthead artwork.
 - `manifest.json`: PWA metadata and icon references.
 - `sw.js`: service worker for offline shell caching.
 - `iq-rfsoc-explorer.html`: standalone RFSoC/IQ tool linked from the dock.
@@ -62,6 +63,8 @@ $env:ROOST_APP_URL='http://127.0.0.1:8765/index.html'
 $env:ROOST_CDP_PORT='9223'
 node tests/run-roost-validation.mjs
 ```
+
+Review inline script edits and refresh their hashes with `node scripts/check-csp.mjs --write`. CI validates the stored policy. Keep the worker’s shell asset list and version in sync with releases.
 
 ## Coding Conventions
 

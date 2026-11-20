@@ -28,6 +28,7 @@ function runNode(args, name, options = {}) {
     env: { ...process.env, ...(options.env || {}) }
   });
   const output = `${result.stdout || ""}${result.stderr || ""}`.trim();
+  if (result.status !== 0) console.error(output || result.error?.message || `Terminated by ${result.signal}`);
   record(name, result.status === 0, output.split(/\r?\n/).slice(-3).join(" | "));
   return result.status === 0;
 }
@@ -115,17 +116,23 @@ function main() {
   }
 
   runNode(["--check", "sw.js"], "service worker syntax");
+  runNode(["scripts/check-csp.mjs"], "content security policies");
+  runNode(["tests/run-security-tests.mjs"], "link, feed and import boundaries");
+  runNode(["tests/run-feed-access-tests.mjs"], "feed connection consent");
   runNode(["tests/run-custom-import-parser-tests.mjs"], "custom import parser fixtures");
   runNode(["tests/run-storage-tests.mjs"], "storage validation and recovery");
   runNode(["tests/run-offline-tests.mjs"], "service worker isolation and fallback");
 
   if (process.env.ROOST_CDP_PORT && process.env.ROOST_APP_URL) {
+    runNode(["tests/run-first-visit-cdp-tests.mjs"], "fresh desk, privacy and keyboard journeys");
     runNode(["tests/run-layout-cdp-tests.mjs"], "layout and runtime CDP suite");
     runNode(["tests/run-daily-cdp-tests.mjs"], "daily opening CDP journeys");
     runNode(["tests/run-launcher-cdp-tests.mjs"], "launcher CDP journeys");
     runNode(["tests/run-storage-cdp-tests.mjs"], "storage recovery CDP journeys");
     runNode(["tests/run-feed-cdp-tests.mjs"], "feed and offline CDP journeys");
     runNode(["tests/run-workflow-cdp-tests.mjs"], "library and writing safety CDP journeys");
+    runNode(["tests/run-cards-cdp-tests.mjs"], "link card keyboard and favorite journeys");
+    runNode(["tests/run-tools-cdp-tests.mjs"], "standalone tool CDP journeys");
   } else {
     checks.push({name: "browser CDP suites", ok: true, skipped: true});
     console.log("SKIP browser CDP suites - set ROOST_CDP_PORT and ROOST_APP_URL to enable");

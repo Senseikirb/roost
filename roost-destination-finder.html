@@ -7,223 +7,136 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Where To">
-<meta name="theme-color" content="#0a1225">
-<title>Where To · Roost</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3nLVASQ75UWG1foNTArDIlMOU+LiBrEsIdQUwcZuTvk='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#101917">
+<title>Where To · The Roost</title>
 <style>
-  :root{
-    --bg:#060d1a;--surface:#0f1b33;--surface-2:#142545;
-    --ink:#e8ecf4;--ink-soft:#8a97b4;--line:rgba(255,255,255,.09);
-    --pine:#c9a84c;--pine-soft:rgba(201,168,76,.14);--amber:#d42040;--amber-soft:rgba(191,10,48,.18);
-    --danger:#ff7f91;--good:#4fbf86;
-    --r:16px;--r-sm:8px;
-    --shadow:0 2px 12px rgba(0,0,0,.30);
-    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0}
-  body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.45;
-    padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 44px) env(safe-area-inset-left);
-    -webkit-font-smoothing:antialiased}
-  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
-    linear-gradient(180deg,rgba(10,18,37,.96),rgba(6,13,26,1) 58%),
-    repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 1px,transparent 1px 12px)}
-  .wrap{max-width:620px;margin:0 auto;padding:18px 16px 0}
-
-  header.top{padding:14px 4px 18px}
-  .kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);font-weight:700}
-  .roost-home{display:inline-flex;align-items:center;gap:6px;min-height:36px;margin:0 0 14px;padding:7px 10px;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:800;text-decoration:none}
-  .roost-home:hover,.roost-home:focus-visible{color:var(--pine);border-color:rgba(201,168,76,.42);background:var(--surface-2);outline:none}
-  header.top h1{font-size:30px;line-height:1.08;margin:6px 0 4px;font-weight:800;color:var(--ink)}
-  header.top p{margin:0;color:var(--ink-soft);font-size:14px}
-
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin:0 0 14px}
-  .card > h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 14px;font-weight:700;display:flex;align-items:center;gap:8px}
-  .card > h2::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--amber);flex:none}
-
-  label.fld{display:block;margin:0 0 12px}
-  label.fld:last-child{margin-bottom:0}
-  label.fld > span{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0 0 6px}
-  input[type=text],input[type=date],input[type=number]{width:100%;font-family:var(--font);font-size:16px;color:var(--ink);
-    background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;appearance:none}
-  input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.72}
-  input:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px var(--pine-soft)}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .row3{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:12px}
-
-  /* toggle */
-  .switchrow{display:flex;align-items:center;justify-content:space-between;gap:14px}
-  .switchrow .lbl{font-weight:700;color:var(--pine);font-size:15px}
-  .switchrow .sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
-  .switch{position:relative;flex:none;width:52px;height:31px;cursor:pointer}
-  .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
-  .track{position:absolute;inset:0;background:var(--surface-2);border:1.5px solid var(--line);border-radius:999px;transition:background .18s,border-color .18s}
-  .knob{position:absolute;top:3px;left:3px;width:23px;height:23px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .18s}
-  .switch input:checked + .track{background:var(--pine);border-color:var(--pine)}
-  .switch input:checked + .track .knob{transform:translateX(21px)}
-
-  .kid-panel{margin-top:16px}
-  .kid-panel.hidden{display:none}
-  .kid-row{display:flex;align-items:flex-end;gap:10px;margin-bottom:10px}
-  .kid-row .name{flex:1.4}
-  .kid-row .age{width:84px;flex:none}
-  .kid-row .age input{text-align:center}
-  .iconbtn{flex:none;width:40px;height:40px;border-radius:var(--r-sm);border:1.5px solid var(--line);background:var(--surface-2);color:var(--danger);font-size:19px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .iconbtn:active,.iconbtn:focus-visible{background:var(--amber-soft);border-color:rgba(255,127,145,.38);outline:none}
-  .addbtn{display:inline-flex;align-items:center;gap:7px;min-height:38px;background:var(--pine-soft);color:var(--pine);border:1px solid rgba(201,168,76,.22);border-radius:var(--r-sm);padding:9px 12px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:var(--font)}
-  .addbtn:active,.addbtn:focus-visible{filter:brightness(.96);background:rgba(201,168,76,.2);outline:none}
-  .addbtn .plus{font-size:17px;line-height:1}
-  .kid-count{font-size:13px;color:var(--ink-soft);margin:2px 0 12px;font-weight:600}
-
-  /* chips */
-  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;padding:8px;background:rgba(20,37,69,.45);border:1px solid var(--line);border-radius:12px}
-  .chip{min-height:38px;padding:8px 11px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-size:13px;font-weight:700;color:var(--ink-soft);cursor:pointer;user-select:none}
-  .chip[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:#060d1a}
-  .chip:focus-visible{outline:none;border-color:rgba(201,168,76,.5);box-shadow:0 0 0 3px var(--pine-soft)}
-
-  .toggle-line{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
-  .toggle-line:first-of-type{border-top:none}
-  .toggle-line .tl-txt{font-size:14px;font-weight:600;color:var(--ink)}
-  .toggle-line .tl-sub{font-size:12px;color:var(--ink-soft);margin-top:1px}
-  .sw-sm{position:relative;flex:none;width:46px;height:28px;cursor:pointer}
-  .sw-sm input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
-  .sw-sm .track{border-radius:999px}
-  .sw-sm .knob{width:21px;height:21px}
-  .sw-sm input:checked + .track .knob{transform:translateX(18px)}
-
-  .runbtn{width:100%;padding:13px;border-radius:var(--r-sm);font-size:15.5px;font-weight:800;border:1px solid rgba(201,168,76,.38);background:var(--pine);color:#060d1a;cursor:pointer;font-family:var(--font);letter-spacing:0}
-  .runbtn:active{filter:brightness(.96)}
-
-  .resultsum{font-size:13px;color:var(--ink-soft);font-weight:600;margin:0 4px 12px;padding-top:4px}
-  .result-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 13px}
-  .copybtn{min-height:38px;border:1px solid var(--line);background:var(--surface-2);color:var(--pine);border-radius:var(--r-sm);padding:9px 11px;font-size:13px;font-weight:800;cursor:pointer;font-family:var(--font)}
-  .copybtn:hover,.copybtn:focus-visible{border-color:rgba(201,168,76,.42);background:var(--pine-soft);outline:none}
-  .copymsg{color:var(--ink-soft);font-size:12px;font-weight:700}
-
-  /* result card */
-  .res{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:15px;margin-bottom:13px;position:relative;overflow:hidden}
-  .res .rank{position:absolute;top:0;left:0;width:4px;height:100%;background:var(--amber)}
-  .res .top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-  .res .place{font-size:19px;font-weight:800;color:var(--pine);letter-spacing:-.01em;line-height:1.15}
-  .res .place small{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);letter-spacing:0;margin-top:2px}
-  .res .cost{text-align:right;flex:none}
-  .res .cost .big{font-size:23px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
-  .res .cost .lab{font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
-
-  .tier{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:6px;margin:11px 0 0}
-  .tier.t1{background:var(--good);color:#fff}
-  .tier.t2{background:var(--amber);color:#fff}
-  .tier.t3{background:var(--surface-2);color:var(--ink-soft)}
-
-  .rchips{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0 0}
-  .rchip{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--surface-2);color:var(--ink-soft)}
-  .rchip.pass{background:var(--amber-soft);color:#ffd4dc}
-
-  .why{margin:12px 0 0;padding:0;list-style:none}
-  .why li{font-size:13px;color:var(--ink);padding-left:16px;position:relative;margin-bottom:4px}
-  .why li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--pine)}
-  .why li:last-child{margin-bottom:0}
-
-  .breakdown{font-size:12px;color:var(--ink-soft);margin:10px 0 0;font-variant-numeric:tabular-nums}
-
-  .flightlink{display:inline-flex;align-items:center;gap:7px;margin:13px 0 0;padding:10px 14px;border-radius:var(--r-sm);background:var(--pine-soft);color:var(--pine);font-size:13.5px;font-weight:700;text-decoration:none}
-  .flightlink:active{filter:brightness(.96)}
-  .flightlink .arr{font-size:15px}
-
-  .empty{font-size:14px;color:var(--ink-soft);background:var(--surface-2);border:1px dashed var(--line);border-radius:var(--r-sm);padding:16px;text-align:center;line-height:1.5}
-
-  .foot{text-align:center;color:var(--ink-soft);font-size:12px;padding:8px 0 0;line-height:1.5}
-  .linkbtn{background:none;border:none;color:var(--danger);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);padding:8px;display:block;margin:4px auto 0}
-  @media (max-width:520px){
-    .wrap{padding-left:12px;padding-right:12px}
-    .row3{grid-template-columns:1fr}
-    .row2{grid-template-columns:1fr}
-    .chips{gap:5px;padding:7px}
-    .chip{min-height:36px;padding:7px 10px;font-size:12.8px}
-    .res .top-row{align-items:flex-start}
-    .res .cost .big{font-size:20px}
-  }
+  :root { color-scheme:dark; --bg:#101917; --panel:#192622; --well:#12201b; --edge:#394c43; --ink:#f3f0e6; --muted:#b6c6b9; --gold:#f1c577; --sage:#8fcdb7; --bad:#ffb2a7; font-family:"Segoe UI",system-ui,sans-serif; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); line-height:1.5; padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  .wrap { width:min(100% - 40px,1080px); margin:auto; padding:22px 0 52px; }
+  .roost-home { color:var(--sage); font-size:.92rem; text-underline-offset:4px; display:inline-flex; align-items:center; min-height:44px; }
+  header { border-bottom:1px solid var(--edge); padding:20px 0 24px; margin-bottom:28px; }
+  h1,h2,h3,p { margin:0; }
+  h1,h2,h3 { font-family:Georgia,serif; line-height:1.13; font-weight:500; }
+  h1 { font-size:clamp(3rem,7vw,5rem); letter-spacing:-.055em; }
+  header p { max-width:60ch; margin-top:12px; color:var(--muted); }
+  .planner { display:grid; grid-template-columns:minmax(300px,2fr) minmax(0,3fr); gap:clamp(20px,4vw,48px); align-items:start; }
+  .planner > * { min-width:0; }
+  .card { border:1px solid var(--edge); border-radius:12px; padding:20px; margin:0 0 14px; background:var(--panel); }
+  .card h2,#resultsTitle { font-size:1.7rem; margin-bottom:18px; }
+  .row2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .fld { display:block; margin-bottom:12px; }
+  .fld span,.filter-title { display:block; font-size:.92rem; font-weight:650; margin-bottom:5px; }
+  .hint,.optional,.copymsg,.breakdown { font-size:.88rem; color:var(--muted); }
+  .hint { margin:0 0 14px; }
+  .optional { font-weight:400; }
+  button,input,textarea { font:inherit; }
+  button { cursor:pointer; }
+  button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,summary:focus-visible,#resultsTitle:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+  input:not([type=checkbox]),textarea { width:100%; min-width:0; min-height:44px; border:1px solid #667b6e; background:var(--well); border-radius:7px; padding:8px; color:var(--ink); }
+  input[readonly] { opacity:.75; }
+  .check { display:flex; gap:10px; align-items:center; min-height:44px; cursor:pointer; }
+  input[type=checkbox] { width:20px; height:20px; accent-color:var(--gold); flex-shrink:0; margin:0; }
+  .kid-panel { margin:6px 0 0 30px; }
+  .hidden,[hidden] { display:none!important; }
+  .kid-row { display:flex; align-items:end; gap:12px; margin-bottom:10px; }
+  .kid-row .fld { margin:0; }
+  .chip,.copybtn,.addbtn,.iconbtn,.linkbtn { border-radius:7px; min-height:44px; background:transparent; color:var(--sage); border:1px solid var(--edge); padding:7px 12px; font-size:.92rem; }
+  button:hover { border-color:var(--sage); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .chip[aria-pressed=true] { background:var(--gold); color:#1e2419; border-color:var(--gold); }
+  details { margin-top:14px; }
+  summary { color:var(--sage); cursor:pointer; min-height:44px; padding:8px 0; }
+  .runbtn { width:100%; border-radius:8px; border:1px solid transparent; min-height:48px; padding:10px; background:var(--gold); color:#192017; font-weight:700; }
+  .foot { margin-top:12px; color:var(--muted); font-size:.88rem; }
+  .linkbtn { padding-inline:0; border:0; text-decoration:underline; text-underline-offset:3px; }
+  #resultsTitle { margin:0 0 6px; scroll-margin-top:18px; }
+  .resultsum { color:var(--muted); }
+  .result-actions { display:flex; align-items:center; gap:12px; margin:12px 0; }
+  .res { position:relative; border:1px solid var(--edge); background:var(--panel); border-radius:12px; padding:clamp(16px,3vw,24px); margin-bottom:12px; }
+  .res:first-of-type { border-top:3px solid var(--gold); }
+  .top-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; }
+  .place { font-size:clamp(1.4rem,3vw,1.9rem); color:var(--ink); margin:0; }
+  .place small { display:block; margin-top:5px; font:400 .92rem/1.4 "Segoe UI",system-ui,sans-serif; color:var(--muted); }
+  .cost { text-align:right; font-variant-numeric:tabular-nums; }
+  .big { font-weight:700; color:var(--gold); }
+  .lab { font-size:.83rem; color:var(--muted); }
+  .rchips { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+  .rchip { font-size:.84rem; padding:2px 8px; border-radius:4px; color:#cce7d6; background:#273d33; }
+  .why { margin:0 0 10px; padding-left:18px; font-size:.94rem; }
+  .why:empty { display:none; }
+  .flightlink { display:inline-flex; align-items:center; min-height:44px; color:var(--sage); font-weight:600; text-underline-offset:4px; }
+  .empty { border-left:3px solid var(--gold); background:var(--panel); padding:12px 16px; margin:12px 0; }
+  .manual-copy { display:block; margin:8px 0; }
+  .manual-copy textarea { display:block; min-height:9em; margin-top:6px; }
+  @media(max-width:740px) { .planner { grid-template-columns:minmax(0,1fr); } .wrap { width:min(100% - 28px,600px); padding-top:12px; } header { padding-top:10px; } }
+  @media(max-width:380px) { .card { padding:14px; } .row2.dates { grid-template-columns:1fr; gap:0; } .top-row { grid-template-columns:1fr; gap:5px; } .cost { display:flex; align-items:baseline; gap:5px; } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <a class="roost-home" href="index.html">&larr; Back to The Roost</a>
-    <div class="kicker">Roost</div>
+<main class="wrap">
+  <a class="roost-home" href="index.html">Back to The Roost</a>
+  <header>
     <h1>Where To</h1>
-    <p>Tell it who's going and what you'll spend — it ranks where to take them.</p>
+    <p>Compare 36 places to take a trip from Dallas–Fort Worth. Set your party, budget and interests to see how the shortlist changes.</p>
   </header>
-
-  <!-- WHO & HOW LONG -->
-  <section class="card">
-    <h2>Who & How Long</h2>
-    <div class="row3">
-      <label class="fld"><span>Fly from</span><input type="text" id="origin" value="DFW" maxlength="4" autocapitalize="characters" autocomplete="off"></label>
-      <label class="fld"><span>Nights</span><input type="number" id="nights" inputmode="numeric" min="1" value="5"></label>
-      <label class="fld"><span>Adults</span><input type="number" id="adults" inputmode="numeric" min="1" value="2"></label>
-    </div>
-    <div class="row2">
-      <label class="fld"><span>Leave (optional)</span><input type="date" id="start"></label>
-      <label class="fld"><span>Return (optional)</span><input type="date" id="end"></label>
-    </div>
-
-    <div class="switchrow" style="margin-top:4px">
-      <div>
-        <div class="lbl">Children coming along</div>
-        <div class="sub">Reshapes both the cost and what's suggested</div>
-      </div>
-      <label class="switch"><input type="checkbox" id="kidsToggle"><span class="track"><span class="knob"></span></span></label>
-    </div>
-    <div class="kid-panel hidden" id="kidPanel">
-      <div class="kid-count" id="kidCount"></div>
-      <div id="kidList"></div>
-      <button class="addbtn" id="addKid"><span class="plus">+</span> Add a child</button>
-    </div>
-  </section>
-
-  <!-- BUDGET & STYLE -->
-  <section class="card">
-    <h2>Budget & Style</h2>
-    <label class="fld"><span>Total trip budget (optional)</span><input type="number" id="budget" inputmode="numeric" min="0" placeholder="Leave blank to rank by value"></label>
-
-    <div style="font-size:13px;font-weight:600;color:var(--ink);margin:14px 0 8px">What sounds good? <span style="font-weight:500;color:var(--ink-soft)">(optional)</span></div>
-    <div class="chips" id="styleChips">
-      <button class="chip" data-style="beach" aria-pressed="false">Beach</button>
-      <button class="chip" data-style="resort" aria-pressed="false">All-inclusive</button>
-      <button class="chip" data-style="themepark" aria-pressed="false">Theme parks</button>
-      <button class="chip" data-style="city" aria-pressed="false">City</button>
-      <button class="chip" data-style="nature" aria-pressed="false">Outdoors</button>
-      <button class="chip" data-style="snow" aria-pressed="false">Snow</button>
-    </div>
-
-    <div style="margin-top:16px">
-      <div class="toggle-line">
-        <div><div class="tl-txt">We can travel internationally</div><div class="tl-sub">Off = domestic only (no passport needed)</div></div>
-        <label class="sw-sm"><input type="checkbox" id="passport" checked><span class="track"><span class="knob"></span></span></label>
-      </div>
-      <div class="toggle-line">
-        <div><div class="tl-txt">Keep flights short</div><div class="tl-sub">Under ~4 hrs — easier with little ones</div></div>
-        <label class="sw-sm"><input type="checkbox" id="shortOnly"><span class="track"><span class="knob"></span></span></label>
-      </div>
-      <div class="toggle-line">
-        <div><div class="tl-txt">Only show styles I picked</div><div class="tl-sub">Otherwise they just rank higher</div></div>
-        <label class="sw-sm"><input type="checkbox" id="styleOnly"><span class="track"><span class="knob"></span></span></label>
-      </div>
-    </div>
-  </section>
-
-  <button class="runbtn" id="runBtn">Find destinations</button>
-
-  <div id="results" style="margin-top:20px"></div>
-
-  <p class="foot">Costs are rough estimates to compare destinations — tap through for live fares before booking.<br>Nothing is saved; this lives only in this tab.</p>
-  <button class="linkbtn" id="resetBtn">Clear and start over</button>
-</div>
+  <div class="planner">
+    <form id="tripForm">
+      <section class="card" aria-labelledby="partyTitle">
+        <h2 id="partyTitle">Your trip</h2>
+        <div class="row2">
+          <label class="fld"><span>Adults</span><input type="number" id="adults" min="1" max="99" value="2" required></label>
+          <label class="fld"><span>Nights</span><input type="number" id="nights" min="1" max="365" value="5" required aria-describedby="dateHint"></label>
+        </div>
+        <label class="check"><input type="checkbox" id="kidsToggle" aria-controls="kidPanel">Children coming along</label>
+        <div class="kid-panel hidden" id="kidPanel">
+          <div id="kidList"></div>
+          <button class="addbtn" id="addKid" type="button">Add a child</button>
+        </div>
+        <details>
+          <summary>Travel dates and fare searches</summary>
+          <div class="row2 dates">
+            <label class="fld"><span>Departure</span><input type="date" id="start"></label>
+            <label class="fld"><span>Return</span><input type="date" id="end"></label>
+          </div>
+          <p class="hint" id="dateHint">Enter both dates to calculate nights automatically.</p>
+          <label class="fld"><span>Airport for live fare searches</span><input type="text" id="origin" value="DFW" minlength="3" maxlength="3" pattern="[A-Za-z]{3}" title="Enter a three-letter airport code" required autocapitalize="characters" autocomplete="off" spellcheck="false"></label>
+          <p class="hint">Estimates use Dallas–Fort Worth. Your airport and dates go to Google Flights only when you open a fare link.</p>
+        </details>
+      </section>
+      <section class="card" aria-labelledby="styleTitle">
+        <h2 id="styleTitle">Budget and interests</h2>
+        <label class="fld"><span>Trip budget in USD <span class="optional" style="display:inline">(optional)</span></span><input type="number" id="budget" min="1" step=".01" placeholder="Any budget"></label>
+        <span class="filter-title" id="styleLabel">Trip styles</span>
+        <div class="chips" id="styleChips" role="group" aria-labelledby="styleLabel">
+          <button type="button" class="chip" data-style="beach" aria-pressed="false">Beach</button>
+          <button type="button" class="chip" data-style="resort" aria-pressed="false">Resorts</button>
+          <button type="button" class="chip" data-style="themepark" aria-pressed="false">Theme parks</button>
+          <button type="button" class="chip" data-style="city" aria-pressed="false">City</button>
+          <button type="button" class="chip" data-style="nature" aria-pressed="false">Outdoors</button>
+          <button type="button" class="chip" data-style="snow" aria-pressed="false">Snow</button>
+        </div>
+        <label class="check"><input type="checkbox" id="passport" checked>Include international destinations</label>
+        <label class="check"><input type="checkbox" id="shortOnly">Up to 4½ hours flying or 5 hours driving</label>
+        <label class="check"><input type="checkbox" id="styleOnly">Require a selected trip style</label>
+      </section>
+      <button class="runbtn" id="runBtn" type="submit">View my shortlist</button>
+      <p class="foot">Your trip details stay in this tab. Estimates use a fixed planning model and may differ from current prices and routes.</p>
+      <button class="linkbtn" type="button" id="resetBtn">Reset trip</button>
+    </form>
+    <section aria-labelledby="resultsTitle">
+      <h2 id="resultsTitle" tabindex="-1">Your shortlist</h2>
+      <div id="results"></div>
+    </section>
+  </div>
+</main>
 
 <script>
 "use strict";
 (function(){
   var uid = 0;
-  var hasRun = false;
   var state = { children: [], styles: {} };
 
   /* ---------- destination dataset (curated, offline) ----------
@@ -268,9 +181,7 @@
     {n:"Tokyo",iata:"HND",reg:"Japan",mi:6440,di:240,fam:0,ns:true,intl:true,drive:false,cats:["city"]}
   ];
 
-  var CAT_LABEL = {beach:"Beach",resort:"All-inclusive",themepark:"Theme parks",city:"City",nature:"Outdoors",snow:"Snow"};
-  var BAND_ORDER = ["infant","toddler","preschool","school","tween","teen"];
-  var BAND_LABEL = {infant:"baby",toddler:"toddler",preschool:"preschooler",school:"kid",tween:"tween",teen:"teen"};
+  var CAT_LABEL = {beach:"Beach",resort:"Resorts",themepark:"Theme parks",city:"City",nature:"Outdoors",snow:"Snow"};
   var AGE_FIT = {
     beach:    {infant:.8, toddler:.9, preschool:.9, school:.9, tween:.8, teen:.8},
     resort:   {infant:.85,toddler:.9, preschool:.9, school:.85,tween:.8, teen:.8},
@@ -285,8 +196,6 @@
   function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
   function fmt(n){ return Math.round(n).toLocaleString(); }
   function money(n){ return "$"+fmt(n); }
-  function intVal(id,def){ var v=parseInt($(id).value,10); return isNaN(v)?def:v; }
-
   function bandOf(age){
     age=Number(age);
     if(age<1) return "infant";
@@ -307,42 +216,62 @@
 
   /* ---------- children module ---------- */
   function renderKids(){
-    var list=$("kidList"); list.innerHTML="";
-    state.children.forEach(function(c){
+    var list=$("kidList");
+    list.replaceChildren();
+    state.children.forEach(function(child,index){
       var row=el("div","kid-row");
-      var nw=el("label","fld name"); var ns=el("span"); ns.textContent="Name (optional)";
-      var ni=el("input"); ni.type="text"; ni.value=c.name; ni.placeholder="Child";
-      ni.oninput=function(){ c.name=ni.value; };
-      nw.appendChild(ns); nw.appendChild(ni);
-      var aw=el("label","fld age"); var as=el("span"); as.textContent="Age";
-      var ai=el("input"); ai.type="number"; ai.inputMode="numeric"; ai.min="0"; ai.max="17";
-      ai.value=(c.age===null?"":c.age); ai.placeholder="–";
-      ai.oninput=function(){ c.age=ai.value===""?null:Number(ai.value); rerun(); };
-      aw.appendChild(as); aw.appendChild(ai);
-      var rm=el("button","iconbtn"); rm.type="button"; rm.textContent="×";
-      rm.onclick=function(){ state.children=state.children.filter(function(x){return x.id!==c.id;}); renderKids(); rerun(); };
-      row.appendChild(nw); row.appendChild(aw); row.appendChild(rm);
+      var label=el("label","fld");
+      var title=el("span");
+      title.textContent="Child "+(index+1)+" age (0–17)";
+      var age=el("input");
+      age.type="number"; age.min="0"; age.max="17"; age.id="child-age-"+child.id;
+      age.value=child.age; age.placeholder="Optional"; age.inputMode="numeric";
+      age.addEventListener("input",function(){ child.age=age.value; render(); });
+      label.append(title,age);
+      var remove=el("button","iconbtn");
+      remove.type="button"; remove.textContent="Remove";
+      remove.setAttribute("aria-label","Remove child "+(index+1));
+      remove.addEventListener("click",function(){
+        state.children.splice(index,1);
+        if(!state.children.length){ $("kidsToggle").checked=false; }
+        updateKidPanel();
+        var next=state.children[Math.min(index,state.children.length-1)];
+        (next ? $("child-age-"+next.id) : $("kidsToggle")).focus();
+        render();
+      });
+      row.append(label,remove);
       list.appendChild(row);
     });
-    var n=state.children.length;
-    $("kidCount").textContent = n===0 ? "No children added yet." : (n+(n===1?" child":" children")+" on this trip.");
+    $("addKid").disabled=state.children.length>=99;
   }
-  function addKid(){ state.children.push({id:++uid,name:"",age:null}); renderKids(); rerun(); }
+  function updateKidPanel(){
+    $("kidPanel").classList.toggle("hidden",!kidsOn());
+    renderKids();
+    $("kidList").querySelectorAll("input").forEach(function(input){ input.disabled=!kidsOn(); });
+  }
+  function addKid(){
+    if(state.children.length>=99) return;
+    var child={id:++uid,age:""};
+    state.children.push(child);
+    updateKidPanel();
+    $("child-age-"+child.id).focus();
+    render();
+  }
 
   /* ---------- flight deep link ---------- */
   function flightURL(origin,iata,start,end){
     var q="flights from "+origin+" to "+iata;
     if(start) q+=" on "+start;
-    if(end) q+=" through "+end;
+    if(end) q+=" returning "+end;
     return "https://www.google.com/travel/flights?q="+encodeURIComponent(q);
   }
   function tripSummary(R){
     var parts=[R.adults+(R.adults===1?" adult":" adults")];
     if(R.on && state.children.length) parts.push(state.children.length+(state.children.length===1?" child":" kids"));
-    return parts.join(" + ")+" · "+R.nights+" nights from "+R.origin+(R.budget?" · under "+money(R.budget):"");
+    return parts.join(" + ")+" · "+R.nights+(R.nights===1?" night":" nights")+" from Dallas–Fort Worth"+(R.budget?" · budget "+money(R.budget):"");
   }
   function travelTime(r){
-    return r.d.drive ? Math.round(r.d.mi/60)+" hr drive" : r.fh.toFixed(1)+" hr "+(r.d.ns?"nonstop":"1 stop");
+    return r.d.drive ? Math.round(r.d.mi/60)+" hr drive" : "~"+r.fh.toFixed(1)+" hr by air";
   }
   function shortlistText(R){
     var lines=["Roost Destination Shortlist", tripSummary(R), ""];
@@ -353,28 +282,34 @@
     return lines.join("\n");
   }
   function copyShortlist(R,msg){
-    if(!navigator.clipboard){
-      msg.textContent="Clipboard unavailable.";
-      return;
+    function manualCopy(){
+      var label=el("label","manual-copy");
+      label.textContent="Select and copy your shortlist";
+      var area=el("textarea"); area.readOnly=true; area.value=shortlistText(R);
+      label.appendChild(area);
+      var old=$("results").querySelector(".manual-copy");
+      if(old) old.remove();
+      msg.parentElement.after(label);
+      area.focus(); area.select();
+      msg.textContent="Manual copy available.";
     }
+    if(!navigator.clipboard || !navigator.clipboard.writeText){ manualCopy(); return; }
     navigator.clipboard.writeText(shortlistText(R)).then(function(){
       msg.textContent="Shortlist copied.";
-    }).catch(function(){
-      msg.textContent="Copy failed.";
-    });
+    }).catch(manualCopy);
   }
 
   /* ---------- the engine ---------- */
   function compute(){
     var origin=($("origin").value||"DFW").toUpperCase().trim()||"DFW";
-    var nights=intVal("nights",5); if(nights<1) nights=1;
-    var adults=intVal("adults",2); if(adults<1) adults=1;
-    var budget=parseInt($("budget").value,10); if(isNaN(budget)||budget<=0) budget=null;
+    var nights=Number($("nights").value);
+    var adults=Number($("adults").value);
+    var budget=$("budget").value ? Number($("budget").value) : null;
     var start=$("start").value, end=$("end").value;
     var passport=$("passport").checked, shortOnly=$("shortOnly").checked, styleOnly=$("styleOnly").checked;
     var sel=Object.keys(state.styles).filter(function(k){return state.styles[k];});
     var on=kidsOn();
-    var kids=on?state.children.filter(function(c){return c.age!==null && !isNaN(c.age);}):[];
+    var kids=on?state.children.filter(function(c){return c.age!=="";}):[];
     var youngest = kids.length? Math.min.apply(null,kids.map(function(c){return c.age;})) : null;
     var band = youngest!==null ? bandOf(youngest) : null;
     var travelers = adults + (on?state.children.length:0);
@@ -399,7 +334,7 @@
       if(on){
         state.children.forEach(function(c){
           var a=c.age;
-          if(a===null||isNaN(a)){ airW+=1; dayW+=0.75; return; }
+          if(a===""){ airW+=1; dayW+=0.75; return; }
           airW += (a<2) ? (d.intl?0.1:0) : 1;
           dayW += (a<6) ? 0.5 : (a<13 ? 0.75 : 0.9);
         });
@@ -416,7 +351,7 @@
     if(budget){
       var within=rows.filter(function(r){return r.total<=budget;});
       if(within.length>=3){ working=within; }
-      else { overBudgetFlag=true; }
+      else { overBudgetFlag=within.length<rows.length; }
     }
 
     // value normalization across the working set
@@ -453,7 +388,13 @@
       r.value=value; r.suitAge=suitAge; r.matched=matched;
     });
 
-    working.sort(function(a,b){return b.score-a.score;});
+    working.sort(function(a,b){
+      if(overBudgetFlag){
+        var aOver=Math.max(0,a.total-budget), bOver=Math.max(0,b.total-budget);
+        if(aOver!==bOver) return aOver-bOver;
+      }
+      return b.score-a.score || a.total-b.total;
+    });
     var top=working.slice(0,10);
 
     return {top:top,origin:origin,nights:nights,adults:adults,budget:budget,start:start,end:end,
@@ -463,25 +404,32 @@
 
   /* ---------- render ---------- */
   function render(){
-    hasRun=true;
-    var box=$("results"); box.innerHTML="";
+    var box=$("results");
+    box.replaceChildren();
+    if(!$("tripForm").checkValidity()){
+      var invalid=$("tripForm").querySelector(":invalid");
+      var warning=el("p","empty");
+      warning.textContent=(invalid?.getAttribute("aria-label") || invalid?.labels?.[0]?.innerText || "Trip details")+" — "+(invalid?.validationMessage || "Check this value to update your shortlist.");
+      box.appendChild(warning);
+      return;
+    }
     var R=compute();
 
     // summary
     var sum=el("div","resultsum");
-    sum.textContent="Top picks for "+tripSummary(R);
+    sum.textContent=tripSummary(R);
     box.appendChild(sum);
 
     if(R.top.length===0){
       var e=el("div","empty");
-      e.innerHTML="Nothing matched those filters. Try turning on international travel, loosening “short flights,” or raising the budget.";
+      e.textContent="No destinations match these filters. Try another style, allow longer trips or include international destinations.";
       box.appendChild(e);
       return;
     }
     var actions=el("div","result-actions");
     var copy=el("button","copybtn");
     copy.type="button";
-    copy.textContent="Copy shortlist";
+    copy.textContent="Copy top "+Math.min(R.top.length,5);
     var msg=el("span","copymsg");
     msg.setAttribute("role","status");
     msg.setAttribute("aria-live","polite");
@@ -492,28 +440,23 @@
     if(R.overBudgetFlag){
       var w=el("div","empty");
       w.style.marginBottom="13px";
-      w.innerHTML="Heads up — most spots come in over "+money(R.budget)+" for this group and length. Showing the closest options, with the overage flagged.";
+      w.textContent="Fewer than three matches fit this budget. Any within budget come first, followed by the smallest overages.";
       box.appendChild(w);
     }
 
     R.top.forEach(function(r){
       var d=r.d;
-      var card=el("div","res");
-      card.appendChild(el("div","rank"));
-
+      var card=el("article","res");
       var top=el("div","top-row");
-      var place=el("div","place"); place.innerHTML = d.n + "<small>"+d.reg+"</small>";
+      var place=el("h3","place");
+      var region=el("small"); region.textContent=d.reg;
+      place.append(d.n,region);
       var cost=el("div","cost");
       var big=el("div","big"); big.textContent=money(r.total);
       var lab=el("div","lab"); lab.textContent="est. total";
       cost.appendChild(big); cost.appendChild(lab);
       top.appendChild(place); top.appendChild(cost);
       card.appendChild(top);
-
-      // tier
-      var tier=el("span","tier "+(r.score>=80?"t1":r.score>=66?"t2":"t3"));
-      tier.textContent = r.score>=80?"Top pick":r.score>=66?"Great fit":"Worth a look";
-      card.appendChild(tier);
 
       // chips
       var rc=el("div","rchips");
@@ -550,7 +493,7 @@
         var a=document.createElement("a");
         a.className="flightlink"; a.href=flightURL(R.origin,d.iata,R.start,R.end);
         a.target="_blank"; a.rel="noopener noreferrer";
-        a.innerHTML='<span class="arr">↗</span> Live fares to '+d.iata;
+        a.textContent="Check fares from "+R.origin+" to "+d.iata;
         card.appendChild(a);
       }
 
@@ -558,46 +501,62 @@
     });
   }
 
-  function rerun(){ if(hasRun) render(); }
+  function updateDates(){
+    var start=$("start"), end=$("end"), nights=$("nights");
+    end.setCustomValidity("");
+    var dated=Boolean(start.value && end.value);
+    nights.readOnly=dated;
+    if(!dated) return;
+    var duration=(end.valueAsNumber-start.valueAsNumber)/86400000;
+    if(duration<1 || duration>365){
+      end.setCustomValidity("Choose a return date 1 to 365 nights after departure.");
+      return;
+    }
+    nights.value=String(duration);
+  }
 
-  /* ---------- wire up ---------- */
-  $("kidsToggle").addEventListener("change", function(){
-    $("kidPanel").classList.toggle("hidden", !this.checked);
-    if(this.checked && state.children.length===0) addKid();
-    rerun();
+  $("kidsToggle").addEventListener("change",function(){
+    if(this.checked && !state.children.length) addKid();
+    else { updateKidPanel(); render(); }
   });
-  $("addKid").addEventListener("click", addKid);
-  $("styleChips").addEventListener("click", function(e){
-    var b=e.target.closest(".chip"); if(!b) return;
-    var s=b.getAttribute("data-style");
-    state.styles[s]=!state.styles[s];
-    b.setAttribute("aria-pressed", state.styles[s]?"true":"false");
-    rerun();
+  $("addKid").addEventListener("click",addKid);
+  $("styleChips").addEventListener("click",function(event){
+    var chip=event.target.closest(".chip");
+    if(!chip) return;
+    var style=chip.dataset.style;
+    state.styles[style]=!state.styles[style];
+    chip.setAttribute("aria-pressed",String(state.styles[style]));
+    $("styleOnly").disabled=!Object.values(state.styles).some(Boolean);
+    render();
   });
   ["origin","nights","adults","budget","start","end"].forEach(function(id){
-    $(id).addEventListener("input", rerun);
+    $(id).addEventListener("input",function(){
+      if(id==="start" || id==="end") updateDates();
+      render();
+    });
   });
   ["passport","shortOnly","styleOnly"].forEach(function(id){
-    $(id).addEventListener("change", rerun);
+    $(id).addEventListener("change",render);
   });
-  $("runBtn").addEventListener("click", function(){
+  $("tripForm").addEventListener("submit",function(event){
+    event.preventDefault();
     render();
-    $("results").scrollIntoView({behavior:"smooth",block:"start"});
+    $("resultsTitle").focus();
   });
-  $("resetBtn").addEventListener("click", function(){
-    if(!confirm("Clear everything and start fresh?")) return;
-    $("origin").value="DFW"; $("nights").value="5"; $("adults").value="2";
-    $("budget").value=""; $("start").value=""; $("end").value="";
-    $("kidsToggle").checked=false; $("kidPanel").classList.add("hidden");
-    $("passport").checked=true; $("shortOnly").checked=false; $("styleOnly").checked=false;
+  $("resetBtn").addEventListener("click",function(){
+    if(!confirm("Reset this trip to two adults and five nights?")) return;
+    $("tripForm").reset();
     state.children=[]; state.styles={};
-    document.querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed","false");});
-    renderKids();
-    hasRun=false; $("results").innerHTML="";
-    window.scrollTo({top:0,behavior:"smooth"});
+    document.querySelectorAll(".chip").forEach(function(chip){chip.setAttribute("aria-pressed","false");});
+    $("styleOnly").disabled=true;
+    updateDates();
+    updateKidPanel();
+    render();
+    $("adults").focus();
   });
 
-  renderKids();
+  $("styleOnly").disabled=true;
+  render();
 })();
 </script>
 </body>
