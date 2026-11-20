@@ -36,6 +36,8 @@ async function captureDesk(app, width) {
   const name = `desk-${width}.png`;
   await mkdir(screenshotDir, {recursive:true});
   await writeFile(path.join(screenshotDir, name), png);
+  const jpeg = await app.send('Page.captureScreenshot', {format:'jpeg', quality:78, fromSurface:true, captureBeyondViewport:false});
+  await writeFile(path.join(screenshotDir, `desk-${width}.jpg`), Buffer.from(jpeg.data,'base64'));
   screenshots.push({name, width, height:900, sha256:sha256(png)});
 }
 
