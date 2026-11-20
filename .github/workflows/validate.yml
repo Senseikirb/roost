@@ -1,0 +1,43 @@
+name: Validate Roost
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Test the Pages site in an isolated browser
+        shell: bash
+        env:
+          ROOST_APP_URL: http://127.0.0.1:8765/roost/index.html
+          ROOST_CDP_PORT: '9223'
+        run: |
+          set -euo pipefail
+          site_root="$(mktemp -d)"
+          profile="$(mktemp -d)"
+          mkdir "$site_root/roost"
+          find . -maxdepth 1 -type f \( -name '*.html' -o -name '*.css' -o -name '*.js' -o -name '*.png' -o -name 'manifest.json' \) -exec cp {} "$site_root/roost/" \;
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory "$site_root" >"$RUNNER_TEMP/roost-http.log" 2>&1 &
+          server_pid=$!
+          google-chrome --headless --disable-gpu --disable-background-networking --no-first-run \
+            --user-data-dir="$profile" --remote-debugging-address=127.0.0.1 --remote-debugging-port="$ROOST_CDP_PORT" \
+            about:blank >"$RUNNER_TEMP/roost-chrome.log" 2>&1 &
+          browser_pid=$!
+          trap 'kill "$browser_pid" "$server_pid" 2>/dev/null || true' EXIT
+          curl --silent --show-error --fail --retry 15 --retry-all-errors --retry-delay 1 "$ROOST_APP_URL" -o /dev/null
+          curl --silent --show-error --fail --retry 15 --retry-all-errors --retry-delay 1 "http://127.0.0.1:$ROOST_CDP_PORT/json/version"
+          node tests/run-roost-validation.mjs

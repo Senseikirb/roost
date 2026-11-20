@@ -28,6 +28,7 @@ function runNode(args, name, options = {}) {
     env: { ...process.env, ...(options.env || {}) }
   });
   const output = `${result.stdout || ""}${result.stderr || ""}`.trim();
+  if (result.status !== 0) console.error(output || result.error?.message || `Terminated by ${result.signal}`);
   record(name, result.status === 0, output.split(/\r?\n/).slice(-3).join(" | "));
   return result.status === 0;
 }
