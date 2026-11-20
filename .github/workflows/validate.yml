@@ -45,4 +45,12 @@ jobs:
             cat "$RUNNER_TEMP/roost-chrome.log"
             exit 1
           fi
+          export ROOST_SCREENSHOT_DIR="$RUNNER_TEMP/roost-desk-preview"
           node tests/run-roost-validation.mjs
+      - name: Save synthetic desk previews
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: roost-desk-preview
+          path: ${{ runner.temp }}/roost-desk-preview/
+          if-no-files-found: error
+          retention-days: 14

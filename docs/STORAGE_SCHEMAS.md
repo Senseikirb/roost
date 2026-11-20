@@ -1,6 +1,6 @@
 # Local storage and recovery
 
-Source audit: September 2026; browsing preference and writing safeguards updated October 2, 2026. `index.html` remains the schema source of truth. All data belongs to the current browser origin; standalone Where To and RFSoC Explorer hold their controls in memory and do not add persistent keys. There is no server, account, synchronization, or usage telemetry.
+Updated November 20, 2026. `index.html` defines the storage formats. Data belongs to the browser origin. The standalone Where To and RFSoC Explorer keep their controls in memory.
 
 ## Recovery contract
 
@@ -19,7 +19,7 @@ The shared storage reader uses defaults for malformed JSON and unexpected top-le
 | Key | Schema / purpose / expected structure | Migration and bounds | Config pack |
 | --- | --- | --- | --- |
 | `kfl_pins_v1` | Key version 1; favorites, array of `{href,label,desc}` | Safe HTTP(S) links; old keys retained. UI writes up to 24 pins; imported arrays are preserved. | No |
-| `kfl_recent_v1` | Key version 1; recent links, array of `{href,label,desc}` | Same legacy representation; both paths write up to 8 recent items. No behavioral score. | No |
+| `kfl_recent_v1` | Key version 1; recent links, array of `{href,label,desc}` | The most recent 10 items use the original representation. | No |
 | `kfl_collapsed_v1` | Key version 1; array of collapsed section IDs | Original and upgrade section controls share the same set; dynamic IDs may remain after a section disappears. | No |
 | `kfl_v3_view` | Legacy raw string; selected original section view, such as `all` | Not JSON; preserved verbatim. | No |
 | `kfl_v3_compact` | Legacy raw `0` / `1`; global card density | Not a JSON envelope; onboarding mirrors its density here. | No |
@@ -30,16 +30,16 @@ The shared storage reader uses defaults for malformed JSON and unexpected top-le
 | `roost_mission_v1` | Key version 1; object with completed missions, notes, start date, selected cycle, filters, mission statement, resource status/query, side quests, leadership, projects | Missing new maps get defaults. Legacy `projectData` alias is recognized. Statement 500 chars, resource query 80; mission notes generally 2,000. | No; personal progress |
 | `missionControlRPG_v3` | Legacy standalone Academy object; `activities`, `rpg`, `resourceStatus`, `projectData`, `bonusQuests`, `leadershipStatus` | When modern state is absent, maps `wN_aN` activities/completion/notes, statement, resources, projects, side quests, and leadership to modern key. Old key is retained. | No; personal progress |
 | `roost_mission_tab_v1` | JSON string; `deck`, `board`, `library`, `quests`, `projects`, `portfolio` | Unknown tab falls back through UI tab selection. | No |
-| `roost_workbench_v1` | Key version 1; note array `{id,title,method,body,t,pinned}` | Missing IDs derived defensively; pin field optional. Read/write max 100; body 12,000 chars, title 120. | No; private notes |
+| `roost_workbench_v1` | Key version 1; note array `{id,title,method,body,t,pinned}` | The editor accepts new notes until it holds 100. Larger restored collections stay editable. Body limit 12,000 characters, title 120. | No; private notes |
 | `roost_readlater_v1` | Key version 1; array `{title,link,source,date,savedAt,status,priority,note,archived,updatedAt}` | Legacy `href` and `archived` supported. Status `new/reading/done/archived`; priority `high/normal`; save max 200, note 800 chars. | No; private reading list |
 | `roost_session_v1` | `{version:1,status,goal,timebox,links,note,summary,createdAt,updatedAt,completedAt}` | One current/last session; status derived for older goal-only records. Empty session removes this key. Goal 120, links/summary 800, note 1,000 chars. | No; private work |
 | `roost_quests_v1` | `{version:1,date,quests,updatedAt}`; three local Daily Quest records including completion timestamps | Daily date/version/pool mismatches generate the deterministic current deck. Old day is not a historical log. | No; daily progress |
-| `roost_boards_v1` | Key version 1; array `{id,name,links,templateId?,createdAt?,updatedAt?}`; link records contain `href,title,desc,section,addedAt,source?` | Template merge preserves prior links; UI saves max 40 boards and template path max 80 links. Manual board links are not globally capped. | **Yes**; board names/links are shared |
+| `roost_boards_v1` | Key version 1; array `{id,name,links,templateId?,createdAt?,updatedAt?}`; link records contain `href,title,desc,section,addedAt,source?` | New boards require an available slot within the 40-board limit. Existing boards and their links survive template merges and edits. | **Yes**; board names/links are shared |
 | `roost_link_notes_v1` | Key version 1; map keyed by URL, values `{title,section,status,rating,tags,note,updatedAt}` | Optional local tags normalized to 12 × 32 chars; notes 1,000 chars. Orphan notes retained if link disappears. | No; private annotations |
 | `roost_achievements_v1` | Key version 1; map of achievement IDs to `{unlockedAt,trigger}` | Missing achievements derived from existing local state; no separate analytics history. | No; personal progress |
 | `roost_custom_sections_v1` | Key version 1; array `{id,title,order,hidden,importBatchId,createdAt,updatedAt}` | Normalized IDs/order; malformed records isolated, title 80 chars. No global count cap. | **Yes** |
 | `roost_custom_links_v1` | Key version 1; array `{id,title,url,description,sectionId,tags,icon,favorite,hidden,importBatchId,createdAt,updatedAt}` | Legacy `href/label/desc/section` aliases supported. Safe HTTP(S) only; title 120, description 500, tags 12 × 32, icon 12 chars. No global count cap. | **Yes** |
-| `roost_import_history_v1` | Key version 1; array `{id,importedAt,type,mode,imported,skipped,linkIds,sectionIds,undoneAt,removedLinks,removedSections}` | Latest 20 batches; each records max 1,000 links / 200 section IDs. Import undo removes only batch-created links and empty created sections. | No; local undo history |
+| `roost_import_history_v1` | Key version 1; array `{id,importedAt,type,mode,imported,skipped,linkIds,sectionIds,addedPinUrls?,undoneAt,removedLinks,removedSections}` | The most recent 20 batches record created links, sections and new favorites. Undo preserves pre-existing favorites and sections still in use. | No; local undo history |
 | `roost_custom_feeds_v1` | `{version:1,feeds,updatedAt}`; feeds `{id,label,url,wire,sectionId,createdAt,updatedAt}` | Legacy plain array and `xmlUrl/title` aliases accepted. Safe HTTP(S), max 80 feeds, label 40 chars. | **Yes** |
 | `roost_layout_v1` | `{version:1,preset,topOrder,sectionOrder,hidden,sizes,updatedAt,migratedFrom?}` | Unknown widgets filtered in memory, known missing IDs appended, launcher locked visible. Different version recorded as `migratedFrom`; no key rename. | **Yes** |
 | `roost_views_v1` | `{version:1,activeId,custom,updatedAt}`; custom records `{id,name,desc,layout,settings,collapsed,createdAt,updatedAt}` | Defaults normalize old values; max 20 saved views and 120 collapsed IDs each. Names 60 chars, descriptions 140. | **Yes** |
@@ -53,10 +53,16 @@ The shared storage reader uses defaults for malformed JSON and unexpected top-le
 | `roost_feed_*` | Key-specific cache `{t,items}`; headline records contain title/link/description/date/source | Temporary cache; enabled only by export checkbox, eligible for restore. Cache age remains based on original timestamp. | No |
 | `roost_next_step_skipped` | **sessionStorage**, raw current-day key | Session-only Next learning step dismissal; never included in localStorage backup/restore. | No |
 
-## Remaining bounded scope
+## Editing and recovery
+
+Read Later resolves edits by article URL. Custom link forms retain drafts on failed saves and check the version opened before replacing a record. Bookmark import and undo write sections, links, favorites and history together, with rollback on storage errors. Academy keeps a conflicting or unsaved draft in the current tab and offers a downloadable single-key backup. A failed backup read stops export. The exported JSON omits the address of the page that created it.
 
 Workbench, Session Planner and Link Notes now keep unsaved edits in the open editor on write failure and guard tool changes/dismissal. Before saving, each compares the current persisted record with the record loaded into the editor and rejects stale overwrites. This is a best-effort conflict check, not an atomic transaction across tabs. Workbench compares title/method/body so independent pin changes remain compatible. Editor baselines and errors are in memory; there is no autosave key or duplicate private draft store. Shared `LS.write` reports failed ordinary writes through a persistent warning, excluding disposable feed/shell-status writes. Successful retries clear the corresponding warning; older direct-storage paths are not all covered.
 
 The recovery change does not rename keys, change schema versions, delete orphan references, impose new destructive global limits, or silently rewrite a damaged collection. Large custom collections, manual board lists, note maps, and health history can still approach browser quota. Ordinary feature save helpers return a failure signal, but not every existing feature surfaces that signal yet. A full backup may contain privately named boards, notes, reading history, and progress; configuration packs deliberately include board names/URLs and custom link/source configuration, so review those before sharing.
 
 The validation suite `tests/run-storage-tests.mjs` executes the production storage functions with a controlled storage adapter. It tests corrupt input, legacy compatibility, export exclusions, exact undo, preview counts, snapshot quota failure, partial-write rollback, failed-undo retry, and configuration-pack privacy boundaries. Browser journeys supplement these checks.
+
+## Feed connections
+
+`roost_headline_connection_v1` stores this browser’s live-feed choice and approved custom sources. Setup, Home Views, backup restore and configuration packs cannot grant network access. Existing feed selections remain available when disconnected.

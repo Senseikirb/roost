@@ -1,12 +1,13 @@
 # The Roost - Setup Guide
 
-Your personal homepage and command center. The current bundle includes 785 curated link cards, Kid Zone, Creative Writing, Philosophy & Ethics, Leadership & Management, Battle History & Maps, Defense & National Security, a privacy-preserving first-run setup, saved home views, a visual layout editor, a daily dashboard, live headlines, custom RSS sources, a mode-aware Roost Wire board, read-later saves, personal boards with starter templates, link notes with local tags, accessibility preferences, manual link-health checks, standalone dock tools, and an optional Mission Control Academy example profile.
+Your personal homepage and command center. The current bundle includes 785 curated link cards, Kid Zone, Creative Writing, Philosophy & Ethics, Leadership & Management, Battle History & Maps, Defense & National Security, an optional desk setup, saved home views, a visual layout editor, a daily dashboard, live headlines, custom RSS sources, a mode-aware Roost Wire board, read-later saves, personal boards with starter templates, link notes with local tags, accessibility preferences, manual link-health checks, standalone dock tools, and an optional Mission Control Academy example profile.
 
 ## What's In This Folder
 
 | File | What it is | Required? |
 |---|---|---|
 | `index.html` | The Roost single-page app | Yes |
+| `roost-desk.css`, `roost-ridgeline.jpg` | Board layout and locally hosted masthead artwork | Yes for the designed appearance |
 | `manifest.json` | PWA install metadata | Yes for install |
 | `sw.js` | Offline shell service worker | Yes for offline |
 | `icon-180.png`, `icon-192.png`, `icon-512.png`, `favicon-32.png` | App icons | Yes for install |
@@ -17,7 +18,7 @@ Keep everything in the same folder. The page is vanilla HTML/CSS/JS: no build st
 
 ## Validate Before Publishing
 
-Run the no-dependency validation bundle from the repo root:
+Changes to inline scripts require refreshed CSP hashes. Review the edits, run `node scripts/check-csp.mjs --write`, then run the validation bundle from the repository root. CI checks the hashes without rewriting them.
 
 ```text
 node tests/run-roost-validation.mjs
@@ -137,7 +138,7 @@ The **Custom Links** dock tool manages local sections and import/export:
 - Sections: create, rename, reorder, hide, and delete.
 - Links: edit, move, duplicate, and delete.
 - Import: browser bookmark HTML, Roost JSON, CSV, and compatible OPML feed subscriptions.
-- Feeds: add safe `http` / `https` RSS or Atom sources to Roost Wire, section headline strips, or both.
+- Feeds: add public HTTPS RSS or Atom sources to Roost Wire, section headline strips, or both.
 - Export: custom links and custom sections as Roost JSON.
 
 Imports are previewed before they write localStorage. Duplicate URLs are detected against built-in and custom links and can be skipped, merged into existing custom links, or imported anyway. Built-in links are read-only, so Merge skips built-in duplicates instead of modifying them. New links and new empty sections from the latest import batch can be removed with **Undo Last Import**; merge edits to existing links are not silently rolled back.
@@ -158,7 +159,7 @@ Backup / Restore also includes **Configuration Pack** export/import with schema 
 
 ## First-Run Setup And Privacy
 
-New public users see a short setup wizard that asks for an optional display name, intended use, enabled modules, live news preference, density, visual mode, and starter sections. The wizard can be skipped, resumed if interrupted, or opened later from **Run Setup Again** in the dock or command launcher.
+New visitors go straight to Daily desk. Choose **Customize desk** to set an optional display name, enabled modules, news visibility, density, colors and starter sections.
 
 Setup is stored under `roost_onboarding_v1` in this browser only. The Roost does not create accounts, send telemetry, use analytics, sync to the cloud, or call an external setup API.
 
@@ -186,7 +187,7 @@ The Today dashboard can show one dismissible **Local Tip** per day. Dismissal is
 
 ## Live Headlines
 
-The Roost Wire and per-section headline strips pull public RSS/Atom feeds in the browser through public CORS proxies (`allorigins.win`, `corsproxy.io`). They are best-effort by design:
+Roost Wire and section headlines start disconnected. Choose **Connect live feeds** to allow the browser to fetch built-in public feeds through AllOrigins and corsproxy.io. Showing or hiding a panel is a separate preference.
 
 - If a feed or proxy fails, the headlines hide or show an unavailable message.
 - The curated links are never blocked by headline failures.
@@ -195,11 +196,11 @@ The Roost Wire and per-section headline strips pull public RSS/Atom feeds in the
 - Headline cards show **Live**, **Cached**, or **Stale** per story. **Unavailable** retains a retry path when there are no usable results. Both news surfaces exclude dated stories older than 14 days.
 - Refresh buttons update the Wire or a section strip in place. They only touch feed data and do not reset Mission Control Academy progress.
 - Roost Wire topic cards include a **More** action for rotating that topic's headline without switching or narrowing the active Wire mode.
-- Custom RSS/Atom feeds are stored locally under `roost_custom_feeds_v1` and reuse the same proxy, parser, cache, and graceful-fallback path as built-in feeds.
+- Save a public HTTPS custom feed in **Custom Links → Feeds**, then choose **Allow source** for that URL. Roost fetches it directly. Its server must allow cross-origin reads. Imported URLs stay paused until approved.
 - Roost Wire modes let you narrow the board to Tech, Defense, AI, Gaming, Finance, World/Priority, or Quiet.
 - Roost Wire and Today can be collapsed independently. Their collapsed/expanded state is remembered in local settings.
 
-Use the dock's "Headlines: on/off" control to disable or re-enable headline surfaces. Disabling cancels pending feed requests and lazy observers. The setting is saved under `roost_settings_v1` and mirrored into `roost_onboarding_v1` so it survives future setup-aware reloads.
+Disconnect live feeds from the Wire to stop network refreshes. Existing cached stories can still be read. Browser-specific connection choices are excluded from backups and configuration packs.
 
 ## Mission Control Academy
 

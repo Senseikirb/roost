@@ -13,24 +13,27 @@ function between(start, end) {
 }
 const constants = [...source.matchAll(/var ([A-Z_]*KEY) = ("[^"\n]*");/g)].map(match => `var ${match[1]} = ${match[2]};`).join("\n");
 const production = constants + "\n" + between("  var LS = {", "  var SETTINGS_KEY") +
-  between("  function safeCustomUrl(", "  function customSections(") +
+  between("  function customId(", "  function customSectionTitle(") +
+  between("  function readPins(", "  function syncPinButton(") +
+  between("  function importHistory(", "  function exportCustomData(") +
+  between("  function meaningfulStorageExists(", "  function publicStarterData(") +
   between("  function safeHttpUrl(", "  function defaultMissionState(") +
   between("  function clean(s)", "  function decodeHtmlEntities(") +
   between('  var BACKUP_SCHEMA = ', "  function buildBackupRestore(");
 const values = new Map();
-let failWrite = null;
+let failWrite = null, failRead = null;
 const storage = {
   get length() { return values.size; },
   key(index) { return [...values.keys()][index] ?? null; },
-  getItem(key) { return values.get(key) ?? null; },
+  getItem(key) { if (failRead === key) throw new Error("Storage unavailable"); return values.get(key) ?? null; },
   setItem(key, value) { if (failWrite && failWrite(key, value)) throw new Error("Quota exceeded"); values.set(key, String(value)); },
   removeItem(key) { if (failWrite && failWrite(key, null)) throw new Error("Storage unavailable"); values.delete(key); }
 };
-const context = vm.createContext({ localStorage: storage, URL, Blob, Date, location: { href: "https://example.com/roost/" } });
+const context = vm.createContext({ localStorage: storage, URL, Blob, Date, builtInUrlSet: () => ({}), toast() {}, reportStorageWrite() {}, location: { href: "https://example.com/roost/?private-test=1" } });
 vm.runInContext(production, context);
 let checks = 0;
 function test(name, run) {
-  values.clear(); failWrite = null;
+  values.clear(); failWrite = null; failRead = null;
   run(); checks++;
   console.log(`PASS ${name}`);
 }
@@ -141,5 +144,51 @@ test("Outer schema and malformed undo input are rejected", () => {
   assert.throws(() => context.parseConfigPackText('{"schema":"the-roost.config-pack.v1","data":[]}'));
   values.set("roost_restore_undo_v1", object({ version: 1, keys: ["roost_settings_v1"], previous: {} }));
   assert.equal(context.restoreUndoState(), null);
+});
+test("Opening Roost twice cannot mistake setup metadata or corrupt data for a returning user's work", () => {
+  values.set("roost_shell_status_v1", '{"lastVisit":"today"}');
+  values.set("roost_workbench_v1", "[null]");
+  values.set("kfl_pins_v1", "invalid");
+  assert.equal(context.meaningfulStorageExists(), false);
+  values.set("roost_workbench_v1", '[{"id":"a","body":"Keep"}]');
+  assert.equal(context.meaningfulStorageExists(), true);
+});
+test("Exports omit the page address and stop if one key is unreadable", () => {
+  values.set("roost_boards_v1", "[]");
+  assert.equal("href" in context.backupPayload(false), false);
+  assert.equal("href" in context.configPackPayload(), false);
+  failRead = "roost_boards_v1";
+  assert.throws(() => context.backupPayload(false), /unavailable/);
+  assert.throws(() => context.configPackPayload(), /unavailable/);
+});
+test("An unsuccessful second restore preserves the first recovery point", () => {
+  values.set("roost_boards_v1", '[{"name":"Original","links":[]}]');
+  assert.equal(context.applyStorageRestore({ roost_boards_v1: "[]" }).ok, true);
+  const firstUndo = values.get("roost_restore_undo_v1");
+  failWrite = key => key === "roost_workbench_v1";
+  assert.equal(context.applyStorageRestore({ roost_settings_v1: "{}", roost_workbench_v1: "[]" }).ok, false);
+  assert.equal(values.get("roost_restore_undo_v1"), firstUndo);
+  assert.equal(context.applyRestoreUndo().ok, true);
+  assert.equal(JSON.parse(values.get("roost_boards_v1"))[0].name, "Original");
+});
+test("Bookmark import and undo retain links, sections, favorites and history together", () => {
+  const existingPin = { href: "https://example.org/old", label: "My pin", desc: "" };
+  values.set("kfl_pins_v1", JSON.stringify([existingPin]));
+  const items = [existingPin.href, "https://example.org/new"].map(url => ({url, title:"Imported", sectionTitle:"Research", description:"", icon:"", tags:[], favorite:true}));
+  const before = new Map(values);
+  failWrite = key => key === "roost_import_history_v1";
+  assert.throws(() => context.applyCustomImport({items}, "skip"), /could not be saved/);
+  assert.deepEqual(values, before);
+  failWrite = null;
+  assert.equal(context.applyCustomImport({items}, "skip").imported, 2);
+  const imported = new Map(values);
+  assert.equal(JSON.parse(values.get("kfl_pins_v1")).length, 2);
+  failWrite = key => key === "roost_import_history_v1";
+  assert.equal(context.undoLastImport().ok, false);
+  assert.deepEqual(values, imported);
+  failWrite = null;
+  assert.equal(context.undoLastImport().ok, true);
+  assert.deepEqual(JSON.parse(values.get("kfl_pins_v1")), [existingPin]);
+  assert.deepEqual(JSON.parse(values.get("roost_custom_links_v1")), []);
 });
 console.log(`Storage validation: ${checks} checks passed.`);

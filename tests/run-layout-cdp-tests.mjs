@@ -1,7 +1,9 @@
 import http from "node:http";
+import { localTestOrigin } from "./cdp-client.mjs";
 
 const CDP_PORT = Number(process.env.ROOST_CDP_PORT || 9223);
 const APP_URL = process.env.ROOST_APP_URL || "http://127.0.0.1:8765/index.html";
+const TEST_ORIGIN = localTestOrigin(APP_URL);
 const EXPECTED_LINK_CARDS = 786; // 785 curated cards plus one custom fixture.
 const EXPECTED_RUNTIME_SECTIONS = 35;
 
@@ -114,6 +116,7 @@ try {
   localStorage.removeItem("roost_recent_commands_v1");
   localStorage.removeItem("roost_views_v1");
   localStorage.removeItem("roost_custom_feeds_v1");
+  localStorage.setItem("roost_headline_connection_v1", JSON.stringify({enabled:true, custom:[]}));
   localStorage.removeItem("roost_accessibility_v1");
   localStorage.removeItem("roost_link_health_v1");
   localStorage.removeItem("roost_boards_v1");
@@ -197,7 +200,7 @@ async function main() {
   await send("Network.setBlockedURLs", { urls: ["https://*"] });
   await send("Network.setBypassServiceWorker", { bypass: true });
   await send("Network.setCacheDisabled", { cacheDisabled: true });
-  await send("Page.addScriptToEvaluateOnNewDocument", { source: seedStorageScript });
+  await send("Page.addScriptToEvaluateOnNewDocument", { source: `if (location.origin === ${JSON.stringify(TEST_ORIGIN)}) {\n${seedStorageScript}\n}` });
 
   async function evalValue(expression) {
     if (process.env.ROOST_CDP_TRACE) console.error(`CDP evaluate: ${expression.slice(0, 180).replace(/\s+/g, ' ')}`);
