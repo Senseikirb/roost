@@ -399,3 +399,14 @@ body[data-home-surface="full"] .top-bar-inner .nav-tabs { grid-row: 2; grid-colu
   .roost-card-frame > .link-card, #quick-access .roost-card-frame > .link-card { padding-block-end: 3.15rem; }
   .roost-card-tools > button, .roost-card-frame .pin-btn { min-height: 2rem; min-width: 2rem; }
 }
+
+#main-content .section { animation: none; }
+@media (min-width: 351px) and (max-width: 600px) {
+  #roost-home-nav { display: grid; grid-template-columns: auto auto auto 1fr; }
+  #roost-home-nav button { white-space: nowrap; padding-inline: .38rem; }
+  #roost-home-nav .roost-customize-desk { justify-self: end; }
+}
+@media (max-width: 600px) {
+  .roost-launcher-label { display: none; }
+  .roost-offline-status:not(.is-offline):not(:has(button)) span { display: none; }
+}
