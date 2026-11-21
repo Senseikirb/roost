@@ -96,3 +96,18 @@ jobs:
           done
           echo "Public Pages did not serve all committed release bytes within five minutes." >&2
           exit 1
+
+  webkit:
+    name: WebKitGTK desk journeys
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Ubuntu WebKitGTK test tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y webkit2gtk-driver python3-selenium xvfb xauth dbus
+      - name: Test the fresh and returning desk in WebKitGTK
+        run: dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1100x24" /usr/bin/python3 tests/run-webkit-smoke.py
