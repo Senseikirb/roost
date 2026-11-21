@@ -76,7 +76,8 @@ try {
   assert.equal(await app.evaluate("document.documentElement.dataset.upgradeFixture"), 'previous', 'activation must leave the open document intact');
   assert.equal(await app.evaluate("document.querySelector('#wb-text').value"), 'Draft held across worker activation');
   assert.deepEqual(await app.evaluate("JSON.parse(localStorage.getItem('roost_workbench_v1'))[0]"), before);
-  assert.equal(await app.evaluate("(async () => (await caches.keys()).some(name => name.includes('test-previous-')))()"), false);
+  // A controllerchange can precede completion of the worker's activate.waitUntil promise.
+  await waitFor("(async () => !(await caches.keys()).some(name => name.includes('test-previous-')))()", 'activation did not retire the previous shell cache');
 
   await app.evaluate(`(() => {
     document.querySelector('#wb-save').click();
