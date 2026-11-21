@@ -191,4 +191,32 @@ test("Bookmark import and undo retain links, sections, favorites and history tog
   assert.deepEqual(JSON.parse(values.get("kfl_pins_v1")), [existingPin]);
   assert.deepEqual(JSON.parse(values.get("roost_custom_links_v1")), []);
 });
+test("Undo requires fresh approval to replace later edits and preserves all values on conflict", () => {
+  const boards = "roost_boards_v1", notes = "roost_workbench_v1";
+  values.set(boards, '[{"name":"old","links":[]}]');
+  assert.equal(context.applyStorageRestore({[boards]:"[]",[notes]:"[]"}).ok, true);
+  values.set(notes, '[{"title":"new work"}]');
+  const untouched = new Map(values);
+  const conflict = context.applyRestoreUndo();
+  assert.equal(conflict.ok, false);
+  assert.deepEqual(Array.from(conflict.conflictKeys), [notes]);
+  assert.deepEqual(values, untouched);
+  values.set(notes, '[{"title":"newer work"}]');
+  const newer = context.applyRestoreUndo(conflict.review);
+  assert.equal(newer.ok, false, "stale confirmation must not overwrite the newer edit");
+  assert.equal(context.applyRestoreUndo(newer.review).ok, true);
+  assert.equal(values.get(boards), '[{"name":"old","links":[]}]');
+  assert.equal(values.has(notes), false);
+});
+test("A legacy Undo point and a changed snapshot require review", () => {
+  const key = "roost_workbench_v1";
+  const snapshot = { version:1, createdAt:"then", keys:[key], previous:{[key]:{existed:false,value:null}} };
+  values.set(key, '[{"title":"new"}]');
+  values.set("roost_restore_undo_v1", object(snapshot));
+  const review = context.applyRestoreUndo();
+  assert.equal(review.legacy, true);
+  assert.equal(review.ok, false);
+  assert.equal(context.applyRestoreUndo(review.review, {...snapshot, createdAt:"different"}).ok, false);
+  assert.equal(context.applyRestoreUndo(review.review).ok, true);
+});
 console.log(`Storage validation: ${checks} checks passed.`);

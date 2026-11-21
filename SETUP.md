@@ -155,7 +155,7 @@ Roost custom JSON exports use schema `the-roost.custom-links.v1`. Full Backup / 
 
 Backup / Restore includes a **Memory Health** card showing local Roost key count, approximate storage size, custom link/note/feed/view counts, and the last export timestamp. The timestamp is stored locally in `roost_backup_meta_v1` after Download Backup or Copy JSON. Backup restores also create a transient one-step `roost_restore_undo_v1` snapshot so **Undo Last Restore** can put overwritten keys back before you reload.
 
-Backup / Restore also includes **Configuration Pack** export/import with schema `the-roost.config-pack.v1`. Packs are for shareable local setup surfaces only: custom links, custom sections, custom feeds, saved views, boards, accessibility preferences, and layout. They intentionally exclude Mission Control progress, recents, Read Later, Workbench notes, link notes, and feed caches.
+Backup / Restore also includes **Configuration Pack** export/import with schema `the-roost.config-pack.v1`. Appearance and layout are selected initially. Select other groups to include them, then open **Review selected export** to inspect exactly what the pack contains. They intentionally exclude Mission Control progress, recents, Read Later, Workbench notes, link notes, and feed caches.
 
 ## First-Run Setup And Privacy
 

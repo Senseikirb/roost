@@ -49,7 +49,7 @@ The shared storage reader uses defaults for malformed JSON and unexpected top-le
 | `roost_tip_state_v1` | `{version:1,dismissedDate,tipId,updatedAt}` | Only current daily dismissal matters. | No |
 | `roost_recent_commands_v1` | Key version 1; array `{title,meta,usedAt}` | Latest six command titles; current commands resolve at use time. Clear from Backup / Restore. | No; private usage history |
 | `roost_backup_meta_v1` | `{version:1,lastExportedAt,method}` | Records a local download/copy action, not verification that a durable backup exists. | No; local status |
-| `roost_restore_undo_v1` | `{version:1,createdAt,keys,previous}`; each previous entry `{existed,value}` | Exact old strings captured before restore/pack writes. One step only; successful undo removes snapshot. **Excluded from export and imported restore data.** | No |
+| `roost_restore_undo_v1` | Version 2 stores `createdAt`, `keys` and `previous`, with `{existed,value,applied}` for each key. Version 1 remains readable. | Undo compares current values with the exact applied bytes. Replacing a later edit requires a second confirmation. A failed undo retains the snapshot. The browser needs room for the prior and applied values during restore. | No |
 | `roost_feed_*` | Key-specific cache `{t,items}`; headline records contain title/link/description/date/source | Temporary cache; enabled only by export checkbox, eligible for restore. Cache age remains based on original timestamp. | No |
 | `roost_next_step_skipped` | **sessionStorage**, raw current-day key | Session-only Next learning step dismissal; never included in localStorage backup/restore. | No |
 

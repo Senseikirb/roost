@@ -86,6 +86,26 @@ try {
     window.confirm = confirmBefore;
     return {rejectsInvalid,usefulPreview,restored,exactUndo,packApplied,packUndo,labelledInputs};
   })()`);
+  results.sharing = await app.evaluate(`(async () => {
+    const review = document.getElementById('pack-outgoing');
+    const boardChoice = document.querySelector('[data-pack-keys="roost_boards_v1"]');
+    const preview = () => JSON.parse(review.querySelector('pre').textContent).data;
+    localStorage.setItem('roost_layout_v1', '{"version":1}');
+    localStorage.setItem('roost_boards_v1', '[{"name":"Private board","links":[]}]');
+    review.open = true;
+    await new Promise(resolve => setTimeout(resolve, 30));
+    const privateByDefault = !boardChoice.checked && !preview().roost_boards_v1 && !!preview().roost_layout_v1;
+    boardChoice.click();
+    const selected = review.querySelector('pre').textContent;
+    localStorage.setItem('roost_boards_v1', '[{"name":"Added later","links":[]}]');
+    let copied;
+    Object.defineProperty(navigator, 'clipboard', {configurable:true,value:{writeText:async text => {copied=text;}}});
+    try { document.getElementById('pack-copy').click(); }
+    finally { delete navigator.clipboard; }
+    const exactCopy = copied === selected && selected.includes('Private board') && !selected.includes('Added later');
+    boardChoice.click();
+    return {privateByDefault,exactCopy,unselectedExcluded:!preview().roost_boards_v1};
+  })()`);
   await app.evaluate(`(() => {
     localStorage.removeItem('roost_mission_v1');
     localStorage.setItem('missionControlRPG_v3', JSON.stringify({activities:{w1_a0:{completed:true,note:'legacy note',completedAt:'2025-01-01'}},rpg:{missionStatement:'legacy statement'}}));

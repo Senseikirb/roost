@@ -13,13 +13,13 @@ Roost is a static, local-first application. A normal desk visit loads HTML, styl
 | Open a link or fare search | The destination receives the visit. External travel searches receive the route and trip details described by the tool. |
 | Export, copy or share | Backups, packs, reports and clipboard contents go to the location you choose. A backup can contain notes, history and personal URLs. |
 
-Hiding a news panel changes its visibility. Disconnecting live feeds revokes Roost’s permission to make further feed requests. Browser-specific connection approvals are excluded from backups and configuration packs.
+Hiding a news panel changes its visibility. Pausing live feeds also cancels pending requests. If the browser refuses to save a revocation, Roost tries to remove its feed permission record. If storage blocks both operations, Roost pauses this tab and warns that other tabs and future visits may retain the earlier permission. Browser-specific connection approvals are excluded from backups and configuration packs.
 
 ## Local data and hosting
 
 Roost stores personal records in browser local storage. The service worker caches known application assets in a cache named for its installation. Clearing site data or deleting a browser profile can remove both. Download a backup before moving to another browser or origin.
 
-Web storage belongs to an origin. Other pages served by the same scheme, hostname and port can access it, even under different paths. Multiple project sites under one GitHub Pages hostname therefore share this boundary. For a deployment that holds sensitive personal notes, use a dedicated origin you control. Exported files are plain text. Anyone with a copy can read them. [Browser storage behavior](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+Web storage belongs to an origin. Other pages served by the same scheme, hostname and port can access it, even under different paths. Multiple project sites under one GitHub Pages hostname therefore share this boundary. For a deployment that holds sensitive personal notes, use a dedicated origin you control. Configuration packs initially select appearance and layout. Bookmarks, feeds, boards and home views require explicit selection. The export review displays the JSON that will be copied or downloaded. Exported files are plain text. Anyone with a copy can read them. [Browser storage behavior](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
 
 ## Controls and verification
 

@@ -2,7 +2,7 @@
    static assets are cached; feeds and external destinations need a network. */
 const SCOPE = self.registration.scope;
 const CACHE_PREFIX = "roost-shell:" + SCOPE + ":";
-const CACHE = CACHE_PREFIX + "v6";
+const CACHE = CACHE_PREFIX + "v7";
 const HOME = new URL("./index.html", SCOPE).href;
 const SHELL_CORE = ["./index.html", "./manifest.json", "./roost-desk.css"];
 const SHELL_OPTIONAL = [

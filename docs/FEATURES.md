@@ -53,7 +53,7 @@ Shortcuts:
 - `Enter`: activate the selected result.
 - `Escape`: close the launcher and restore focus.
 
-The launcher ranks exact titles, title prefixes, and title words before descriptive matches. Favorites and Recent provide small tie-breaks using existing local saves; there is no usage score or new tracking. Saved results open the matching Workbench note, Read Later article, or Board. Commands and section jumps share the same relevance order. If the enhanced launcher fails, the original inline search input still works as a link filter.
+The launcher ranks exact titles, title prefixes, and title words before descriptive matches. Favorites and Recent provide small tie-breaks using existing local saves; there is no usage score or new tracking. Saved search includes favorite, custom and annotated links alongside Workbench notes, Read Later articles and Boards. On the Daily desk, a pinned note has priority. When space is available, **Continue writing** opens your latest unpinned note and keeps its title off the desk. Commands and section jumps share the same relevance order. If the enhanced launcher fails, the original inline search input still works as a link filter.
 
 Command matches are treated as valid launcher results even when no link card matches the same query, so searches like `import`, `backup`, or `setup` do not show a misleading no-results page state.
 
@@ -215,4 +215,4 @@ The dock includes a **Backup / Restore** tool for local memory. It exports The R
 
 Restore validates the envelope and known data structures before writing, previews new/replaced/unchanged keys and categories, and requires a saved recovery snapshot. Failed writes roll back to the previous values, with explicit errors if browser storage also blocks recovery. **Undo Last Restore** covers backups and configuration packs. Missing keys are preserved. After restore or undo, reload the page to apply restored UI state. Exports include the schema, export date, categories, approximate UTF-8 data size, and transient exclusions. See [Storage schemas](STORAGE_SCHEMAS.md) for exact formats and limits.
 
-The same panel includes **Configuration Pack** export/import with schema `the-roost.config-pack.v1`. Packs include shareable setup surfaces such as custom links, custom sections, custom feeds, saved views, boards, accessibility preferences, and layout. They exclude personal progress, recents, Read Later, link notes, Workbench notes, Mission Control progress, and feed caches.
+The same panel includes **Configuration Pack** export/import with schema `the-roost.config-pack.v1`. Pack exports start with appearance and layout selected. Choose bookmarks and sections, feed addresses, views or boards to include them. Open **Review selected export** to inspect the exact JSON that Copy and Download will use. They exclude personal progress, recents, Read Later, link notes, Workbench notes, Mission Control progress, and feed caches.

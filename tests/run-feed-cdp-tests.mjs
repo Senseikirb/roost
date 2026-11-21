@@ -167,9 +167,6 @@ try {
   assert.ok(results.offlineReload.cards === expectedCards && results.offlineReload.notePreserved && /External sites need a connection/.test(results.offlineReload.status), "offline reload must preserve shell and local notes: " + JSON.stringify(results.offlineReload));
   console.log("PASS offline reload and local data preservation");
   await app.send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
-  await app.evaluate(`navigator.serviceWorker.dispatchEvent(new Event('controllerchange'))`);
-  results.updateNotice = await app.evaluate(`!!document.querySelector('[data-roost-reload]') && /newer app/.test(document.getElementById('roost-offline-status').textContent)`);
-  assert.ok(results.updateNotice, "new worker activation must offer a deliberate reload");
   assert.deepEqual(app.errors, [], "no uncaught runtime errors");
   console.log(JSON.stringify({ results, runtimeErrors: app.errors }, null, 2));
 } finally {

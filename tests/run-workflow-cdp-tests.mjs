@@ -183,6 +183,35 @@ try {
 } finally {await grouped.close();}
 const persistent=await connectApp({url,seed:`if(!sessionStorage.workflowSeeded){localStorage.clear();Object.entries(${JSON.stringify(seed)}).forEach(([key,value])=>localStorage.setItem(key,JSON.stringify(value)));sessionStorage.workflowSeeded='1';}`});
 try {
+  const path = await persistent.evaluate(`(async () => {
+    const click = selector => document.querySelector(selector).click();
+    const state = () => [document.body.dataset.homeSurface, location.hash,
+      document.getElementById("command-center").getBoundingClientRect().height > 0, document.activeElement.id];
+    function go(direction) {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error("History traversal did not complete")), 2500);
+        window.addEventListener("popstate", () => { clearTimeout(timer); resolve(state()); }, { once: true });
+        history[direction]();
+      });
+    }
+    click('#roost-home-nav [data-home-surface="library"]');
+    const directoryLength = history.length;
+    click('.v3-section-launcher a[href="#philosophy"]');
+    roostTestHooks.navigateRoostSection("philosophy");
+    const unique = history.length === directoryLength + 1;
+    const directory = await go("back");
+    const desk = await go("back");
+    const library = await go("forward");
+    const section = await go("forward");
+    return { unique, directory, desk, library, section, visible: document.getElementById("philosophy").getBoundingClientRect().height > 0 };
+  })()`);
+  assert.equal(path.unique, true, "reopening the current section creates no duplicate history entry");
+  assert.deepEqual(path.directory.slice(0, 3), ["library", "", true]);
+  assert.equal(path.directory[3], "command-center-heading");
+  assert.deepEqual(path.desk.slice(0, 3), ["desk", "", false]);
+  assert.deepEqual(path.library.slice(0, 3), ["library", "", true]);
+  assert.deepEqual(path.section.slice(0, 3), ["library", "#philosophy", false]);
+  assert.equal(path.visible, true);
   await persistent.evaluate(`roostTestHooks.navigateRoostSection('philosophy');roostTestHooks.setHomeSurface('desk');`);
   assert.equal(await persistent.evaluate('location.hash'),'');
   assert.equal(await persistent.evaluate(`document.getElementById('search-input').getAttribute('aria-expanded')`),'false');

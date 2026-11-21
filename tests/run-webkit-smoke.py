@@ -14,6 +14,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.webkitgtk.options import Options
 from selenium.webdriver.webkitgtk.service import Service
 
 
@@ -87,12 +88,15 @@ def run(width):
         handler = partial(SimpleHTTPRequestHandler, directory=str(stage))
         with ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
             Thread(target=server.serve_forever, daemon=True).start()
+            service = Service("/usr/bin/WebKitWebDriver")
             try:
-                with webdriver.WebKitGTK(service=Service("/usr/bin/WebKitWebDriver")) as driver:
+                service.start()
+                with webdriver.Remote(command_executor=service.service_url, options=Options()) as driver:
                     print("WebKitGTK", driver.capabilities.get("browserVersion"), flush=True)
                     driver.set_window_size(1480, 1000)
                     check_desk(driver, width, f"http://127.0.0.1:{server.server_port}/viewport.html")
             finally:
+                service.stop()
                 server.shutdown()
 
 
