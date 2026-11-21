@@ -98,6 +98,10 @@ for (const width of [320, 390, 1440]) {
       return document.activeElement.id;
     })()`);
     assert.equal(heading, 'roost-setup-title');
+    await app.send('Input.dispatchKeyEvent', {type:'keyDown', key:'Tab', code:'Tab', modifiers:8, windowsVirtualKeyCode:9});
+    await app.send('Input.dispatchKeyEvent', {type:'keyUp', key:'Tab', code:'Tab', modifiers:8, windowsVirtualKeyCode:9});
+    assert.equal(await app.evaluate(`document.activeElement.hasAttribute('data-setup-next')`), true,
+      'reverse Tab from the setup heading stays inside the dialog');
     await app.evaluate(`(() => {
       const name = document.querySelector('[data-setup-field="displayName"]');
       name.value = 'Unsaved visitor';

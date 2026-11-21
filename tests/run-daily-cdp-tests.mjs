@@ -52,6 +52,19 @@ for (const width of [360,390,768,1440]) {
       return {count:roostTestHooks.todayResumePoints().length,empty:!!document.querySelector('.roost-today-empty'),tools:!!document.querySelector('#roost-today [data-open-tool="session"]')};
     })()`);
     assert.equal(empty.count,0);assert.equal(empty.empty,true);assert.equal(empty.tools,true);
+    const writing = await app.evaluate(`(() => {
+      localStorage.setItem('roost_workbench_v1', JSON.stringify([
+        {id:'older', title:'Earlier private title', body:'older text', t:'2026-09-10T12:00:00Z'},
+        {id:'newer', title:'Newer private title', body:'newer text', t:'2026-10-01T12:00:00Z'}
+      ]));
+      roostTestHooks.renderTodayDashboard();
+      const desk = document.getElementById('roost-today');
+      const button = desk.querySelector('[data-resume-point="0"]');
+      const privateTitleHidden = !desk.textContent.includes('private title');
+      button.click();
+      return {privateTitleHidden, title:document.getElementById('wb-title').value, body:document.getElementById('wb-text').value};
+    })()`);
+    assert.deepEqual(writing,{privateTitleHidden:true,title:'Newer private title',body:'newer text'});
     assert.deepEqual(app.errors,[]);report.push({width,...before,journeys:'passed'});
   } finally {await app.close();}
 }

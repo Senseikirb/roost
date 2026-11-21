@@ -130,6 +130,7 @@ function main() {
     runNode(["tests/run-launcher-cdp-tests.mjs"], "launcher CDP journeys");
     runNode(["tests/run-storage-cdp-tests.mjs"], "storage recovery CDP journeys");
     runNode(["tests/run-feed-cdp-tests.mjs"], "feed and offline CDP journeys");
+    runNode(["tests/run-upgrade-cdp-tests.mjs"], "installed shell update and offline recovery");
     runNode(["tests/run-workflow-cdp-tests.mjs"], "library and writing safety CDP journeys");
     runNode(["tests/run-cards-cdp-tests.mjs"], "link card keyboard and favorite journeys");
     runNode(["tests/run-tools-cdp-tests.mjs"], "standalone tool CDP journeys");

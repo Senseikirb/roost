@@ -6,7 +6,10 @@ const seed = {
     version: 1, completed: true, profile: 'launcher-test', layoutApplied: true,
     data: { modules: { wire: false, today: true, missionExample: false, workbench: true, diagrams: true, kidZone: true }, news: false, density: 'comfort', visualMode: 'default', starterSections: ['quick-access'] }
   },
-  roost_settings_v1: { headlines: false, searchScope: 'all' },
+  // A saved Learning view may outlive its optional Academy module.
+  roost_settings_v1: { headlines: false, searchScope: 'mission' },
+  roost_custom_sections_v1: [{id:'personal-index',title:'My resources',order:0}],
+  roost_custom_links_v1: [{id:'personal-link',sectionId:'personal-index',title:'My saved bookmark',url:'https://example.org/my-bookmark'}],
   roost_workbench_v1: [{ id: 'launch-note', title: 'Field research notebook', body: 'Needlewords retained offline', method: 'Cornell Notes', pinned: true, t: '2026-09-25T00:00:00Z' }],
   roost_readlater_v1: [{ title: 'Orbital reading archive', link: 'https://example.com/launch-article', source: 'Local fixture', note: 'Needlewords in article notes', status: 'archived', savedAt: '2026-09-25T00:00:00Z' }],
   roost_boards_v1: [{ id: 'launch-board', name: 'Satellite research board', links: [{ title: 'Needlewords link', href: 'https://example.com/board-link' }] }]
@@ -19,6 +22,8 @@ async function key(key, code, modifiers = 0) {
   await app.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, modifiers });
 }
 try {
+  checks.disabledMission = await app.evaluate(`document.querySelector('[data-search-scope="mission"]').hidden && document.querySelector('[data-search-scope="all"]').getAttribute('aria-pressed') === 'true'`);
+  assert.equal(checks.disabledMission,true,'disabled Academy uses the global scope');
   checks.ranking = await app.evaluate(`(() => {
     const hooks = window.roostTestHooks;
     const input = document.getElementById('search-input');
@@ -74,6 +79,26 @@ try {
     return { note: items.some(item => item.kind === 'Note'), article: items.some(item => item.kind === 'Article'), board: items.some(item => item.kind === 'Board'), noDeadEnd: !document.getElementById('no-results').classList.contains('visible') };
   })()`);
   Object.values(checks.saved).forEach(value => assert.equal(value, true, 'actionable saved search'));
+  checks.savedLinks = await app.evaluate(`(() => {
+    const input = document.getElementById('search-input');
+    const cards = [...document.querySelectorAll('#quick-access a.link-card')];
+    const [favorite, annotated, untouched] = cards.filter((card,index) => cards.findIndex(other => other.href === card.href) === index);
+    favorite.parentElement.querySelector('.pin-btn').click();
+    roostTestHooks.saveLinkNotes({[annotated.href]:{tags:['desk-search-fixture']}});
+    function search(query) {
+      input.value = query;
+      input.dispatchEvent(new Event('input', {bubbles:true}));
+      return roostTestHooks.buildCommandLauncherGroups(query).flatMap(g => g.items).filter(item => item.kind === 'Link').map(item => item.title);
+    }
+    const title = card => card.querySelector('.card-label').textContent;
+    const namedFavorite = search(title(favorite)).filter(label => label === title(favorite)).length;
+    const boardMatches = favorite.getAttribute('data-hidden') === 'false';
+    const annotatedMatch = search('desk-search-fixture').includes(title(annotated));
+    const personalMatch = search('My saved bookmark').includes('My saved bookmark');
+    const excludesUnsaved = !search(title(untouched)).includes(title(untouched)) && untouched.getAttribute('data-hidden') === 'true';
+    return {namedFavorite,boardMatches,annotatedMatch,personalMatch,excludesUnsaved};
+  })()`);
+  assert.deepEqual(checks.savedLinks,{namedFavorite:1,boardMatches:true,annotatedMatch:true,personalMatch:true,excludesUnsaved:true});
   checks.savedJourneys = await app.evaluate(`(() => {
     const open = window.roostTestHooks.openSavedLauncherItem;
     open({kind:'workbench',id:'launch-note'});
@@ -120,6 +145,39 @@ try {
     return !trigger.isConnected && document.activeElement.id === 'search-input';
   })()`);
   assert.equal(checks.rebuiltTodayFocus, true, 'closing after Today rerenders restores usable keyboard focus');
+
+  await app.evaluate(`document.getElementById('roost-dock-toggle').focus()`);
+  async function pressNative(name, code, vk, modifiers = 0) {
+    for (const type of ['keyDown', 'keyUp']) {
+      await app.send('Input.dispatchKeyEvent', { type, key:name, code, windowsVirtualKeyCode:vk, modifiers });
+    }
+  }
+  await pressNative('Enter', 'Enter', 13);
+  await pressNative('Tab', 'Tab', 9);
+  assert.equal(await app.evaluate(`!!document.activeElement.closest('#roost-dock-menu')`), true,
+    'Tab from the expanded Tools button reaches its options');
+  await app.evaluate(`(() => {
+    const item = document.querySelector('#roost-dock [data-action="session"]');
+    item.focus(); item.click();
+    document.getElementById('roost-modal-x').focus();
+  })()`);
+  const collapsed = await app.evaluate(`localStorage.getItem('kfl_collapsed_v1')`);
+  await pressNative('?', 'Slash', 191, 8);
+  await pressNative('c', 'KeyC', 67);
+  assert.equal(await app.evaluate(`!document.querySelector('#help-overlay.visible') &&
+    !!document.querySelector('.roost-modal.open') && document.getElementById('main-content').closest('[inert]') !== null`),
+    true, 'global shortcuts preserve the active dialog and background isolation');
+  assert.equal(await app.evaluate(`localStorage.getItem('kfl_collapsed_v1')`), collapsed,
+    'dialog shortcuts preserve stored section visibility');
+  const ax = await app.send('Accessibility.getFullAXTree');
+  assert.ok(ax.nodes.some(node => !node.ignored && node.role?.value === 'dialog' && node.name?.value === 'Session Planner'),
+    'the active named dialog is exposed to assistive technology');
+  await pressNative('Escape', 'Escape', 27);
+  assert.equal(await app.evaluate(`document.activeElement.id`), 'roost-dock-toggle', 'Escape returns to the visible Tools trigger');
+  await pressNative('c', 'KeyC', 67, 2);
+  assert.equal(await app.evaluate(`localStorage.getItem('kfl_collapsed_v1')`), collapsed,
+    'the system copy shortcut leaves the board layout unchanged');
+  checks.dockKeyboardAndDialogIsolation = true;
 
   checks.localRankingAndReads = await app.evaluate(`(() => {
     const hooks = window.roostTestHooks;

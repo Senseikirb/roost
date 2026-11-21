@@ -54,4 +54,31 @@ assert.equal((await pending).length, 0, "revocation invalidates earlier response
 ctx.navigator.onLine = false;
 ctx.fetchWithTimeout = () => { throw new Error("Offline network attempt"); };
 await ctx.fetchOne(custom, "News", { force: true });
-console.log("PASS local feed consent, cached reads, per-source approval, restore boundary, cancellation and offline");
+ctx.navigator.onLine = true;
+ctx.toast = () => {};
+ctx.headlineConnectionNotice = "";
+// Another tab paused custom without the storage event reaching this tab yet.
+values.set(consentKey, {enabled:true, custom:[]});
+assert.equal(ctx.canFetchHeadline(custom), false);
+ctx.saveHeadlineConnection(true, [custom, denied]);
+assert.deepEqual(Array.from(ctx.readHeadlineConnection().custom), [denied]);
+values.set(consentKey, {enabled:false, custom:[denied]});
+ctx.saveHeadlineConnection(true, []);
+assert.equal(ctx.readHeadlineConnection().enabled, false, "a source toggle cannot renew global permission");
+
+ctx.saveHeadlineConnection(true, [custom]);
+ctx.LS.write = () => false;
+ctx.localStorage = { removeItem: key => values.delete(key), getItem: key => values.get(key) ?? null };
+ctx.saveHeadlineConnection(false, [custom]);
+assert.equal(values.has(consentKey), false, "quota failures still permit durable revocation by removal");
+assert.equal(ctx.readHeadlineConnection().enabled, false, "reload remains paused");
+ctx.saveHeadlineConnection(true, [custom]);
+assert.equal(ctx.canFetchHeadline(custom), false, "a failed permission grant stays paused");
+
+values.set(consentKey, {enabled:true, custom:[custom]});
+ctx.headlineConnection = ctx.readHeadlineConnection();
+ctx.localStorage.removeItem = () => { throw new Error("unavailable"); };
+ctx.saveHeadlineConnection(true, []);
+assert.equal(ctx.canFetchHeadline(custom), false, "a source revoke pauses locally even when storage is blocked");
+assert.match(ctx.headlineConnectionNotice, /future visits/, "must explain that the old durable record remains");
+console.log("PASS local feed consent, stale tab permission boundaries, cached reads, quota-safe revocation and offline");
